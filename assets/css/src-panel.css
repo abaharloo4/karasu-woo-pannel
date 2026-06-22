@@ -1,0 +1,13 @@
+/**
+ * @package KarasuWooPannel
+ * @version 1.0.0
+ * @date 2026-06-23
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom utility overrides */
+.wsm-hidden {
+	display: none !important;
+}
