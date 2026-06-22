@@ -26,9 +26,9 @@ class WSM_Auth {
 	 *
 	 * @param string $username Username.
 	 * @param string $password Password.
-	 * @return true|WP_Error True on success, WP_Error on failure.
+	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
-	public function login( string $username, string $password ): true|WP_Error {
+	public function login( string $username, string $password ): bool|WP_Error {
 		// Use standard WordPress authentication engine.
 		$user = wp_authenticate( $username, $password );
 
