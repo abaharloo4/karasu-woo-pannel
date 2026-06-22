@@ -72,7 +72,7 @@ class WSM_GitHub_Updater {
 	public function init(): void {
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
 		add_filter( 'plugins_api', [ $this, 'plugin_popup' ], 20, 3 );
-		add_filter( 'upgrader_post_install', [ $this, 'post_install' ], 10, 3 );
+		add_filter( 'upgrader_source_selection', [ $this, 'rename_source' ], 10, 4 );
 		add_action( 'delete_site_transient_update_plugins', [ $this, 'delete_transient' ] );
 	}
 
@@ -195,35 +195,27 @@ class WSM_GitHub_Updater {
 	}
 
 	/**
-	 * Hook after plugin update install to rename the temporary folder back to the clean slug.
+	 * Rename the source folder to the clean slug during installation selection.
 	 *
-	 * @param bool  $response   True on success, false or WP_Error on failure.
-	 * @param array $hook_extra Extra context arguments.
-	 * @param array $result     Installation results array.
-	 * @return bool|array Results array.
+	 * @param string      $source        File source location.
+	 * @param string      $remote_source Remote source location.
+	 * @param \WP_Upgrader $upgrader      WP_Upgrader instance.
+	 * @param array|null  $hook_extra    Extra arguments.
+	 * @return string New source location.
 	 */
-	public function post_install( $response, array $hook_extra, array $result ) {
+	public function rename_source( string $source, string $remote_source, $upgrader, ?array $hook_extra = null ): string {
 		global $wp_filesystem;
 
 		if ( isset( $hook_extra['plugin'] ) && $hook_extra['plugin'] === $this->plugin ) {
-			$destination        = $result['destination'] ?? '';
-			$proper_destination = WP_PLUGIN_DIR . '/' . $this->slug . '/';
-
-			if ( ! empty( $destination ) && $destination !== $proper_destination ) {
-				// Delete existing directory to make way for new one.
-				if ( $wp_filesystem->exists( $proper_destination ) ) {
-					$wp_filesystem->delete( $proper_destination, true );
-				}
-
-				// Move the downloaded folder to the clean plugin name.
-				$moved = $wp_filesystem->move( $destination, $proper_destination );
-				if ( $moved ) {
-					$result['destination'] = $proper_destination;
+			$new_source = trailingslashit( $remote_source ) . $this->slug;
+			if ( $source !== $new_source ) {
+				if ( $wp_filesystem->move( $source, $new_source, true ) ) {
+					return $new_source;
 				}
 			}
 		}
 
-		return $response;
+		return $source;
 	}
 
 	/**
