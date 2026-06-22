@@ -3,7 +3,7 @@
  * Abstract Base REST Controller
  *
  * @package KarasuWooPannel
- * @version 1.0.0
+ * @version 1.0.1
  * @date 2026-06-23
  */
 
@@ -29,10 +29,7 @@ abstract class WSM_REST_Controller extends WP_REST_Controller {
 	 */
 	protected $namespace = 'wsm/v1';
 
-	/**
-	 * Register API routes.
-	 */
-	abstract public function register_routes(): void;
+
 
 	/**
 	 * Default permission check callback for protected endpoints.

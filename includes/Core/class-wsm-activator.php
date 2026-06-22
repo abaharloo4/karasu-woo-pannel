@@ -3,7 +3,7 @@
  * Plugin Activation Logic
  *
  * @package KarasuWooPannel
- * @version 1.0.0
+ * @version 1.0.1
  * @date 2026-06-23
  */
 

@@ -3,7 +3,7 @@
  * Rate Limiter for custom login page
  *
  * @package KarasuWooPannel
- * @version 1.0.0
+ * @version 1.0.1
  * @date 2026-06-23
  */
 

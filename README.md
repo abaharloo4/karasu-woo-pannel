@@ -1,5 +1,5 @@
 <!--
-Version: 1.0.0
+Version: 1.0.1
 Date: 2026-06-23
 -->
 # افزونه KarasuWooPannel

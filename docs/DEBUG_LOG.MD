@@ -1,6 +1,6 @@
 # DEBUG LOG — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.0  
+**نسخه:** 1.0.1  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 
