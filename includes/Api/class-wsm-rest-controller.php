@@ -27,7 +27,7 @@ abstract class WSM_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected string $namespace = 'wsm/v1';
+	protected $namespace = 'wsm/v1';
 
 	/**
 	 * Register API routes.
