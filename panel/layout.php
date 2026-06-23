@@ -21,6 +21,8 @@ $current_user = wp_get_current_user();
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?php echo esc_html( get_bloginfo( 'name' ) ); ?> — <?php echo esc_html( __( 'Store Management Panel', 'karasu-woo-pannel' ) ); ?></title>
 
+	<?php if ( function_exists( 'wp_site_icon' ) ) { wp_site_icon(); } ?>
+
 	<script>
 		(function() {
 			const savedTheme = localStorage.getItem('wsm-theme');
@@ -541,7 +543,13 @@ $current_user = wp_get_current_user();
 	</div>
 <?php endif; ?>
 
-<?php wp_print_scripts( [ 'wsm-panel-js', 'wsm-jalalidatepicker-js' ] ); ?>
+<?php
+$printed_scripts = [ 'wsm-panel-js', 'wsm-jalalidatepicker-js' ];
+if ( wp_script_is( 'wsm-attributes-js', 'enqueued' ) ) {
+	$printed_scripts[] = 'wsm-attributes-js';
+}
+wp_print_scripts( $printed_scripts );
+?>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 	const sidebar = document.getElementById("wsm-sidebar");

@@ -98,6 +98,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 <!-- Chart.js Local -->
-<script src="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/vendor/chart.min.js' ); ?>"></script>
+<script src="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/lib/chart.min.js' ); ?>"></script>
 
 <script src="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/js/wsm-reports.js' ); ?>"></script>

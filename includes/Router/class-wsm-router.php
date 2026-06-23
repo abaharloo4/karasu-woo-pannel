@@ -103,7 +103,7 @@ class WSM_Router {
 
 		wp_register_style(
 			'wsm-jalalidatepicker-css',
-			WSM_PLUGIN_URL . 'assets/vendor/jalalidatepicker.min.css',
+			WSM_PLUGIN_URL . 'assets/lib/jalalidatepicker.min.css',
 			[],
 			WSM_VERSION
 		);
@@ -125,7 +125,7 @@ class WSM_Router {
 
 		wp_register_script(
 			'wsm-jalalidatepicker-js',
-			WSM_PLUGIN_URL . 'assets/vendor/jalalidatepicker.min.js',
+			WSM_PLUGIN_URL . 'assets/lib/jalalidatepicker.min.js',
 			[],
 			WSM_VERSION,
 			true
