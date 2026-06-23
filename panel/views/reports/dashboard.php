@@ -3,7 +3,7 @@
  * Jalali Sales Reports Dashboard Panel View Template
  *
  * @package KarasuWooPannel
- * @version 1.0.8
+ * @version 1.0.9
  * @date 2026-06-23
  */
 
@@ -34,11 +34,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-4 wsm-shadow-lg wsm-flex wsm-flex-wrap wsm-gap-4 wsm-items-end">
 		<div class="wsm-flex-1 wsm-min-w-[150px]">
 			<label for="rep-start" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">تاریخ شروع (مثال: ۱۴۰۵/۰۱/۰۱)</label>
-			<input type="text" id="rep-start" placeholder="YYYY/MM/DD" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2.5 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none">
+			<input type="text" id="rep-start" data-jdp placeholder="۱۴۰۵/۰۱/۰۱" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2.5 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none">
 		</div>
 		<div class="wsm-flex-1 wsm-min-w-[150px]">
 			<label for="rep-end" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">تاریخ پایان (مثال: ۱۴۰۵/۰۱/۳۱)</label>
-			<input type="text" id="rep-end" placeholder="YYYY/MM/DD" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2.5 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none">
+			<input type="text" id="rep-end" data-jdp placeholder="۱۴۰۵/۰۱/۳۱" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2.5 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none">
 		</div>
 		<button id="wsm-filter-reports-btn" class="wsm-px-6 wsm-py-3 wsm-text-sm wsm-bg-indigo-600 hover:wsm-bg-indigo-500 wsm-text-white wsm-font-semibold wsm-rounded-2xl wsm-transition-colors">
 			فیلتر گزارش

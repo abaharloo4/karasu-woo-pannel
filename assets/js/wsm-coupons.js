@@ -2,7 +2,7 @@
  * KarasuWooPannel Coupons Management Script
  *
  * @package KarasuWooPannel
- * @version 1.0.8
+ * @version 1.0.9
  * @date 2026-06-23
  */
 
@@ -217,7 +217,7 @@
 							</div>
 							<div>
 								<label for="c-expiry" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">تاریخ انقضا (مثال: ۱۴۰۵/۱۲/۲۹)</label>
-								<input type="text" id="c-expiry" placeholder="YYYY/MM/DD" value="${isNew ? '' : WSM.escHtml(couponData.date_expires)}" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
+								<input type="text" id="c-expiry" data-jdp placeholder="۱۴۰۵/۱۲/۲۹" value="${isNew ? '' : WSM.escHtml(couponData.date_expires)}" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
 							</div>
 						</div>
 

@@ -3,7 +3,7 @@
  * Authentication REST Controller
  *
  * @package KarasuWooPannel
- * @version 1.0.8
+ * @version 1.0.9
  * @date 2026-06-23
  */
 

@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,7 +39,7 @@ Updates are queried directly from the public GitHub release tags. When a new rel
 
 == Changelog ==
 
-= 1.0.8 =
+= 1.0.9 =
 * Added User Access Control (UAC) tab to WP Admin Settings page to manage individual user capabilities.
 * Added SMS Templates editing tab to WP Admin Settings page.
 * Dynamically granted access capabilities to built-in administrator and WooCommerce shop_manager roles to prevent redirection issues.
