@@ -3,7 +3,7 @@
  * Plugin Deactivation Logic
  *
  * @package KarasuWooPannel
- * @version 1.1.0
+ * @version 1.1.1
  * @date 2026-06-23
  */
 

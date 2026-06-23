@@ -3,7 +3,7 @@
  * Main Plugin Coordinator Class (Singleton)
  *
  * @package KarasuWooPannel
- * @version 1.1.0
+ * @version 1.1.1
  * @date 2026-06-23
  */
 
@@ -75,6 +75,7 @@ final class WSM_Plugin {
 		$auth_ctrl      = new \WooStoreManager\Api\WSM_Auth_Controller();
 		$sms_ctrl       = new \WooStoreManager\Api\WSM_Sms_Controller();
 		$cron           = new \WooStoreManager\Core\WSM_Cron();
+		$taxonomy       = new \WooStoreManager\Core\WSM_Taxonomy();
 
 		// Repositories & Services
 		$order_repo      = new \WooStoreManager\Repositories\WSM_Order_Repository();
@@ -88,6 +89,7 @@ final class WSM_Plugin {
 		$coupon_service  = new \WooStoreManager\Services\WSM_Coupon_Service( $coupon_repo );
 		$coupons_ctrl    = new \WooStoreManager\Api\WSM_Coupons_Controller( $coupon_service );
 		$reports_ctrl    = new \WooStoreManager\Api\WSM_Reports_Controller();
+		$attributes_ctrl = new \WooStoreManager\Api\WSM_Attributes_Controller();
 
 		// SMS Hooks
 		$sms_hooks = new \WooStoreManager\Core\WSM_Sms_Hooks();
@@ -96,6 +98,7 @@ final class WSM_Plugin {
 		// Register hooks with the Loader.
 		$this->loader->add_filter( 'determine_current_user', $auth, 'determine_current_user', 15 );
 		$this->loader->add_action( 'admin_init', $roles, 'block_admin_access' );
+		$this->loader->add_action( 'init', $taxonomy, 'register' );
 
 		$this->loader->add_action( 'init', $rewrite, 'add_rewrite_rules' );
 		$this->loader->add_filter( 'query_vars', $rewrite, 'add_query_vars' );
@@ -111,6 +114,7 @@ final class WSM_Plugin {
 		$this->loader->add_action( 'rest_api_init', $sms_ctrl, 'register_routes' );
 		$this->loader->add_action( 'rest_api_init', $coupons_ctrl, 'register_routes' );
 		$this->loader->add_action( 'rest_api_init', $reports_ctrl, 'register_routes' );
+		$this->loader->add_action( 'rest_api_init', $attributes_ctrl, 'register_routes' );
 
 		$this->loader->add_action( 'wsm_daily_cleanup', $cron, 'daily_cleanup' );
 

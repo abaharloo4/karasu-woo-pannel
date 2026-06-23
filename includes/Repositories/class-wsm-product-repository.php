@@ -95,8 +95,11 @@ class WSM_Product_Repository {
 		$product = $this->set_product_properties( $product, $data );
 		$product_id = $product->save();
 
-		if ( $product_id > 0 && 'variable' === $type ) {
-			$this->save_variable_data( $product, $data );
+		if ( $product_id > 0 ) {
+			$this->save_product_brands( $product_id, $data );
+			if ( 'variable' === $type ) {
+				$this->save_variable_data( $product, $data );
+			}
 		}
 
 		return $product_id > 0 ? $product_id : new WP_Error( 'wsm_create_failed', __( 'خطا در ایجاد محصول.', 'karasu-woo-pannel' ) );
@@ -117,6 +120,8 @@ class WSM_Product_Repository {
 
 		$product = $this->set_product_properties( $product, $data );
 		$product->save();
+
+		$this->save_product_brands( $product->get_id(), $data );
 
 		if ( $product->is_type( 'variable' ) ) {
 			$this->save_variable_data( $product, $data );
@@ -285,6 +290,18 @@ class WSM_Product_Repository {
 
 				$variation->save();
 			}
+		}
+	}
+
+	/**
+	 * Save product brands taxonomy.
+	 *
+	 * @param int   $product_id Product ID.
+	 * @param array $data       Product data.
+	 */
+	private function save_product_brands( int $product_id, array $data ): void {
+		if ( isset( $data['brand_ids'] ) ) {
+			wp_set_post_terms( $product_id, array_map( 'absint', (array) $data['brand_ids'] ), 'product_brand' );
 		}
 	}
 }

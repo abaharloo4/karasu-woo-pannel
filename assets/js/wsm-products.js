@@ -253,13 +253,20 @@
 
 	// 2. PRODUCT EDIT / CREATE FORM HANDLER
 	async function renderProductForm(container, productId) {
-		// Fetch categories first.
+		// Fetch categories and brands first.
 		let categories = [];
+		let brands = [];
 		try {
 			const catResponse = await WSM.fetch('/categories', { method: 'GET' });
 			categories = catResponse.data;
 		} catch (err) {
 			// Ignore category fetch error.
+		}
+		try {
+			const brandResponse = await WSM.fetch('/brands', { method: 'GET' });
+			brands = brandResponse.data;
+		} catch (err) {
+			// Ignore brand fetch error.
 		}
 
 		let productData = null;
@@ -293,6 +300,18 @@
 				<label class="wsm-flex wsm-items-center wsm-text-sm wsm-text-slate-300 wsm-cursor-pointer wsm-py-1">
 					<input type="checkbox" name="category_ids" value="${cat.id}" ${checked} class="wsm-ml-2">
 					${WSM.escHtml(cat.name)}
+				</label>
+			`;
+		});
+
+		// Build brands checkboxes.
+		let brandCheckboxes = '';
+		brands.forEach(brand => {
+			const checked = productData && productData.brand_ids && productData.brand_ids.includes(brand.id) ? 'checked' : '';
+			brandCheckboxes += `
+				<label class="wsm-flex wsm-items-center wsm-text-sm wsm-text-slate-300 wsm-cursor-pointer wsm-py-1">
+					<input type="checkbox" name="brand_ids" value="${brand.id}" ${checked} class="wsm-ml-2">
+					${WSM.escHtml(brand.name)}
 				</label>
 			`;
 		});
@@ -452,9 +471,17 @@
 
 					<!-- Categories list Card -->
 					<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-space-y-4">
-						<h3 class="wsm-font-semibold wsm-text-slate-200">دسته‌بندی‌ها</h3>
+						<h3 class="wsm-font-semibold wsm-text-slate-200">${window.wsmConfig.translations?.categories || 'دسته‌بندی‌ها'}</h3>
 						<div class="wsm-max-h-60 wsm-overflow-y-auto wsm-pr-1 wsm-flex wsm-flex-col">
-							${catCheckboxes || '<p class="wsm-text-xs wsm-text-slate-500">هیچ دسته‌بندی وجود ندارد.</p>'}
+							${catCheckboxes || `<p class="wsm-text-xs wsm-text-slate-500">${window.wsmConfig.translations?.noCategories || 'هیچ دسته‌بندی وجود ندارد.'}</p>`}
+						</div>
+					</div>
+
+					<!-- Brands list Card -->
+					<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-space-y-4">
+						<h3 class="wsm-font-semibold wsm-text-slate-200">${window.wsmConfig.translations?.brands || 'برندها'}</h3>
+						<div class="wsm-max-h-60 wsm-overflow-y-auto wsm-pr-1 wsm-flex wsm-flex-col">
+							${brandCheckboxes || `<p class="wsm-text-xs wsm-text-slate-500">${window.wsmConfig.translations?.noBrands || 'هیچ برندی وجود ندارد.'}</p>`}
 						</div>
 					</div>
 
@@ -899,6 +926,12 @@
 				catIds.push(parseInt(cb.value));
 			});
 
+			// Collect checked brands.
+			const brandIds = [];
+			document.querySelectorAll('input[name="brand_ids"]:checked').forEach(cb => {
+				brandIds.push(parseInt(cb.value));
+			});
+
 			const payload = {
 				name: document.getElementById('p-name').value,
 				type: pType ? pType.value : 'simple',
@@ -912,6 +945,7 @@
 				stock_status: document.getElementById('p-stock-status').value,
 				image_id: document.getElementById('p-image-id').value,
 				category_ids: catIds,
+				brand_ids: brandIds,
 				status: document.getElementById('p-status').value,
 				weight: document.getElementById('p-weight').value,
 				length: document.getElementById('p-length').value,

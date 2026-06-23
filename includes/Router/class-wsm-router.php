@@ -3,7 +3,7 @@
  * View Router and Dispatcher
  *
  * @package KarasuWooPannel
- * @version 1.1.0
+ * @version 1.1.1
  * @date 2026-06-23
  */
 
@@ -37,6 +37,8 @@ class WSM_Router {
 		'coupons'           => 'coupons/list',
 		'coupons/new'       => 'coupons/edit',
 		'coupons/edit'      => 'coupons/edit',
+		'attributes'        => 'attributes/list',
+		'brands'            => 'brands/list',
 		'reports'           => 'reports/dashboard',
 		'reports/sales'     => 'reports/sales',
 		'reports/products'  => 'reports/products',
@@ -129,6 +131,14 @@ class WSM_Router {
 			true
 		);
 
+		wp_register_script(
+			'wsm-attributes-js',
+			WSM_PLUGIN_URL . 'assets/js/wsm-attributes.js',
+			[],
+			WSM_VERSION,
+			true
+		);
+
 		wp_enqueue_style( 'wsm-font-vazirmatn' );
 		wp_enqueue_style( 'wsm-jalalidatepicker-css' );
 		wp_enqueue_style( 'wsm-panel-css' );
@@ -171,6 +181,10 @@ class WSM_Router {
 	 */
 	private function render( string $view ): void {
 		$this->enqueue_panel_assets();
+
+		if ( in_array( $view, [ 'attributes/list', 'brands/list' ], true ) ) {
+			wp_enqueue_script( 'wsm-attributes-js' );
+		}
 
 		// Exposed to layout.php
 		$view_file = WSM_PLUGIN_DIR . 'panel/views/' . $view . '.php';

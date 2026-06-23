@@ -97,7 +97,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js Local -->
+<script src="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/vendor/chart.min.js' ); ?>"></script>
 
 <script src="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/js/wsm-reports.js' ); ?>"></script>

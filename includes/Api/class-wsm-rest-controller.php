@@ -3,7 +3,7 @@
  * Abstract Base REST Controller
  *
  * @package KarasuWooPannel
- * @version 1.1.0
+ * @version 1.1.1
  * @date 2026-06-23
  */
 

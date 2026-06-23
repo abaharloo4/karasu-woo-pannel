@@ -196,6 +196,11 @@ class WSM_Product_Service {
 			}
 		}
 
+		$brand_ids = wp_get_post_terms( $product->get_id(), 'product_brand', [ 'fields' => 'ids' ] );
+		if ( is_wp_error( $brand_ids ) ) {
+			$brand_ids = [];
+		}
+
 		return [
 			'id'                => $product->get_id(),
 			'name'              => $product->get_name(),
@@ -211,6 +216,7 @@ class WSM_Product_Service {
 			'stock_quantity'    => $product->get_stock_quantity(),
 			'stock_status'      => $product->get_stock_status(),
 			'category_ids'      => $product->get_category_ids(),
+			'brand_ids'         => $brand_ids,
 			'image'             => [
 				'id'  => $product->get_image_id(),
 				'url' => wp_get_attachment_image_url( $product->get_image_id(), 'large' ),
