@@ -3,7 +3,7 @@
  * Custom Store Admin Panel Base Layout Template
  *
  * @package KarasuWooPannel
- * @version 1.0.6
+ * @version 1.0.7
  * @date 2026-06-23
  */
 
@@ -104,12 +104,6 @@ $current_user = wp_get_current_user();
 				</a>
 				<a href="<?php echo esc_url( wsm_panel_url( 'reports' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('reports') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">گزارش‌ها</span>
-				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'sms-settings' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('sms-settings') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
-					<span class="wsm-ml-3">تنظیمات پیامک</span>
-				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'reports/sms-log' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('sms-log') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
-					<span class="wsm-ml-3">لاگ‌های پیامک</span>
 				</a>
 			</nav>
 			<div class="wsm-p-4 wsm-border-t wsm-border-slate-800">

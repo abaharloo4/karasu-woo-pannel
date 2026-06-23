@@ -1,6 +1,6 @@
 # ROADMAP — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.6  
+**نسخه:** 1.0.7  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released
 

@@ -3,7 +3,7 @@
  * Dashboard Landing Page Template View
  *
  * @package KarasuWooPannel
- * @version 1.0.6
+ * @version 1.0.7
  * @date 2026-06-23
  */
 
@@ -24,8 +24,8 @@ $current_user = wp_get_current_user();
 				به پنل مدیریت اختصاصی فروشگاه خود خوش آمدید. خلاصه وضعیت امروز و عملکرد فروشگاه را در زیر مشاهده کنید.
 			</p>
 		</div>
-		<div class="wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2 wsm-text-xs wsm-font-mono wsm-text-slate-400">
-			<?php echo esc_html( \WooStoreManager\Helpers\WSM_Date_Helper::to_jalali_string( date( 'Y-m-d H:i:s' ) ) ); ?>
+		<div class="wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2.5 wsm-text-xs wsm-font-mono wsm-text-slate-400">
+			<span id="dash-live-clock">در حال دریافت ساعت...</span>
 		</div>
 	</div>
 
@@ -60,7 +60,7 @@ $current_user = wp_get_current_user();
 	<!-- Quick Actions -->
 	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg">
 		<h3 class="wsm-font-semibold wsm-text-slate-200 wsm-mb-4">دسترسی سریع و عملیات‌ها</h3>
-		<div class="wsm-grid wsm-grid-cols-2 md:wsm-grid-cols-5 wsm-gap-4">
+		<div class="wsm-grid wsm-grid-cols-2 md:wsm-grid-cols-4 wsm-gap-4">
 			<a href="<?php echo esc_url( wsm_panel_url( 'orders' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group">
 				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">📦</span>
 				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">لیست سفارش‌ها</span>
@@ -76,10 +76,6 @@ $current_user = wp_get_current_user();
 			<a href="<?php echo esc_url( wsm_panel_url( 'reports' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group">
 				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">📊</span>
 				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">گزارش‌های فروشگاه</span>
-			</a>
-			<a href="<?php echo esc_url( wsm_panel_url( 'sms-settings' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group wsm-col-span-2 md:wsm-col-span-1">
-				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">💬</span>
-				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">تنظیمات پیامک</span>
 			</a>
 		</div>
 	</div>

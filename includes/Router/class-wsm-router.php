@@ -3,7 +3,7 @@
  * View Router and Dispatcher
  *
  * @package KarasuWooPannel
- * @version 1.0.6
+ * @version 1.0.7
  * @date 2026-06-23
  */
 
@@ -41,8 +41,6 @@ class WSM_Router {
 		'reports/sales'     => 'reports/sales',
 		'reports/products'  => 'reports/products',
 		'reports/customers' => 'reports/customers',
-		'reports/sms-log'   => 'reports/sms-log',
-		'sms-settings'      => 'sms/settings',
 	];
 
 	/**

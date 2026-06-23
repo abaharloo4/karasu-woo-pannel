@@ -3,7 +3,7 @@
  * SMS Dispatcher and Notification Service
  *
  * @package KarasuWooPannel
- * @version 1.0.6
+ * @version 1.0.7
  * @date 2026-06-23
  */
 
@@ -244,7 +244,9 @@ class WSM_Sms_Service {
 	 * @return bool True if option value changed, else false.
 	 */
 	public static function update_templates( array $templates ): bool {
-		$sanitized = [];
+		$existing = get_option( 'wsm_sms_templates', [] );
+		$sanitized = is_array( $existing ) ? $existing : [];
+
 		$default_keys = [
 			'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed',
 			'admin_pending', 'admin_processing', 'admin_on-hold', 'admin_completed', 'admin_cancelled', 'admin_refunded', 'admin_failed',

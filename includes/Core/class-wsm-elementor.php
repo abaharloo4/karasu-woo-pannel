@@ -3,7 +3,7 @@
  * Elementor Widgets Bootstrapper and Category Ordering
  *
  * @package KarasuWooPannel
- * @version 1.0.6
+ * @version 1.0.7
  * @date 2026-06-23
  */
 

@@ -3,7 +3,7 @@
  * WordPress Admin Menu Registry
  *
  * @package KarasuWooPannel
- * @version 1.0.6
+ * @version 1.0.7
  * @date 2026-06-23
  */
 
@@ -116,7 +116,8 @@ class WSM_Admin_Menu {
 			}
 
 			// Redirect to prevent form resubmission
-			wp_safe_redirect( add_query_arg( [ 'page' => 'wsm_settings', 'settings-updated' => 'true', 'tab' => 'wsm-tab-templates' ], admin_url( 'admin.php' ) ) );
+			$redirect_tab = isset( $_POST['wsm_redirect_tab'] ) ? sanitize_key( $_POST['wsm_redirect_tab'] ) : 'wsm-tab-templates-customer';
+			wp_safe_redirect( add_query_arg( [ 'page' => 'wsm_settings', 'settings-updated' => 'true', 'tab' => $redirect_tab ], admin_url( 'admin.php' ) ) );
 			exit;
 		}
 	}
@@ -201,31 +202,65 @@ class WSM_Admin_Menu {
 				box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
 				background: linear-gradient(to right, #6366f1, #818cf8);
 			}
+			.wsm-settings-container {
+				display: flex;
+				flex-direction: row-reverse;
+				min-height: 550px;
+				background: #0f172a;
+			}
+			@media(max-width: 768px) {
+				.wsm-settings-container {
+					flex-direction: column;
+				}
+				.wsm-settings-sidebar {
+					width: 100% !important;
+					border-left: none !important;
+					border-bottom: 1px solid #1e293b;
+				}
+			}
+			.wsm-settings-sidebar {
+				width: 260px;
+				background: #0a0f1d;
+				border-left: 1px solid #1e293b;
+				display: flex;
+				flex-direction: column;
+				padding: 15px 0;
+			}
 			.wsm-tabs-nav {
 				display: flex;
-				background: #020617;
-				padding: 10px 20px 0 20px;
-				border-bottom: 1px solid #1e293b;
-				flex-wrap: wrap;
+				flex-direction: column;
+				background: transparent;
+				padding: 0;
 			}
 			.wsm-tab-link {
 				color: #94a3b8;
-				padding: 15px 25px;
+				padding: 14px 20px;
 				cursor: pointer;
 				font-weight: 700;
-				font-size: 14px;
-				border-bottom: 3px solid transparent;
+				font-size: 13px;
+				border-right: 3px solid transparent;
 				transition: all 0.2s ease;
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				text-align: right;
 			}
 			.wsm-tab-link:hover {
 				color: #cbd5e1;
+				background: rgba(30, 41, 59, 0.3);
 			}
 			.wsm-tab-link.active {
 				color: #818cf8;
-				border-bottom-color: #818cf8;
+				background: rgba(99, 102, 241, 0.05);
+				border-right-color: #818cf8;
 			}
-			.wsm-settings-body {
-				padding: 40px;
+			.wsm-tab-link span {
+				font-size: 16px;
+			}
+			.wsm-settings-content {
+				flex: 1;
+				padding: 35px;
+				background: #0f172a;
 			}
 			.wsm-tab-content {
 				display: none;
@@ -401,14 +436,33 @@ class WSM_Admin_Menu {
 				</a>
 			</div>
 
-			<div class="wsm-tabs-nav">
-				<div class="wsm-tab-link <?php echo 'wsm-tab-general' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-general')">تنظیمات عمومی پنل</div>
-				<div class="wsm-tab-link <?php echo 'wsm-tab-sms' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-sms')">درگاه پیامک (ملی‌پیامک)</div>
-				<div class="wsm-tab-link <?php echo 'wsm-tab-templates' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-templates')">قالب‌های ارسال پیامک</div>
-				<div class="wsm-tab-link <?php echo 'wsm-tab-users' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-users')">مدیریت دسترسی کاربران</div>
-			</div>
+			<div class="wsm-settings-container">
+				<!-- Right Sidebar -->
+				<div class="wsm-settings-sidebar">
+					<div class="wsm-tabs-nav">
+						<div class="wsm-tab-link <?php echo 'wsm-tab-general' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-general')">
+							<span>⚙️</span> تنظیمات عمومی پنل
+						</div>
+						<div class="wsm-tab-link <?php echo 'wsm-tab-sms' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-sms')">
+							<span>💬</span> درگاه پیامک (ملی‌پیامک)
+						</div>
+						<div class="wsm-tab-link <?php echo 'wsm-tab-templates-customer' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-templates-customer')">
+							<span>👤</span> قالب‌های پیامک خریدار
+						</div>
+						<div class="wsm-tab-link <?php echo 'wsm-tab-templates-admin' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-templates-admin')">
+							<span>👑</span> قالب‌های پیامک مدیر
+						</div>
+						<div class="wsm-tab-link <?php echo 'wsm-tab-users' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-users')">
+							<span>👥</span> مدیریت دسترسی کاربران
+						</div>
+						<div class="wsm-tab-link <?php echo 'wsm-tab-status' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-status')">
+							<span>ℹ️</span> وضعیت و معرفی افزونه
+						</div>
+					</div>
+				</div>
 
-			<div class="wsm-settings-body">
+				<!-- Left Content Area -->
+				<div class="wsm-settings-content">
 				<!-- Tab 1 & Tab 2: Options.php standard form -->
 				<form action="options.php" method="post" id="wsm-options-form" style="<?php echo in_array( $active_tab, [ 'wsm-tab-general', 'wsm-tab-sms' ], true ) ? '' : 'display: none;'; ?>">
 					<?php settings_fields( 'wsm_settings_group' ); ?>
@@ -504,29 +558,17 @@ class WSM_Admin_Menu {
 					</div>
 				</form>
 
-				<!-- Tab 3: SMS Templates Settings Form -->
-				<div id="wsm-tab-templates" class="wsm-tab-content <?php echo 'wsm-tab-templates' === $active_tab ? 'active' : ''; ?>">
+				<!-- Tab 3: SMS Customer Templates Tab -->
+				<div id="wsm-tab-templates-customer" class="wsm-tab-content <?php echo 'wsm-tab-templates-customer' === $active_tab ? 'active' : ''; ?>">
 					<form action="" method="post">
 						<?php wp_nonce_field( 'wsm_save_sms_templates_action', 'wsm_save_sms_templates_nonce' ); ?>
 						<input type="hidden" name="wsm_save_sms_templates" value="1">
+						<input type="hidden" name="wsm_redirect_tab" value="wsm-tab-templates-customer">
 						
 						<?php
 						if ( class_exists( '\WooStoreManager\Services\WSM_Sms_Service' ) ) {
 							$templates = \WooStoreManager\Services\WSM_Sms_Service::get_templates();
-							
 							$customer_keys = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed' ];
-							$admin_keys    = [
-								'admin_new_order',
-								'admin_low_stock',
-								'admin_pending',
-								'admin_processing',
-								'admin_on-hold',
-								'admin_completed',
-								'admin_cancelled',
-								'admin_refunded',
-								'admin_failed',
-							];
-							
 							$labels = [
 								'pending'          => 'در انتظار پرداخت (Pending)',
 								'processing'       => 'در حال پردازش / ثبت سفارش (Processing)',
@@ -535,15 +577,6 @@ class WSM_Admin_Menu {
 								'cancelled'        => 'لغو شده (Cancelled)',
 								'refunded'         => 'مسترد شده (Refunded)',
 								'failed'           => 'پرداخت ناموفق (Failed)',
-								'admin_new_order'  => 'سفارش جدید (New Order)',
-								'admin_low_stock'  => 'کاهش موجودی انبار (Low Stock Alert)',
-								'admin_pending'    => 'در انتظار پرداخت (Pending) - مدیر',
-								'admin_processing' => 'در حال پردازش / ثبت سفارش (Processing) - مدیر',
-								'admin_on-hold'    => 'معلق (On Hold) - مدیر',
-								'admin_completed'  => 'تکمیل شده / ارسال شده (Completed) - مدیر',
-								'admin_cancelled'  => 'لغو شده (Cancelled) - مدیر',
-								'admin_refunded'   => 'مسترد شده (Refunded) - مدیر',
-								'admin_failed'     => 'پرداخت ناموفق (Failed) - مدیر',
 							];
 							?>
 							
@@ -582,6 +615,49 @@ class WSM_Admin_Menu {
 								}
 								?>
 							</div>
+							<?php
+						}
+						?>
+						
+						<div class="wsm-submit-area" style="padding: 20px 0; background: transparent; border-top: none;">
+							<button type="submit" class="wsm-save-btn">ذخیره قالب‌های خریدار</button>
+						</div>
+					</form>
+				</div>
+
+				<!-- Tab 4: SMS Admin Templates Tab -->
+				<div id="wsm-tab-templates-admin" class="wsm-tab-content <?php echo 'wsm-tab-templates-admin' === $active_tab ? 'active' : ''; ?>">
+					<form action="" method="post">
+						<?php wp_nonce_field( 'wsm_save_sms_templates_action', 'wsm_save_sms_templates_nonce' ); ?>
+						<input type="hidden" name="wsm_save_sms_templates" value="1">
+						<input type="hidden" name="wsm_redirect_tab" value="wsm-tab-templates-admin">
+						
+						<?php
+						if ( class_exists( '\WooStoreManager\Services\WSM_Sms_Service' ) ) {
+							$templates = \WooStoreManager\Services\WSM_Sms_Service::get_templates();
+							$admin_keys = [
+								'admin_new_order',
+								'admin_low_stock',
+								'admin_pending',
+								'admin_processing',
+								'admin_on-hold',
+								'admin_completed',
+								'admin_cancelled',
+								'admin_refunded',
+								'admin_failed',
+							];
+							$labels = [
+								'admin_new_order'  => 'سفارش جدید (New Order)',
+								'admin_low_stock'  => 'کاهش موجودی انبار (Low Stock Alert)',
+								'admin_pending'    => 'در انتظار پرداخت (Pending) - مدیر',
+								'admin_processing' => 'در حال پردازش / ثبت سفارش (Processing) - مدیر',
+								'admin_on-hold'    => 'معلق (On Hold) - مدیر',
+								'admin_completed'  => 'تکمیل شده / ارسال شده (Completed) - مدیر',
+								'admin_cancelled'  => 'لغو شده (Cancelled) - مدیر',
+								'admin_refunded'   => 'مسترد شده (Refunded) - مدیر',
+								'admin_failed'     => 'پرداخت ناموفق (Failed) - مدیر',
+							];
+							?>
 							
 							<!-- Admin Templates Card -->
 							<div class="wsm-card">
@@ -629,13 +705,12 @@ class WSM_Admin_Menu {
 								}
 								?>
 							</div>
-							
 							<?php
 						}
 						?>
 						
 						<div class="wsm-submit-area" style="padding: 20px 0; background: transparent; border-top: none;">
-							<button type="submit" class="wsm-save-btn">ذخیره قالب‌های پیامک</button>
+							<button type="submit" class="wsm-save-btn">ذخیره قالب‌های مدیر</button>
 						</div>
 					</form>
 				</div>
@@ -786,6 +861,91 @@ class WSM_Admin_Menu {
 						</div>
 					</form>
 				</div>
+
+				<!-- Tab 6: Status & About Info Tab -->
+				<div id="wsm-tab-status" class="wsm-tab-content <?php echo 'wsm-tab-status' === $active_tab ? 'active' : ''; ?>">
+					<div class="wsm-card">
+						<h3>معرفی افزونه KarasuWooPannel</h3>
+						<p class="wsm-field-desc" style="line-height: 1.8; color: #cbd5e1; font-size: 13.5px; margin-bottom: 20px;">
+							افزونه <strong>KarasuWooPannel</strong> یک ابزار پیشرفته و مدرن است که مدیریت فروشگاه ووکامرس شما را متحول می‌کند. این افزونه با راه‌اندازی یک پنل مدیریت اختصاصی و سریع با زیبایی بصری مدرن، امکان مدیریت محصولات ساده و متغیر، دسته‌بندی‌ها، کوپن‌ها، بررسی دقیق سفارش‌ها و مشاهده گزارش‌های پیشرفته با تقویم شمسی جلالی را به ارمغان می‌آورد. همچنین سیستم هوشمند اطلاع‌رسانی پیامکی ملی‌پیامک خریداران و مدیران را از آخرین رویدادهای خرید آگاه می‌سازد.
+						</p>
+					</div>
+
+					<div class="wsm-card">
+						<h3>وضعیت سیستم و مشخصات فنی</h3>
+						<style>
+							.wsm-status-table {
+								width: 100%;
+								border-collapse: collapse;
+								margin-top: 10px;
+								font-size: 13px;
+							}
+							.wsm-status-table td {
+								padding: 12px 10px;
+								border-bottom: 1px solid #1e293b;
+							}
+							.wsm-status-table td:first-child {
+								font-weight: 700;
+								color: #94a3b8;
+								width: 200px;
+							}
+							.wsm-status-badge {
+								display: inline-block;
+								padding: 3px 10px;
+								border-radius: 6px;
+								font-size: 11px;
+								font-weight: bold;
+							}
+						</style>
+						<table class="wsm-status-table">
+							<tr>
+								<td>نسخه افزونه</td>
+								<td><span class="wsm-status-badge" style="background: rgba(99,102,241,0.15); color: #818cf8;"><?php echo esc_html( WSM_VERSION ); ?></span></td>
+							</tr>
+							<tr>
+								<td>آدرس پنل مدیریت اختصاصی</td>
+								<td><a href="<?php echo esc_url( home_url( '/' . $panel_slug ) ); ?>" target="_blank" style="color: #6366f1; text-decoration: none; font-weight: 700;"><?php echo esc_html( home_url( '/' . $panel_slug ) ); ?></a></td>
+							</tr>
+							<tr>
+								<td>وضعیت ووکامرس (WooCommerce)</td>
+								<td>
+									<?php if ( class_exists( 'WooCommerce' ) ) : ?>
+										<span class="wsm-status-badge" style="background: rgba(16,185,129,0.15); color: #34d399;">فعال (نسخه <?php echo esc_html( WC()->version ); ?>)</span>
+									<?php else : ?>
+										<span class="wsm-status-badge" style="background: rgba(239,68,68,0.15); color: #f87171;">غیرفعال / نصب نشده</span>
+									<?php endif; ?>
+								</td>
+							</tr>
+							<tr>
+								<td>نسخه وردپرس</td>
+								<td><?php echo esc_html( get_bloginfo( 'version' ) ); ?></td>
+							</tr>
+							<tr>
+								<td>نسخه PHP سرور</td>
+								<td><?php echo esc_html( PHP_VERSION ); ?></td>
+							</tr>
+							<tr>
+								<td>اتصال درگاه ملی‌پیامک</td>
+								<td>
+									<?php if ( ! empty( $sms_username ) && ! empty( $sms_password ) ) : ?>
+										<span class="wsm-status-badge" style="background: rgba(16,185,129,0.15); color: #34d399;">پیکربندی شده (نام کاربری: <?php echo esc_html( $sms_username ); ?>)</span>
+									<?php else : ?>
+										<span class="wsm-status-badge" style="background: rgba(239,68,68,0.15); color: #f87171;">پیکربندی نشده</span>
+									<?php endif; ?>
+								</td>
+							</tr>
+							<tr>
+								<td>عضویت مدیران فروشگاه (Custom Roles)</td>
+								<td>
+									<?php
+									$custom_managers = get_users( [ 'role' => 'shop_manager_custom' ] );
+									echo esc_html( count( $custom_managers ) ) . ' کاربر با نقش مدیر اختصاصی';
+									?>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -800,12 +960,18 @@ class WSM_Admin_Menu {
 				document.getElementById(tabId).classList.add('active');
 				evt.currentTarget.classList.add('active');
 
-				// Hide or show the options.php standard form depending on tab
 				const optionsForm = document.getElementById('wsm-options-form');
+				const templatesForm = document.getElementById('wsm-templates-form');
+				
 				if (tabId === 'wsm-tab-general' || tabId === 'wsm-tab-sms') {
-					optionsForm.style.display = 'block';
+					if (optionsForm) optionsForm.style.display = 'block';
+					if (templatesForm) templatesForm.style.display = 'none';
+				} else if (tabId === 'wsm-tab-templates-customer' || tabId === 'wsm-tab-templates-admin') {
+					if (optionsForm) optionsForm.style.display = 'none';
+					if (templatesForm) templatesForm.style.display = 'block';
 				} else {
-					optionsForm.style.display = 'none';
+					if (optionsForm) optionsForm.style.display = 'none';
+					if (templatesForm) templatesForm.style.display = 'none';
 				}
 			}
 

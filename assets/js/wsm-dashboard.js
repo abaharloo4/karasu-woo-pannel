@@ -2,7 +2,7 @@
  * KarasuWooPannel Dashboard Client Logic Script
  *
  * @package KarasuWooPannel
- * @version 1.0.6
+ * @version 1.0.7
  * @date 2026-06-23
  */
 
@@ -140,10 +140,35 @@
 		}
 	}
 
+	function startLiveClock() {
+		const clockEl = document.getElementById('dash-live-clock');
+		if (!clockEl) return;
+
+		const formatter = new Intl.DateTimeFormat('fa-IR', {
+			calendar: 'persian',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			weekday: 'long',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+			timeZone: 'Asia/Tehran'
+		});
+
+		function updateClock() {
+			clockEl.textContent = formatter.format(new Date());
+		}
+
+		updateClock();
+		setInterval(updateClock, 1000);
+	}
+
 	document.addEventListener('DOMContentLoaded', () => {
 		loadDashboardStats();
 		loadRecentOrders();
 		loadLowStockAlerts();
+		startLiveClock();
 	});
 
 })();
