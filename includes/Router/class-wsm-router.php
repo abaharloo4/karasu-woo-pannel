@@ -3,7 +3,7 @@
  * View Router and Dispatcher
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -70,7 +70,7 @@ class WSM_Router {
 		}
 
 		// 3. Verify user has capability to access the panel.
-		if ( ! current_user_can( 'wsm_access_panel' ) ) {
+		if ( ! current_user_can( 'wsm_access_panel' ) && ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
 			// Redirect unauthorized logged-in users (like subscribers) to site home.
 			wp_safe_redirect( home_url() );
 			exit;

@@ -1,6 +1,6 @@
 # DEBUG LOG — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.4  
+**نسخه:** 1.0.5  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 
@@ -78,3 +78,33 @@ This log captures technical bugs, architectural adjustments, and security edge c
   1. Added "قالب‌های ارسال پیامک" (SMS Templates) and "مدیریت دسترسی کاربران" (User Access Control) tabs to `WSM_Admin_Menu` with POST actions handlers to save data.
   2. Dynamically granted all custom `wsm_` capabilities to `administrator` and `shop_manager` roles on activation and `admin_init`.
   3. Added a toggle password visibility button and script to the login template and Javascript.
+
+### 13. Shared SMS Templates for Customer and Admin
+* **Symptom:** Customer and admin SMS notifications used the same template pool, with no way to configure separate messages for each recipient type per order status change.
+* **Cause:** The template keys only covered customer-facing statuses (`pending`, `processing`, etc.) plus two admin-only events (`new_order`, `low_stock`). There was no mechanism for the admin to receive status-change notifications with a different template.
+* **Resolution:** Added separate `admin_` prefixed template keys for all order statuses (`admin_pending`, `admin_processing`, `admin_on-hold`, `admin_completed`, `admin_cancelled`, `admin_refunded`, `admin_failed`) alongside the existing `admin_new_order` and `admin_low_stock`. Updated the WooCommerce hooks listener to send both customer and admin SMS on each status change, and exposed all templates in both the WP Admin settings and the standalone panel settings UI.
+
+### 14. Persistent Redirect to Homepage for Admin/Shop Manager Users
+* **Symptom:** WordPress administrators and WooCommerce shop managers were redirected to the homepage when accessing the standalone panel `/store-admin/`, even after logging in.
+* **Cause:** 
+  1. `WSM_Auth::is_authenticated()` only checked the custom `wsm_session` cookie, ignoring standard WordPress login sessions.
+  2. `WSM_Router::dispatch()` checked exclusively for `wsm_access_panel` capability, which may not be assigned if the activation hook hadn't run for built-in roles.
+  3. All REST API controllers similarly rejected users who lacked `wsm_*` capabilities even if they had `manage_options` or `manage_woocommerce`.
+* **Resolution:** 
+  1. Updated `WSM_Auth::is_authenticated()` to fall back to checking `is_user_logged_in()` combined with `manage_woocommerce` or `manage_options` capabilities.
+  2. Updated `WSM_Router::dispatch()`, `WSM_Auth::login()`, and all REST API controller `check_permission()` methods to accept `manage_woocommerce` or `manage_options` as alternative authorization capabilities.
+  3. Added `wp_set_current_user()` in `WSM_Rewrite::handle_request()` to resolve early anonymous user caching when only the custom session cookie is present.
+
+### 15. GitHub Auto-Updater Not Triggering Update Notices
+* **Symptom:** Even with a newer version published on GitHub, no update notice appeared in the WordPress plugins dashboard.
+* **Cause:** 
+  1. SSL verification failures on shared hosting prevented `wp_remote_get` from reaching GitHub API.
+  2. The `zipball_url` from the GitHub API required authentication headers, causing download failures.
+  3. The `check_update()` method had an `empty($transient->checked)` guard that prevented injection when WordPress hadn't populated the checked array yet.
+  4. The plugin was never registered in `$transient->no_update`, causing WordPress to silently skip it.
+* **Resolution:** 
+  1. Added `'sslverify' => false` to all `wp_remote_get` calls.
+  2. Switched download URLs from API `zipball_url` to public `https://github.com/{user}/{repo}/archive/refs/tags/{tag}.zip`.
+  3. Removed the `empty($transient->checked)` guard.
+  4. Properly managed both `$transient->response` and `$transient->no_update` arrays, unsetting from one when adding to the other.
+  5. Reduced failure cache from 1 hour to 30 minutes and success cache from 12 hours to 6 hours for faster update detection.

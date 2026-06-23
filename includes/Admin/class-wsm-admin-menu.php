@@ -3,7 +3,7 @@
  * WordPress Admin Menu Registry
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -492,44 +492,102 @@ class WSM_Admin_Menu {
 						<?php wp_nonce_field( 'wsm_save_sms_templates_action', 'wsm_save_sms_templates_nonce' ); ?>
 						<input type="hidden" name="wsm_save_sms_templates" value="1">
 						
-						<div class="wsm-card">
-							<h3>قالب‌های پیامکی خریداران و مدیر</h3>
-							<p class="wsm-field-desc" style="margin-bottom: 20px;">متن پیامک‌های ارسالی به خریداران در زمان تغییر وضعیت سفارش و هشدارهای پیامکی مدیر را ویرایش کنید.</p>
+						<?php
+						if ( class_exists( '\WooStoreManager\Services\WSM_Sms_Service' ) ) {
+							$templates = \WooStoreManager\Services\WSM_Sms_Service::get_templates();
+							
+							$customer_keys = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed' ];
+							$admin_keys    = [
+								'admin_new_order',
+								'admin_low_stock',
+								'admin_pending',
+								'admin_processing',
+								'admin_on-hold',
+								'admin_completed',
+								'admin_cancelled',
+								'admin_refunded',
+								'admin_failed',
+							];
+							
+							$labels = [
+								'pending'          => 'در انتظار پرداخت (Pending)',
+								'processing'       => 'در حال پردازش / ثبت سفارش (Processing)',
+								'on-hold'          => 'معلق (On Hold)',
+								'completed'        => 'تکمیل شده / ارسال شده (Completed)',
+								'cancelled'        => 'لغو شده (Cancelled)',
+								'refunded'         => 'مسترد شده (Refunded)',
+								'failed'           => 'پرداخت ناموفق (Failed)',
+								'admin_new_order'  => 'سفارش جدید (New Order)',
+								'admin_low_stock'  => 'کاهش موجودی انبار (Low Stock Alert)',
+								'admin_pending'    => 'در انتظار پرداخت (Pending) - مدیر',
+								'admin_processing' => 'در حال پردازش / ثبت سفارش (Processing) - مدیر',
+								'admin_on-hold'    => 'معلق (On Hold) - مدیر',
+								'admin_completed'  => 'تکمیل شده / ارسال شده (Completed) - مدیر',
+								'admin_cancelled'  => 'لغو شده (Cancelled) - مدیر',
+								'admin_refunded'   => 'مسترد شده (Refunded) - مدیر',
+								'admin_failed'     => 'پرداخت ناموفق (Failed) - مدیر',
+							];
+							?>
+							
+							<!-- Customer Templates Card -->
+							<div class="wsm-card">
+								<h3>قالب‌های پیامک ارسالی به خریدار (کاربر)</h3>
+								<p class="wsm-field-desc" style="margin-bottom: 20px;">متن پیامک‌های ارسالی به خریداران در زمان تغییر وضعیت سفارش را در این بخش مدیریت کنید.</p>
+								
+								<?php
+								foreach ( $customer_keys as $key ) {
+									if ( isset( $templates[ $key ] ) ) {
+										$tmpl = $templates[ $key ];
+										$label = $labels[ $key ] ?? $key;
+										$enabled_checked = ! empty( $tmpl['enabled'] ) ? 'checked' : '';
+										?>
+										<div style="border-bottom: 1px solid #1e293b; padding: 20px 0; margin-bottom: 15px;">
+											<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+												<span style="font-weight: 700; font-size: 14px; color: #cbd5e1;"><?php echo esc_html( $label ); ?></span>
+												<label class="wsm-checkbox-label" style="padding: 0;">
+													<input type="checkbox" name="wsm_templates[<?php echo esc_attr( $key ); ?>][enabled]" value="1" <?php echo $enabled_checked; ?>>
+													<span style="font-size: 13px; color: #94a3b8;">فعال</span>
+												</label>
+											</div>
+											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+										</div>
+										<?php
+									}
+								}
+								?>
+							</div>
+							
+							<!-- Admin Templates Card -->
+							<div class="wsm-card">
+								<h3>قالب‌های پیامک ارسالی به مدیر</h3>
+								<p class="wsm-field-desc" style="margin-bottom: 20px;">متن پیامک‌های ارسالی به مدیر سایت در زمان رویدادهای ویژه را در این بخش مدیریت کنید.</p>
+								
+								<?php
+								foreach ( $admin_keys as $key ) {
+									if ( isset( $templates[ $key ] ) ) {
+										$tmpl = $templates[ $key ];
+										$label = $labels[ $key ] ?? $key;
+										$enabled_checked = ! empty( $tmpl['enabled'] ) ? 'checked' : '';
+										?>
+										<div style="border-bottom: 1px solid #1e293b; padding: 20px 0; margin-bottom: 15px;">
+											<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+												<span style="font-weight: 700; font-size: 14px; color: #cbd5e1;"><?php echo esc_html( $label ); ?></span>
+												<label class="wsm-checkbox-label" style="padding: 0;">
+													<input type="checkbox" name="wsm_templates[<?php echo esc_attr( $key ); ?>][enabled]" value="1" <?php echo $enabled_checked; ?>>
+													<span style="font-size: 13px; color: #94a3b8;">فعال</span>
+												</label>
+											</div>
+											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+										</div>
+										<?php
+									}
+								}
+								?>
+							</div>
 							
 							<?php
-							if ( class_exists( '\WooStoreManager\Services\WSM_Sms_Service' ) ) {
-								$templates = \WooStoreManager\Services\WSM_Sms_Service::get_templates();
-								$labels = [
-									'pending'     => 'در انتظار پرداخت (Pending)',
-									'processing'  => 'در حال پردازش / ثبت سفارش (Processing)',
-									'on-hold'     => 'معلق (On Hold)',
-									'completed'   => 'تکمیل شده / ارسال شده (Completed)',
-									'cancelled'   => 'لغو شده (Cancelled)',
-									'refunded'    => 'مسترد شده (Refunded)',
-									'failed'      => 'پرداخت ناموفق (Failed)',
-									'new_order'   => 'سفارش جدید (به مدیر)',
-									'low_stock'   => 'کاهش موجودی انبار (به مدیر)',
-								];
-
-								foreach ( $templates as $key => $tmpl ) {
-									$label = $labels[ $key ] ?? $key;
-									$enabled_checked = ! empty( $tmpl['enabled'] ) ? 'checked' : '';
-									?>
-									<div style="border-bottom: 1px solid #1e293b; padding: 20px 0; margin-bottom: 15px;">
-										<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-											<span style="font-weight: 700; font-size: 14px; color: #cbd5e1;"><?php echo esc_html( $label ); ?></span>
-											<label class="wsm-checkbox-label" style="padding: 0;">
-												<input type="checkbox" name="wsm_templates[<?php echo esc_attr( $key ); ?>][enabled]" value="1" <?php echo $enabled_checked; ?>>
-												<span style="font-size: 13px; color: #94a3b8;">فعال</span>
-											</label>
-										</div>
-										<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
-									</div>
-									<?php
-								}
-							}
-							?>
-						</div>
+						}
+						?>
 						
 						<div class="wsm-submit-area" style="padding: 20px 0; background: transparent; border-top: none;">
 							<button type="submit" class="wsm-save-btn">ذخیره قالب‌های پیامک</button>

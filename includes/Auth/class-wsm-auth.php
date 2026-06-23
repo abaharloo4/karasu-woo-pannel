@@ -3,7 +3,7 @@
  * Custom Session and Authentication Manager
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -37,7 +37,7 @@ class WSM_Auth {
 		}
 
 		// Verify if user has store admin panel access capabilities.
-		if ( ! user_can( $user, 'wsm_access_panel' ) ) {
+		if ( ! user_can( $user, 'wsm_access_panel' ) && ! user_can( $user, 'manage_woocommerce' ) && ! user_can( $user, 'manage_options' ) ) {
 			return new WP_Error(
 				'wsm_access_denied',
 				__( 'حساب کاربری شما دسترسی لازم برای ورود به پنل را ندارد.', 'karasu-woo-pannel' )
@@ -125,6 +125,11 @@ class WSM_Auth {
 				'samesite' => 'Strict',
 			]
 		);
+
+		// Also log out of standard WordPress if logged in.
+		if ( is_user_logged_in() ) {
+			wp_logout();
+		}
 	}
 
 	/**
@@ -134,23 +139,30 @@ class WSM_Auth {
 	 */
 	public static function is_authenticated(): bool {
 		$token = self::get_instance_token();
-		if ( ! $token ) {
-			return false;
+		if ( $token ) {
+			global $wpdb;
+			$table        = $wpdb->prefix . 'wsm_sessions';
+			$hashed_token = wp_hash( $token );
+
+			$session = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT id FROM {$table} WHERE session_id = %s AND expires_at > %s LIMIT 1",
+					$hashed_token,
+					current_time( 'mysql', true )
+				)
+			);
+
+			if ( $session ) {
+				return true;
+			}
 		}
 
-		global $wpdb;
-		$table        = $wpdb->prefix . 'wsm_sessions';
-		$hashed_token = wp_hash( $token );
+		// Fallback: If standard WordPress user session is active and has store panel access.
+		if ( is_user_logged_in() && ( current_user_can( 'wsm_access_panel' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'manage_options' ) ) ) {
+			return true;
+		}
 
-		$session = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT id FROM {$table} WHERE session_id = %s AND expires_at > %s LIMIT 1",
-				$hashed_token,
-				current_time( 'mysql', true )
-			)
-		);
-
-		return (bool) $session;
+		return false;
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * REST Controller for WooCommerce Products
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -146,7 +146,7 @@ class WSM_Products_Controller extends WSM_REST_Controller {
 			return $auth_check;
 		}
 
-		if ( ! current_user_can( 'wsm_manage_products' ) ) {
+		if ( ! current_user_can( 'wsm_manage_products' ) && ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error(
 				'wsm_forbidden',
 				__( 'دسترسی غیرمجاز. شما مجوز مدیریت محصولات را ندارید.', 'karasu-woo-pannel' ),

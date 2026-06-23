@@ -1,6 +1,6 @@
 # ARCHITECTURE — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.4  
+**نسخه:** 1.0.5  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 **Prefix اختصاصی:** `wsm_`  
@@ -171,7 +171,7 @@ woostore-manager/
 // woostore-manager.php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'WSM_VERSION', '1.0.4' );
+define( 'WSM_VERSION', '1.0.5' );
 define( 'WSM_PLUGIN_FILE', __FILE__ );
 define( 'WSM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WSM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

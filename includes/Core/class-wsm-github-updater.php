@@ -3,7 +3,7 @@
  * GitHub Plugin Automatic Updater
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -98,33 +98,62 @@ class WSM_GitHub_Updater {
 		}
 
 		if ( false === $release ) {
+			$request_args = [
+				'headers'   => [
+					'User-Agent' => 'KarasuWooPannel-Updater',
+				],
+				'timeout'   => 15,
+				'sslverify' => false,
+			];
+
 			$url      = sprintf( 'https://api.github.com/repos/%s/%s/releases/latest', $this->username, $this->repo );
-			$response = wp_remote_get(
-				$url,
-				[
-					'headers' => [
-						'User-Agent' => 'KarasuWooPannel-Updater',
-					],
-					'timeout' => 10,
-				]
+			$response = wp_remote_get( $url, $request_args );
+
+			$api_success = false;
+
+			if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+				$body    = wp_remote_retrieve_body( $response );
+				$release = json_decode( $body, true );
+				if ( is_array( $release ) ) {
+					$api_success = true;
+				}
+			}
+
+			// Fallback to releases.atom feed if API rate-limited or failed
+			if ( ! $api_success ) {
+				$feed_url = sprintf( 'https://github.com/%s/%s/releases.atom', $this->username, $this->repo );
+				$feed_res = wp_remote_get( $feed_url, $request_args );
+
+				if ( ! is_wp_error( $feed_res ) && 200 === wp_remote_retrieve_response_code( $feed_res ) ) {
+					$xml_content = wp_remote_retrieve_body( $feed_res );
+					if ( preg_match( '/<entry>.*?<title>(.*?)<\/title>/s', $xml_content, $matches ) ) {
+						$tag_name = trim( $matches[1] );
+						$release = [
+							'tag_name' => $tag_name,
+							'body'     => 'به‌روزرسانی جدید نسخه ' . $tag_name,
+						];
+						$api_success = true;
+					}
+				}
+			}
+
+			if ( ! $api_success ) {
+				// Cache failure for 30 minutes to prevent rapid repeated API requests on errors.
+				set_transient( $cache_key, 'failed', 30 * MINUTE_IN_SECONDS );
+				return null;
+			}
+
+			// Always use direct GitHub archive ZIP URL (no API auth required, no rate limit).
+			$tag = $release['tag_name'];
+			$release['zip_url'] = sprintf(
+				'https://github.com/%s/%s/archive/refs/tags/%s.zip',
+				$this->username,
+				$this->repo,
+				$tag
 			);
 
-			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-				// Cache failure for 1 hour to prevent rapid repeated API requests on errors.
-				set_transient( $cache_key, 'failed', HOUR_IN_SECONDS );
-				return null;
-			}
-
-			$body    = wp_remote_retrieve_body( $response );
-			$release = json_decode( $body, true );
-
-			if ( ! is_array( $release ) ) {
-				set_transient( $cache_key, 'failed', HOUR_IN_SECONDS );
-				return null;
-			}
-
-			// Cache success for 12 hours.
-			set_transient( $cache_key, $release, 12 * HOUR_IN_SECONDS );
+			// Cache success for 6 hours.
+			set_transient( $cache_key, $release, 6 * HOUR_IN_SECONDS );
 		}
 
 		return $release;
@@ -137,12 +166,15 @@ class WSM_GitHub_Updater {
 	 * @return object|mixed Updated transient object.
 	 */
 	public function check_update( $transient ) {
-		if ( ! is_object( $transient ) || empty( $transient->checked ) ) {
+		if ( ! is_object( $transient ) ) {
 			return $transient;
 		}
 
 		if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
 			$transient->response = [];
+		}
+		if ( ! isset( $transient->no_update ) || ! is_array( $transient->no_update ) ) {
+			$transient->no_update = [];
 		}
 
 		$release = $this->get_latest_release();
@@ -161,10 +193,28 @@ class WSM_GitHub_Updater {
 			$obj->new_version = $remote_version;
 			$obj->url         = sprintf( 'https://github.com/%s/%s', $this->username, $this->repo );
 			
-			// Use zipball_url for downloading package.
-			$obj->package     = $release['zipball_url'] ?? '';
+			// Use direct GitHub archive ZIP URL (no API auth, no rate limit).
+			$obj->package     = $release['zip_url'] ?? '';
+			$obj->icons       = [];
+			$obj->banners     = [];
+			$obj->tested      = '';
+			$obj->requires_php = '8.0';
 
 			$transient->response[ $this->plugin ] = $obj;
+
+			// Remove from no_update to ensure WordPress shows the update notice.
+			unset( $transient->no_update[ $this->plugin ] );
+		} else {
+			// Plugin is up to date — register in no_update and remove from response.
+			$obj              = new \stdClass();
+			$obj->slug        = $this->slug;
+			$obj->plugin      = $this->plugin;
+			$obj->new_version = $local_version;
+			$obj->url         = sprintf( 'https://github.com/%s/%s', $this->username, $this->repo );
+			$obj->package     = '';
+
+			$transient->no_update[ $this->plugin ] = $obj;
+			unset( $transient->response[ $this->plugin ] );
 		}
 
 		return $transient;
@@ -197,7 +247,7 @@ class WSM_GitHub_Updater {
 		$res->version      = $remote_version;
 		$res->author       = sprintf( '<a href="https://github.com/%s" target="_blank">%s</a>', $this->username, $this->username );
 		$res->homepage     = sprintf( 'https://github.com/%s/%s', $this->username, $this->repo );
-		$res->download_link = $release['zipball_url'] ?? '';
+		$res->download_link = $release['zip_url'] ?? '';
 		$res->sections     = [
 			'description' => esc_html__( 'یک پنل مدیریت فروشگاه کاملاً مستقل، راست‌چین و مدرن مبتنی بر TailwindCSS برای ووکامرس.', 'karasu-woo-pannel' ),
 			'changelog'   => $changelog,

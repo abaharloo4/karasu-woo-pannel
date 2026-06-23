@@ -3,7 +3,7 @@
  * Custom Elementor Login Button Widget
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -272,7 +272,7 @@ class WSM_Login_Widget extends Widget_Base {
 		$settings = $this->get_settings_for_display();
 
 		$is_auth = \WooStoreManager\Auth\WSM_Auth::is_authenticated();
-		$has_access = current_user_can( 'wsm_access_panel' );
+		$has_access = current_user_can( 'wsm_access_panel' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'manage_options' );
 
 		// Decide label and url
 		if ( $is_auth && $has_access ) {

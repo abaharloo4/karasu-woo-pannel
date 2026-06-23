@@ -1,6 +1,6 @@
 # GUIDELINES — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.4  
+**نسخه:** 1.0.5  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 **Prefix اختصاصی:** `wsm_`
@@ -659,7 +659,7 @@ public function process_order( int $order_id ): bool|\WP_Error {
 ```javascript
 /**
  * KarasuWooPannel — Panel Scripts
- * @version 1.0.4
+ * @version 1.0.5
  */
 ( function() {
     'use strict';

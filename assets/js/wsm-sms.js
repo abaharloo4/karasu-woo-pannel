@@ -2,7 +2,7 @@
  * KarasuWooPannel SMS Settings and Logs Script
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -21,8 +21,15 @@
 		'cancelled': 'لغو شده (مشتری)',
 		'refunded': 'مرجوع شده (مشتری)',
 		'failed': 'ناموفق (مشتری)',
-		'new_order': 'سفارش جدید (مدیر)',
-		'low_stock': 'کمبود موجودی (مدیر)',
+		'admin_new_order': 'سفارش جدید (مدیر)',
+		'admin_low_stock': 'کمبود موجودی (مدیر)',
+		'admin_pending': 'در انتظار پرداخت (مدیر)',
+		'admin_processing': 'در حال پردازش (مدیر)',
+		'admin_on-hold': 'معلق (مدیر)',
+		'admin_completed': 'تکمیل شده (مدیر)',
+		'admin_cancelled': 'لغو شده (مدیر)',
+		'admin_refunded': 'مرجوع شده (مدیر)',
+		'admin_failed': 'ناموفق (مدیر)',
 		'test_message': 'پیامک تست',
 	};
 
@@ -37,7 +44,11 @@
 			const response = await WSM.fetch('/sms/templates', { method: 'GET' });
 			const templates = response.data;
 
-			const keys = ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'new_order', 'low_stock'];
+			const keys = [
+				'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed',
+				'admin_pending', 'admin_processing', 'admin_on-hold', 'admin_completed', 'admin_cancelled', 'admin_refunded', 'admin_failed',
+				'admin_new_order', 'admin_low_stock'
+			];
 
 			keys.forEach(key => {
 				const checkbox = document.getElementById(`sms-${key}-enabled`);
@@ -63,7 +74,11 @@
 		submitBtn.disabled = true;
 		submitBtn.innerHTML = 'در حال ذخیره...';
 
-		const keys = ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'new_order', 'low_stock'];
+		const keys = [
+			'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed',
+			'admin_pending', 'admin_processing', 'admin_on-hold', 'admin_completed', 'admin_cancelled', 'admin_refunded', 'admin_failed',
+			'admin_new_order', 'admin_low_stock'
+		];
 		const payload = {};
 
 		keys.forEach(key => {

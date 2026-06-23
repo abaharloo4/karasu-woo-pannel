@@ -3,7 +3,7 @@
  * WooCommerce Hooks Listener for Outbound SMS Notifications
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -61,6 +61,7 @@ class WSM_Sms_Hooks {
 	public function on_order_status_changed( int $order_id, string $old_status, string $new_status, WC_Order $order ): void {
 		$templates = WSM_Sms_Service::get_templates();
 
+		// 1. Customer notification
 		if ( isset( $templates[ $new_status ] ) ) {
 			$tpl = $templates[ $new_status ];
 			if ( ! empty( $tpl['enabled'] ) && ! empty( $tpl['text'] ) ) {
@@ -68,6 +69,19 @@ class WSM_Sms_Hooks {
 				if ( ! empty( $phone ) ) {
 					$message = $this->sms_service->parse_variables( $tpl['text'], $order );
 					$this->sms_service->send_sms( $phone, $message, $new_status, $order_id );
+				}
+			}
+		}
+
+		// 2. Admin notification
+		$admin_key = 'admin_' . $new_status;
+		if ( isset( $templates[ $admin_key ] ) ) {
+			$tpl = $templates[ $admin_key ];
+			if ( ! empty( $tpl['enabled'] ) && ! empty( $tpl['text'] ) ) {
+				$admin_phone = get_option( 'wsm_admin_mobile' );
+				if ( ! empty( $admin_phone ) ) {
+					$message = $this->sms_service->parse_variables( $tpl['text'], $order );
+					$this->sms_service->send_sms( $admin_phone, $message, $admin_key, $order_id );
 				}
 			}
 		}
@@ -82,13 +96,13 @@ class WSM_Sms_Hooks {
 	 */
 	public function on_new_order( int $order_id, array $posted_data, WC_Order $order ): void {
 		$templates = WSM_Sms_Service::get_templates();
-		$tpl       = $templates['new_order'] ?? null;
+		$tpl       = $templates['admin_new_order'] ?? $templates['new_order'] ?? null;
 
 		if ( $tpl && ! empty( $tpl['enabled'] ) && ! empty( $tpl['text'] ) ) {
 			$admin_phone = get_option( 'wsm_admin_mobile' );
 			if ( ! empty( $admin_phone ) ) {
 				$message = $this->sms_service->parse_variables( $tpl['text'], $order );
-				$this->sms_service->send_sms( $admin_phone, $message, 'new_order', $order_id );
+				$this->sms_service->send_sms( $admin_phone, $message, 'admin_new_order', $order_id );
 			}
 		}
 	}
@@ -100,13 +114,13 @@ class WSM_Sms_Hooks {
 	 */
 	public function on_low_stock( WC_Product $product ): void {
 		$templates = WSM_Sms_Service::get_templates();
-		$tpl       = $templates['low_stock'] ?? null;
+		$tpl       = $templates['admin_low_stock'] ?? $templates['low_stock'] ?? null;
 
 		if ( $tpl && ! empty( $tpl['enabled'] ) && ! empty( $tpl['text'] ) ) {
 			$admin_phone = get_option( 'wsm_admin_mobile' );
 			if ( ! empty( $admin_phone ) ) {
 				$message = $this->sms_service->parse_variables( $tpl['text'], $product );
-				$this->sms_service->send_sms( $admin_phone, $message, 'low_stock', $product->get_id() );
+				$this->sms_service->send_sms( $admin_phone, $message, 'admin_low_stock', $product->get_id() );
 			}
 		}
 	}

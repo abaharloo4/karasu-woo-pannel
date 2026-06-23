@@ -3,7 +3,7 @@
  * SMS Configuration Panel View Template
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -114,7 +114,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<!-- Admin Templates Section -->
 			<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-space-y-4">
 				<h3 class="wsm-font-semibold wsm-text-slate-200">قالب‌های پیامکی مدیر</h3>
-				<p class="wsm-text-xs wsm-text-slate-400">قالب‌های پیامک ارسالی به مدیر سایت در زمان رویدادهای خاص را مدیریت کنید.</p>
+				<p class="wsm-text-xs wsm-text-slate-400">قالب‌های پیامک ارسالی به مدیر سایت در زمان رویدادهای خاص و تغییر وضعیت‌ها را مدیریت کنید.</p>
 
 				<div class="wsm-divide-y wsm-divide-slate-800/40 wsm-space-y-4">
 					<!-- New Order Admin -->
@@ -122,11 +122,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<div class="wsm-flex wsm-items-center wsm-justify-between">
 							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">سفارش جدید (New Order)</span>
 							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
-								<input type="checkbox" id="sms-new-order-enabled" class="wsm-ml-2">
+								<input type="checkbox" id="sms-admin_new_order-enabled" class="wsm-ml-2">
 								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
 							</label>
 						</div>
-						<textarea id="sms-new-order-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+						<textarea id="sms-admin_new_order-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
 					</div>
 
 					<!-- Low Stock Admin -->
@@ -134,11 +134,95 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<div class="wsm-flex wsm-items-center wsm-justify-between">
 							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">کاهش موجودی انبار (Low Stock Alert)</span>
 							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
-								<input type="checkbox" id="sms-low-stock-enabled" class="wsm-ml-2">
+								<input type="checkbox" id="sms-admin_low_stock-enabled" class="wsm-ml-2">
 								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
 							</label>
 						</div>
-						<textarea id="sms-low-stock-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+						<textarea id="sms-admin_low_stock-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+					</div>
+
+					<!-- Pending Admin -->
+					<div class="wsm-pt-4 wsm-space-y-3">
+						<div class="wsm-flex wsm-items-center wsm-justify-between">
+							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">در انتظار پرداخت (Pending) - مدیر</span>
+							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
+								<input type="checkbox" id="sms-admin_pending-enabled" class="wsm-ml-2">
+								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
+							</label>
+						</div>
+						<textarea id="sms-admin_pending-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+					</div>
+
+					<!-- Processing Admin -->
+					<div class="wsm-pt-4 wsm-space-y-3">
+						<div class="wsm-flex wsm-items-center wsm-justify-between">
+							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">در حال پردازش (Processing) - مدیر</span>
+							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
+								<input type="checkbox" id="sms-admin_processing-enabled" class="wsm-ml-2">
+								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
+							</label>
+						</div>
+						<textarea id="sms-admin_processing-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+					</div>
+
+					<!-- On Hold Admin -->
+					<div class="wsm-pt-4 wsm-space-y-3">
+						<div class="wsm-flex wsm-items-center wsm-justify-between">
+							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">معلق (On Hold) - مدیر</span>
+							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
+								<input type="checkbox" id="sms-admin_on-hold-enabled" class="wsm-ml-2">
+								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
+							</label>
+						</div>
+						<textarea id="sms-admin_on-hold-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+					</div>
+
+					<!-- Completed Admin -->
+					<div class="wsm-pt-4 wsm-space-y-3">
+						<div class="wsm-flex wsm-items-center wsm-justify-between">
+							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">تکمیل شده (Completed) - مدیر</span>
+							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
+								<input type="checkbox" id="sms-admin_completed-enabled" class="wsm-ml-2">
+								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
+							</label>
+						</div>
+						<textarea id="sms-admin_completed-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+					</div>
+
+					<!-- Cancelled Admin -->
+					<div class="wsm-pt-4 wsm-space-y-3">
+						<div class="wsm-flex wsm-items-center wsm-justify-between">
+							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">لغو شده (Cancelled) - مدیر</span>
+							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
+								<input type="checkbox" id="sms-admin_cancelled-enabled" class="wsm-ml-2">
+								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
+							</label>
+						</div>
+						<textarea id="sms-admin_cancelled-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+					</div>
+
+					<!-- Refunded Admin -->
+					<div class="wsm-pt-4 wsm-space-y-3">
+						<div class="wsm-flex wsm-items-center wsm-justify-between">
+							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">مسترد شده (Refunded) - مدیر</span>
+							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
+								<input type="checkbox" id="sms-admin_refunded-enabled" class="wsm-ml-2">
+								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
+							</label>
+						</div>
+						<textarea id="sms-admin_refunded-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
+					</div>
+
+					<!-- Failed Admin -->
+					<div class="wsm-pt-4 wsm-space-y-3">
+						<div class="wsm-flex wsm-items-center wsm-justify-between">
+							<span class="wsm-text-sm wsm-font-medium wsm-text-slate-300">پرداخت ناموفق (Failed) - مدیر</span>
+							<label class="wsm-flex wsm-items-center wsm-cursor-pointer">
+								<input type="checkbox" id="sms-admin_failed-enabled" class="wsm-ml-2">
+								<span class="wsm-text-xs wsm-text-slate-400">فعال</span>
+							</label>
+						</div>
+						<textarea id="sms-admin_failed-text" rows="2" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none"></textarea>
 					</div>
 				</div>
 			</div>

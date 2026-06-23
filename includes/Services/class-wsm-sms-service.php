@@ -3,7 +3,7 @@
  * SMS Dispatcher and Notification Service
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -156,47 +156,85 @@ class WSM_Sms_Service {
 	public static function get_templates(): array {
 		$defaults = [
 			// Customer templates.
-			'pending'    => [
+			'pending'          => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} ثبت شد و در انتظار پرداخت است.',
 			],
-			'processing' => [
+			'processing'       => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} با موفقیت ثبت شد و در حال پردازش است.',
 			],
-			'on-hold'    => [
+			'on-hold'          => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} در وضعیت معلق قرار گرفت.',
 			],
-			'completed'  => [
+			'completed'        => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} تکمیل شد و فرآیند ارسال آغاز گردید. با تشکر.',
 			],
-			'cancelled'  => [
+			'cancelled'        => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی، سفارش #{order_id} لغو شد.',
 			],
-			'refunded'   => [
+			'refunded'         => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی، سفارش #{order_id} مرجوع گردید و مبلغ آن مسترد شد.',
 			],
-			'failed'     => [
+			'failed'           => [
 				'enabled' => false,
 				'text'    => 'پرداخت سفارش #{order_id} ناموفق بود و لغو گردید.',
 			],
 			// Admin templates.
-			'new_order'  => [
+			'admin_pending'    => [
+				'enabled' => false,
+				'text'    => 'سفارش #{order_id} ثبت شد و در انتظار پرداخت است.',
+			],
+			'admin_processing' => [
+				'enabled' => false,
+				'text'    => 'سفارش #{order_id} پرداخت شد و در حال پردازش است.',
+			],
+			'admin_on-hold'    => [
+				'enabled' => false,
+				'text'    => 'سفارش #{order_id} به وضعیت معلق تغییر یافت.',
+			],
+			'admin_completed'  => [
+				'enabled' => false,
+				'text'    => 'سفارش #{order_id} تکمیل و ارسال شد.',
+			],
+			'admin_cancelled'  => [
+				'enabled' => false,
+				'text'    => 'سفارش #{order_id} لغو شد.',
+			],
+			'admin_refunded'   => [
+				'enabled' => false,
+				'text'    => 'سفارش #{order_id} مرجوع شد.',
+			],
+			'admin_failed'     => [
+				'enabled' => false,
+				'text'    => 'سفارش #{order_id} پرداخت ناموفق داشت.',
+			],
+			'admin_new_order'  => [
 				'enabled' => false,
 				'text'    => 'سفارش جدید #{order_id} به مبلغ {order_total} تومان ثبت شد.',
 			],
-			'low_stock'  => [
+			'admin_low_stock'  => [
 				'enabled' => false,
 				'text'    => 'هشدار کمبود موجودی: محصول {product_name} به تعداد {stock_qty} رسیده است.',
 			],
 		];
 
 		$saved = get_option( 'wsm_sms_templates', [] );
-		return array_replace_recursive( $defaults, (array) $saved );
+		$merged = array_replace_recursive( $defaults, (array) $saved );
+
+		// Backward compatibility fallback for new_order and low_stock
+		if ( isset( $saved['new_order'] ) && ! isset( $saved['admin_new_order'] ) ) {
+			$merged['admin_new_order'] = $saved['new_order'];
+		}
+		if ( isset( $saved['low_stock'] ) && ! isset( $saved['admin_low_stock'] ) ) {
+			$merged['admin_low_stock'] = $saved['low_stock'];
+		}
+
+		return $merged;
 	}
 
 	/**
@@ -207,7 +245,11 @@ class WSM_Sms_Service {
 	 */
 	public static function update_templates( array $templates ): bool {
 		$sanitized = [];
-		$default_keys = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'new_order', 'low_stock' ];
+		$default_keys = [
+			'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed',
+			'admin_pending', 'admin_processing', 'admin_on-hold', 'admin_completed', 'admin_cancelled', 'admin_refunded', 'admin_failed',
+			'admin_new_order', 'admin_low_stock'
+		];
 
 		foreach ( $default_keys as $key ) {
 			if ( isset( $templates[ $key ] ) ) {
@@ -216,6 +258,14 @@ class WSM_Sms_Service {
 					'text'    => sanitize_textarea_field( $templates[ $key ]['text'] ?? '' ),
 				];
 			}
+		}
+
+		// Also preserve original new_order/low_stock keys for compatibility
+		if ( isset( $sanitized['admin_new_order'] ) ) {
+			$sanitized['new_order'] = $sanitized['admin_new_order'];
+		}
+		if ( isset( $sanitized['admin_low_stock'] ) ) {
+			$sanitized['low_stock'] = $sanitized['admin_low_stock'];
 		}
 
 		return update_option( 'wsm_sms_templates', $sanitized );

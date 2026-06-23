@@ -1,6 +1,6 @@
 /**
  * Tailwind Configuration for KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 /** @type {import('tailwindcss').Config} */

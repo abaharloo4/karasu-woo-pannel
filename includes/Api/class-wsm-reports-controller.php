@@ -3,7 +3,7 @@
  * REST Controller for Solar Jalali Sales Reports
  *
  * @package KarasuWooPannel
- * @version 1.0.4
+ * @version 1.0.5
  * @date 2026-06-23
  */
 
@@ -124,7 +124,7 @@ class WSM_Reports_Controller extends WSM_REST_Controller {
 			return $auth_check;
 		}
 
-		if ( ! current_user_can( 'wsm_view_reports' ) ) {
+		if ( ! current_user_can( 'wsm_view_reports' ) && ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error(
 				'wsm_forbidden',
 				__( 'دسترسی غیرمجاز. شما مجوز مشاهده گزارش‌ها را ندارید.', 'karasu-woo-pannel' ),
