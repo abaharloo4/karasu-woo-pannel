@@ -1,6 +1,6 @@
 # DEBUG LOG — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.3  
+**نسخه:** 1.0.4  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 
@@ -67,3 +67,14 @@ This log captures technical bugs, architectural adjustments, and security edge c
   1. Hooked into `site_transient_update_plugins` (runs on transient retrieval) in addition to `pre_set_site_transient_update_plugins` (runs on transient saving).
   2. Bypassed and cleared our local GitHub API transient cache whenever `force-check=1` query parameter is present in the URL (which gets added when clicking "Check Again" in WordPress Updates page).
   3. Ensured `$transient->response` is initialized before injecting the update object.
+
+### 12. Incomplete Admin Settings, Role Redirect, and Missing Password Visibility Toggle
+* **Symptom:** The WP settings page lacked SMS templates and user capabilities configuration. Standard admin/shop manager accounts got redirected to the homepage after logging into the standalone panel. Users could not toggle password visibility on the login form.
+* **Cause:** 
+  1. No settings fields or tabs existed in WP Admin for templates or capabilities.
+  2. Built-in administrator and shop_manager roles did not have the custom `wsm_` capabilities by default, so `current_user_can('wsm_access_panel')` returned false.
+  3. The login form template lacked a toggle button and script.
+* **Resolution:**
+  1. Added "قالب‌های ارسال پیامک" (SMS Templates) and "مدیریت دسترسی کاربران" (User Access Control) tabs to `WSM_Admin_Menu` with POST actions handlers to save data.
+  2. Dynamically granted all custom `wsm_` capabilities to `administrator` and `shop_manager` roles on activation and `admin_init`.
+  3. Added a toggle password visibility button and script to the login template and Javascript.

@@ -3,7 +3,7 @@
  * Custom Rewrite Rules Manager
  *
  * @package KarasuWooPannel
- * @version 1.0.3
+ * @version 1.0.4
  * @date 2026-06-23
  */
 

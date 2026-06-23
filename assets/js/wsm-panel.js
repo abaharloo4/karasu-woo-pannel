@@ -2,7 +2,7 @@
  * KarasuWooPannel Client JavaScript Library
  *
  * @package KarasuWooPannel
- * @version 1.0.3
+ * @version 1.0.4
  * @date 2026-06-23
  */
 
@@ -149,6 +149,25 @@
 						// Fail-safe redirect even if REST endpoint fails
 					}
 					window.location.href = panelUrl + '/login';
+				}
+			});
+		}
+
+		// 3. Toggle Password Visibility.
+		const togglePasswordBtn = document.getElementById('toggle-password');
+		if (togglePasswordBtn) {
+			togglePasswordBtn.addEventListener('click', () => {
+				const passwordInput = document.getElementById('password');
+				if (passwordInput) {
+					const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+					passwordInput.setAttribute('type', type);
+					if (type === 'text') {
+						togglePasswordBtn.classList.add('wsm-text-indigo-400');
+						togglePasswordBtn.classList.remove('wsm-text-slate-500');
+					} else {
+						togglePasswordBtn.classList.remove('wsm-text-indigo-400');
+						togglePasswordBtn.classList.add('wsm-text-slate-500');
+					}
 				}
 			});
 		}

@@ -1,5 +1,5 @@
 <!--
-Version: 1.0.3
+Version: 1.0.4
 Date: 2026-06-23
 -->
 # Installation Guide — KarasuWooPannel

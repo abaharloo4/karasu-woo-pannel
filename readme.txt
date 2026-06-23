@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,8 +39,18 @@ Updates are queried directly from the public GitHub release tags. When a new rel
 
 == Changelog ==
 
+= 1.0.4 =
+* Added User Access Control (UAC) tab to WP Admin Settings page to manage individual user capabilities.
+* Added SMS Templates editing tab to WP Admin Settings page.
+* Dynamically granted access capabilities to built-in administrator and WooCommerce shop_manager roles to prevent redirection issues.
+* Added password visibility toggle (eye icon) to the standalone login page.
+
 = 1.0.3 =
-* Redesigned WP admin settings page into a premium tabbed layout with AJAX SMS gateway validation.
+* Hooked to site_transient_update_plugins for dynamic update injection on retrieval.
+* Added force-check bypass logic in updater to clear GitHub release info cache when clicking "Check Again".
+
+= 1.0.2 =
+* Redesigned WP Admin settings page into a premium tabbed layout with AJAX SMS gateway validation.
 * Fixed empty standalone panel login page caused by mismatched template directory path.
 
 = 1.0.1 =

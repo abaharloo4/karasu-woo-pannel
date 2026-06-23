@@ -3,7 +3,7 @@
  * Main Plugin Coordinator Class (Singleton)
  *
  * @package KarasuWooPannel
- * @version 1.0.3
+ * @version 1.0.4
  * @date 2026-06-23
  */
 
@@ -91,6 +91,7 @@ final class WSM_Plugin {
 		$this->loader->add_action( 'template_redirect', $rewrite, 'handle_request' );
 
 		$this->loader->add_action( 'admin_menu', $admin_menu, 'add_admin_menu' );
+		$this->loader->add_action( 'admin_init', $admin_menu, 'handle_post_actions' );
 		$this->loader->add_action( 'admin_init', $admin_settings, 'register_settings' );
 		$this->loader->add_action( 'rest_api_init', $auth_ctrl, 'register_routes' );
 		$this->loader->add_action( 'rest_api_init', $orders_ctrl, 'register_routes' );
