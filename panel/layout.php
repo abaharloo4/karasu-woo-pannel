@@ -3,7 +3,7 @@
  * Custom Store Admin Panel Base Layout Template
  *
  * @package KarasuWooPannel
- * @version 1.0.5
+ * @version 1.0.6
  * @date 2026-06-23
  */
 
@@ -63,28 +63,52 @@ $current_user = wp_get_current_user();
 				</span>
 			</div>
 			<nav class="wsm-flex-1 wsm-px-4 wsm-py-6 wsm-space-y-1 wsm-overflow-y-auto">
-				<a href="<?php echo esc_url( wsm_panel_url() ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors wsm-bg-indigo-600/10 wsm-text-indigo-400">
+				<?php
+				$is_active = function( $page ) use ( $view ) {
+					switch ( $page ) {
+						case 'dashboard':
+							return 'dashboard' === $view;
+						case 'orders':
+							return 0 === strpos( $view, 'orders/' );
+						case 'products':
+							return 0 === strpos( $view, 'products/' );
+						case 'categories':
+							return 0 === strpos( $view, 'categories/' );
+						case 'coupons':
+							return 0 === strpos( $view, 'coupons/' );
+						case 'reports':
+							return 0 === strpos( $view, 'reports/' ) && 'reports/sms-log' !== $view;
+						case 'sms-settings':
+							return 'sms/settings' === $view;
+						case 'sms-log':
+							return 'reports/sms-log' === $view;
+						default:
+							return false;
+					}
+				};
+				?>
+				<a href="<?php echo esc_url( wsm_panel_url() ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('dashboard') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">داشبورد</span>
 				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'orders' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+				<a href="<?php echo esc_url( wsm_panel_url( 'orders' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('orders') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">سفارش‌ها</span>
 				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'products' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+				<a href="<?php echo esc_url( wsm_panel_url( 'products' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('products') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">محصولات</span>
 				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'categories' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+				<a href="<?php echo esc_url( wsm_panel_url( 'categories' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('categories') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">دسته‌بندی‌ها</span>
 				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'coupons' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+				<a href="<?php echo esc_url( wsm_panel_url( 'coupons' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('coupons') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">کوپن‌ها</span>
 				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'reports' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+				<a href="<?php echo esc_url( wsm_panel_url( 'reports' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('reports') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">گزارش‌ها</span>
 				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'sms-settings' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+				<a href="<?php echo esc_url( wsm_panel_url( 'sms-settings' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('sms-settings') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">تنظیمات پیامک</span>
 				</a>
-				<a href="<?php echo esc_url( wsm_panel_url( 'reports/sms-log' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+				<a href="<?php echo esc_url( wsm_panel_url( 'reports/sms-log' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('sms-log') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">لاگ‌های پیامک</span>
 				</a>
 			</nav>
@@ -101,7 +125,7 @@ $current_user = wp_get_current_user();
 			<!-- Header -->
 			<header class="wsm-h-16 wsm-bg-slate-900/40 wsm-backdrop-blur-md wsm-border-b wsm-border-slate-800 wsm-flex wsm-items-center wsm-justify-between wsm-px-6">
 				<div class="wsm-flex wsm-items-center md:wsm-hidden">
-					<span class="wsm-text-lg wsm-font-bold wsm-bg-gradient-to-r wsm-from-indigo-400 wsm-to-cyan-400 wsm-bg-clip-text wsm-text-transparent">KarasuWoo</span>
+					<span class="wsm-text-lg wsm-font-bold wsm-bg-gradient-to-r wsm-from-indigo-400 wsm-to-cyan-400 wsm-bg-clip-text wsm-text-transparent">KarasuWooPannel</span>
 				</div>
 				<div></div>
 				<div class="wsm-flex wsm-items-center wsm-space-x-4 wsm-space-x-reverse">

@@ -1,6 +1,6 @@
 # DEBUG LOG — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.5  
+**نسخه:** 1.0.6  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 
@@ -9,6 +9,26 @@ This log captures technical bugs, architectural adjustments, and security edge c
 ---
 
 ## Resolved Issues
+
+### 16. WP Admin Settings Page Location in Submenu
+* **Symptom:** The plugin's admin settings page was nested under WooCommerce submenu, making it less discoverable and accessible.
+* **Cause:** Registered using `add_submenu_page( 'woocommerce', ... )`.
+* **Resolution:** Changed registration to a standalone top-level menu page using `add_menu_page()` with position `56` (directly under WooCommerce main menu) and a custom store icon `dashicons-store`.
+
+### 17. Standalone Panel Dashboard Landing Page Empty
+* **Symptom:** Accessing the landing page of the custom store panel displayed only a placeholder greeting text mentioning future phases.
+* **Cause:** `panel/views/dashboard.php` had placeholder text and was not connected to database or REST API endpoints.
+* **Resolution:** Redesigned the dashboard view to display key summary widgets (today sales/orders, monthly sales/orders), quick action links, a recent orders table (fetching last 5 orders), and a low-stock alert table. Created `assets/js/wsm-dashboard.js` to dynamically load data via REST endpoints.
+
+### 18. Unclear Available Variables and Missing Cursor-Based Inserter in SMS templates settings
+* **Symptom:** Available template variables were not documented clearly per template, and users had to type them manually.
+* **Cause:** Plain textareas with no contextual help or insertion helpers.
+* **Resolution:** Overhauled the SMS templates tab in WP Admin and standalone panel settings. Added clickable badge pills under each textarea listing the supported placeholders (`{order_id}`, `{order_total}`, `{customer_name}`, `{status_label}`, `{billing_phone}` for orders; and `{product_id}`, `{product_name}`, `{sku}`, `{stock_qty}` for low-stock alerts). Clicking a pill inserts the variable at the textarea's current cursor position and refocuses.
+
+### 19. Brand logo inconsistency and static sidebar active navigation state
+* **Symptom:** Sidebar links on the store panel were static (always highlighted the Dashboard tab), and mobile view header showed the incorrect name `KarasuWoo`.
+* **Cause:** Navigation links lacked active state checks, and the mobile header had hardcoded text.
+* **Resolution:** Added a dynamic active page CSS resolver in `layout.php` to conditionally highlight the active navigation item. Corrected mobile logo text from `KarasuWoo` to `KarasuWooPannel`.
 
 ### 1. Data Stripping in Product Sanitization
 * **Symptom:** Variable product updates failed to save attributes, permutations, or variation main images.

@@ -3,21 +3,138 @@
  * Dashboard Landing Page Template View
  *
  * @package KarasuWooPannel
- * @version 1.0.5
+ * @version 1.0.6
  * @date 2026-06-23
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
+$current_user = wp_get_current_user();
 ?>
 <div class="wsm-space-y-6">
-	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-8 wsm-shadow-lg">
-		<h1 class="wsm-text-2xl wsm-font-bold wsm-bg-gradient-to-r wsm-from-indigo-400 wsm-to-cyan-400 wsm-bg-clip-text wsm-text-transparent wsm-mb-2">
-			داشبورد KarasuWooPannel
-		</h1>
-		<p class="wsm-text-slate-400">
-			به پنل مدیریت اختصاصی فروشگاه خود خوش آمدید. در فازهای بعدی، بخش‌های مربوط به مدیریت سفارش‌ها، محصولات، کوپن‌ها و گزارش‌های پیشرفته در این قسمت قرار خواهند گرفت.
-		</p>
+	<!-- Greeting Header -->
+	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-flex wsm-flex-wrap wsm-justify-between wsm-items-center wsm-gap-4">
+		<div>
+			<h1 class="wsm-text-2xl wsm-font-bold wsm-bg-gradient-to-r wsm-from-indigo-400 wsm-to-cyan-400 wsm-bg-clip-text wsm-text-transparent">
+				سلام، <?php echo esc_html( $current_user->display_name ); ?>! 👋
+			</h1>
+			<p class="wsm-text-xs wsm-text-slate-400 wsm-mt-1">
+				به پنل مدیریت اختصاصی فروشگاه خود خوش آمدید. خلاصه وضعیت امروز و عملکرد فروشگاه را در زیر مشاهده کنید.
+			</p>
+		</div>
+		<div class="wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2 wsm-text-xs wsm-font-mono wsm-text-slate-400">
+			<?php echo esc_html( \WooStoreManager\Helpers\WSM_Date_Helper::to_jalali_string( date( 'Y-m-d H:i:s' ) ) ); ?>
+		</div>
+	</div>
+
+	<!-- Stats Grid -->
+	<div class="wsm-grid wsm-grid-cols-1 md:wsm-grid-cols-4 wsm-gap-6">
+		<!-- Today Sales -->
+		<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-relative wsm-overflow-hidden">
+			<span class="wsm-text-xs wsm-font-semibold wsm-text-slate-400">فروش امروز</span>
+			<h2 id="dash-today-sales" class="wsm-text-2xl wsm-font-bold wsm-text-indigo-400 wsm-mt-2">در حال بارگذاری...</h2>
+			<div class="wsm-absolute wsm-bottom-0 wsm-left-0 wsm-right-0 wsm-h-1 wsm-bg-gradient-to-r wsm-from-indigo-500 wsm-to-indigo-300 wsm-opacity-50"></div>
+		</div>
+		<!-- Today Orders -->
+		<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-relative wsm-overflow-hidden">
+			<span class="wsm-text-xs wsm-font-semibold wsm-text-slate-400">سفارش‌های امروز</span>
+			<h2 id="dash-today-orders" class="wsm-text-2xl wsm-font-bold wsm-text-slate-200 wsm-mt-2">در حال بارگذاری...</h2>
+			<div class="wsm-absolute wsm-bottom-0 wsm-left-0 wsm-right-0 wsm-h-1 wsm-bg-gradient-to-r wsm-from-emerald-500 wsm-to-emerald-300 wsm-opacity-50"></div>
+		</div>
+		<!-- Month Sales -->
+		<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-relative wsm-overflow-hidden">
+			<span class="wsm-text-xs wsm-font-semibold wsm-text-slate-400">فروش این ماه</span>
+			<h2 id="dash-month-sales" class="wsm-text-2xl wsm-font-bold wsm-text-indigo-400 wsm-mt-2">در حال بارگذاری...</h2>
+			<div class="wsm-absolute wsm-bottom-0 wsm-left-0 wsm-right-0 wsm-h-1 wsm-bg-gradient-to-r wsm-from-cyan-500 wsm-to-cyan-300 wsm-opacity-50"></div>
+		</div>
+		<!-- Month Orders -->
+		<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-relative wsm-overflow-hidden">
+			<span class="wsm-text-xs wsm-font-semibold wsm-text-slate-400">سفارش‌های این ماه</span>
+			<h2 id="dash-month-orders" class="wsm-text-2xl wsm-font-bold wsm-text-slate-200 wsm-mt-2">در حال بارگذاری...</h2>
+			<div class="wsm-absolute wsm-bottom-0 wsm-left-0 wsm-right-0 wsm-h-1 wsm-bg-gradient-to-r wsm-from-purple-500 wsm-to-purple-300 wsm-opacity-50"></div>
+		</div>
+	</div>
+
+	<!-- Quick Actions -->
+	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg">
+		<h3 class="wsm-font-semibold wsm-text-slate-200 wsm-mb-4">دسترسی سریع و عملیات‌ها</h3>
+		<div class="wsm-grid wsm-grid-cols-2 md:wsm-grid-cols-5 wsm-gap-4">
+			<a href="<?php echo esc_url( wsm_panel_url( 'orders' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group">
+				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">📦</span>
+				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">لیست سفارش‌ها</span>
+			</a>
+			<a href="<?php echo esc_url( wsm_panel_url( 'products' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group">
+				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">🛍️</span>
+				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">مدیریت محصولات</span>
+			</a>
+			<a href="<?php echo esc_url( wsm_panel_url( 'coupons/new' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group">
+				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">🎟️</span>
+				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">کوپن تخفیف جدید</span>
+			</a>
+			<a href="<?php echo esc_url( wsm_panel_url( 'reports' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group">
+				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">📊</span>
+				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">گزارش‌های فروشگاه</span>
+			</a>
+			<a href="<?php echo esc_url( wsm_panel_url( 'sms-settings' ) ); ?>" class="wsm-flex wsm-flex-col wsm-items-center wsm-justify-center wsm-p-4 wsm-bg-slate-950/60 hover:wsm-bg-slate-950 wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500/50 wsm-rounded-2xl wsm-transition-all wsm-text-center wsm-group wsm-col-span-2 md:wsm-col-span-1">
+				<span class="wsm-text-xl wsm-mb-2 wsm-group-hover:wsm-scale-110 wsm-transition-transform">💬</span>
+				<span class="wsm-text-xs wsm-font-medium wsm-text-slate-300">تنظیمات پیامک</span>
+			</a>
+		</div>
+	</div>
+
+	<!-- Split Two Column Layout -->
+	<div class="wsm-grid wsm-grid-cols-1 lg:wsm-grid-cols-2 wsm-gap-6">
+		<!-- Column 1: Recent Orders -->
+		<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-flex wsm-flex-col">
+			<div class="wsm-flex wsm-items-center wsm-justify-between wsm-mb-4">
+				<h3 class="wsm-font-semibold wsm-text-slate-200">آخرین سفارش‌ها</h3>
+				<a href="<?php echo esc_url( wsm_panel_url( 'orders' ) ); ?>" class="wsm-text-xs wsm-text-indigo-400 hover:wsm-text-indigo-300">مشاهده همه</a>
+			</div>
+			<div class="wsm-flex-1 wsm-overflow-x-auto">
+				<table class="wsm-w-full wsm-text-right wsm-border-collapse">
+					<thead>
+						<tr class="wsm-border-b wsm-border-slate-800/80">
+							<th class="wsm-pb-2 wsm-text-xs wsm-text-slate-500">سفارش</th>
+							<th class="wsm-pb-2 wsm-text-xs wsm-text-slate-500">خریدار</th>
+							<th class="wsm-pb-2 wsm-text-xs wsm-text-slate-500">وضعیت</th>
+							<th class="wsm-pb-2 wsm-text-xs wsm-text-slate-500">مجموع</th>
+						</tr>
+					</thead>
+					<tbody id="dash-orders-table-body" class="wsm-divide-y wsm-divide-slate-800/40">
+						<tr>
+							<td colspan="4" class="wsm-py-4 wsm-text-center wsm-text-slate-500">در حال دریافت...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- Column 2: Low Stock Alerts -->
+		<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-flex wsm-flex-col">
+			<div class="wsm-flex wsm-items-center wsm-justify-between wsm-mb-4">
+				<h3 class="wsm-font-semibold wsm-text-slate-200">هشدارهای انبار (موجودی رو به اتمام)</h3>
+				<a href="<?php echo esc_url( wsm_panel_url( 'reports/products' ) ); ?>" class="wsm-text-xs wsm-text-indigo-400 hover:wsm-text-indigo-300">گزارش انبار</a>
+			</div>
+			<div class="wsm-flex-1 wsm-overflow-x-auto">
+				<table class="wsm-w-full wsm-text-right wsm-border-collapse">
+					<thead>
+						<tr class="wsm-border-b wsm-border-slate-800/80">
+							<th class="wsm-pb-2 wsm-text-xs wsm-text-slate-500">محصول</th>
+							<th class="wsm-pb-2 wsm-text-xs wsm-text-slate-500">کد کالا (SKU)</th>
+							<th class="wsm-pb-2 wsm-text-xs wsm-text-slate-500 wsm-text-center">موجودی فعلی</th>
+						</tr>
+					</thead>
+					<tbody id="dash-inventory-table-body" class="wsm-divide-y wsm-divide-slate-800/40">
+						<tr>
+							<td colspan="3" class="wsm-py-4 wsm-text-center wsm-text-slate-500">در حال دریافت...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>
 </div>
+
+<script src="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/js/wsm-dashboard.js' ); ?>"></script>

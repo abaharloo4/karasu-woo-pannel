@@ -3,7 +3,7 @@
  * WooCommerce Reports Aggregation Repository
  *
  * @package KarasuWooPannel
- * @version 1.0.5
+ * @version 1.0.6
  * @date 2026-06-23
  */
 
@@ -203,6 +203,7 @@ class WSM_Report_Repository {
 					$low_stock[] = [
 						'id'        => $product->get_id(),
 						'name'      => $product->get_name(),
+						'sku'       => $product->get_sku() ?: '—',
 						'stock'     => $qty,
 						'threshold' => $threshold,
 					];

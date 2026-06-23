@@ -3,7 +3,7 @@
  * Categories List Panel View Template
  *
  * @package KarasuWooPannel
- * @version 1.0.5
+ * @version 1.0.6
  * @date 2026-06-23
  */
 

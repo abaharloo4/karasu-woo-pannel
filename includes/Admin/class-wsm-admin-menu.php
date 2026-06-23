@@ -3,7 +3,7 @@
  * WordPress Admin Menu Registry
  *
  * @package KarasuWooPannel
- * @version 1.0.5
+ * @version 1.0.6
  * @date 2026-06-23
  */
 
@@ -25,13 +25,14 @@ class WSM_Admin_Menu {
 	 * Register submenu options page.
 	 */
 	public function add_admin_menu(): void {
-		add_submenu_page(
-			'woocommerce',
+		add_menu_page(
 			__( 'تنظیمات KarasuWooPannel', 'karasu-woo-pannel' ),
 			__( 'KarasuWooPannel', 'karasu-woo-pannel' ),
 			'manage_options',
 			'wsm_settings',
-			[ $this, 'render_settings_page' ]
+			[ $this, 'render_settings_page' ],
+			'dashicons-store',
+			56
 		);
 	}
 
@@ -370,6 +371,23 @@ class WSM_Admin_Menu {
 				border: 1px solid rgba(239, 68, 68, 0.2);
 				color: #f87171;
 			}
+			.wsm-var-badge {
+				background: #020617;
+				border: 1px solid #1e293b;
+				color: #818cf8;
+				padding: 4px 8px;
+				border-radius: 8px;
+				font-size: 11px;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				font-family: inherit;
+				font-weight: 600;
+			}
+			.wsm-var-badge:hover {
+				background: #1e293b;
+				color: #22d3ee;
+				border-color: #3b82f6;
+			}
 		</style>
 
 		<div class="wsm-settings-wrap">
@@ -549,7 +567,15 @@ class WSM_Admin_Menu {
 													<span style="font-size: 13px; color: #94a3b8;">فعال</span>
 												</label>
 											</div>
-											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" id="wsm-textarea-<?php echo esc_attr( $key ); ?>" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											<div class="wsm-template-vars" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+												<span style="font-size: 11px; color: #64748b; margin-left: 4px;">متغیرها (کلیک برای درج):</span>
+												<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{order_id}">{order_id} (شناسه)</button>
+												<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{order_total}">{order_total} (مبلغ)</button>
+												<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{customer_name}">{customer_name} (خریدار)</button>
+												<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{status_label}">{status_label} (وضعیت)</button>
+												<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{billing_phone}">{billing_phone} (موبایل)</button>
+											</div>
 										</div>
 										<?php
 									}
@@ -568,6 +594,7 @@ class WSM_Admin_Menu {
 										$tmpl = $templates[ $key ];
 										$label = $labels[ $key ] ?? $key;
 										$enabled_checked = ! empty( $tmpl['enabled'] ) ? 'checked' : '';
+										$is_low_stock = ( 'admin_low_stock' === $key );
 										?>
 										<div style="border-bottom: 1px solid #1e293b; padding: 20px 0; margin-bottom: 15px;">
 											<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -577,7 +604,25 @@ class WSM_Admin_Menu {
 													<span style="font-size: 13px; color: #94a3b8;">فعال</span>
 												</label>
 											</div>
-											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" id="wsm-textarea-<?php echo esc_attr( $key ); ?>" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											<?php if ( $is_low_stock ) : ?>
+												<div class="wsm-template-vars" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+													<span style="font-size: 11px; color: #64748b; margin-left: 4px;">متغیرها (کلیک برای درج):</span>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{product_id}">{product_id} (شناسه)</button>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{product_name}">{product_name} (نام محصول)</button>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{sku}">{sku} (کد محصول)</button>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{stock_qty}">{stock_qty} (موجودی)</button>
+												</div>
+											<?php else : ?>
+												<div class="wsm-template-vars" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+													<span style="font-size: 11px; color: #64748b; margin-left: 4px;">متغیرها (کلیک برای درج):</span>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{order_id}">{order_id} (شناسه)</button>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{order_total}">{order_total} (مبلغ)</button>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{customer_name}">{customer_name} (خریدار)</button>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{status_label}">{status_label} (وضعیت)</button>
+													<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{billing_phone}">{billing_phone} (موبایل)</button>
+												</div>
+											<?php endif; ?>
 										</div>
 										<?php
 									}
@@ -812,6 +857,33 @@ class WSM_Admin_Menu {
 				alertBox.style.display = 'block';
 				alertBox.innerText = msg;
 				alertBox.className = 'wsm-alert wsm-alert-' + type;
+			}
+
+			document.addEventListener('DOMContentLoaded', () => {
+				document.querySelectorAll('.wsm-var-badge').forEach(badge => {
+					badge.addEventListener('click', (e) => {
+						e.preventDefault();
+						const targetId = badge.getAttribute('data-target');
+						const val = badge.getAttribute('data-val');
+						const textarea = document.getElementById(targetId);
+						if (textarea) {
+							wsmInsertAtCursor(textarea, val);
+						}
+					});
+				});
+			});
+
+			function wsmInsertAtCursor(textarea, text) {
+				if (textarea.selectionStart || textarea.selectionStart === 0) {
+					var startPos = textarea.selectionStart;
+					var endPos = textarea.selectionEnd;
+					textarea.value = textarea.value.substring(0, startPos) + text + textarea.value.substring(endPos, textarea.value.length);
+					textarea.selectionStart = startPos + text.length;
+					textarea.selectionEnd = startPos + text.length;
+				} else {
+					textarea.value += text;
+				}
+				textarea.focus();
 			}
 		</script>
 		<?php

@@ -2,7 +2,7 @@
  * KarasuWooPannel SMS Settings and Logs Script
  *
  * @package KarasuWooPannel
- * @version 1.0.5
+ * @version 1.0.6
  * @date 2026-06-23
  */
 
@@ -275,10 +275,69 @@
 		});
 	}
 
+	function appendVariableBadges() {
+		const textareas = document.querySelectorAll('#wsm-sms-settings-form textarea');
+		textareas.forEach(textarea => {
+			if (textarea.id === 'test-message') return;
+
+			const isLowStock = textarea.id.includes('low_stock');
+			const vars = isLowStock 
+				? [
+					{ name: '{product_id}', label: 'شناسه' },
+					{ name: '{product_name}', label: 'نام' },
+					{ name: '{sku}', label: 'کد SKU' },
+					{ name: '{stock_qty}', label: 'موجودی' }
+				]
+				: [
+					{ name: '{order_id}', label: 'شناسه سفارش' },
+					{ name: '{order_total}', label: 'مبلغ' },
+					{ name: '{customer_name}', label: 'خریدار' },
+					{ name: '{status_label}', label: 'وضعیت' },
+					{ name: '{billing_phone}', label: 'موبایل' }
+				];
+
+			const badgeContainer = document.createElement('div');
+			badgeContainer.className = 'wsm-flex wsm-flex-wrap wsm-gap-1.5 wsm-items-center wsm-mt-1.5';
+			
+			const labelSpan = document.createElement('span');
+			labelSpan.className = 'wsm-text-[10px] wsm-text-slate-500 wsm-ml-1';
+			labelSpan.textContent = 'متغیرها (کلیک برای درج):';
+			badgeContainer.appendChild(labelSpan);
+
+			vars.forEach(v => {
+				const btn = document.createElement('button');
+				btn.type = 'button';
+				btn.className = 'wsm-insert-var-btn wsm-text-[10px] wsm-bg-slate-950 hover:wsm-bg-slate-800 wsm-border wsm-border-slate-800 wsm-text-indigo-400 wsm-px-2 wsm-py-0.5 wsm-rounded-lg wsm-transition-colors';
+				btn.textContent = `${v.name} (${v.label})`;
+				btn.addEventListener('click', (e) => {
+					e.preventDefault();
+					insertAtCursor(textarea, v.name);
+				});
+				badgeContainer.appendChild(btn);
+			});
+
+			textarea.parentNode.insertBefore(badgeContainer, textarea.nextSibling);
+		});
+	}
+
+	function insertAtCursor(textarea, text) {
+		if (textarea.selectionStart || textarea.selectionStart === 0) {
+			var startPos = textarea.selectionStart;
+			var endPos = textarea.selectionEnd;
+			textarea.value = textarea.value.substring(0, startPos) + text + textarea.value.substring(endPos, textarea.value.length);
+			textarea.selectionStart = startPos + text.length;
+			textarea.selectionEnd = startPos + text.length;
+		} else {
+			textarea.value += text;
+		}
+		textarea.focus();
+	}
+
 	// Bootstrap
 	document.addEventListener('DOMContentLoaded', () => {
 		loadSmsTemplates();
 		loadSmsLogs();
+		appendVariableBadges();
 
 		document.getElementById('wsm-sms-settings-form')?.addEventListener('submit', saveSmsTemplates);
 		document.getElementById('wsm-send-test-sms-btn')?.addEventListener('click', sendTestSms);
