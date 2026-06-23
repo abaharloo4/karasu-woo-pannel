@@ -2,7 +2,7 @@
  * KarasuWooPannel Coupons Management Script
  *
  * @package KarasuWooPannel
- * @version 1.0.9
+ * @version 1.0.10
  * @date 2026-06-23
  */
 
@@ -22,7 +22,7 @@
 		tableBody.innerHTML = `
 			<tr>
 				<td colspan="6" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500 wsm-animate-pulse">
-					در حال دریافت لیست کوپن‌ها...
+					در حال دریافت لیست تخفیف‌ها...
 				</td>
 			</tr>
 		`;
@@ -41,7 +41,7 @@
 				tableBody.innerHTML = `
 					<tr>
 						<td colspan="6" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500">
-							هیچ کوپنی یافت نشد.
+							هیچ کد تخفیفی یافت نشد.
 						</td>
 					</tr>
 				`;
@@ -80,7 +80,7 @@
 				btn.addEventListener('click', async (e) => {
 					e.preventDefault();
 					const id = btn.getAttribute('data-id');
-					if (confirm('آیا از حذف دائم این کوپن اطمینان دارید؟')) {
+					if (confirm('آیا از حذف دائم این کد تخفیف اطمینان دارید؟')) {
 						try {
 							await WSM.fetch(`/coupons/${id}`, { method: 'DELETE' });
 							loadCouponsList();
@@ -100,7 +100,7 @@
 			tableBody.innerHTML = `
 				<tr>
 					<td colspan="6" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-rose-400">
-						خطا در دریافت اطلاعات کوپن‌ها.
+						خطا در دریافت اطلاعات تخفیف‌ها.
 					</td>
 				</tr>
 			`;
@@ -166,7 +166,7 @@
 			} catch (err) {
 				container.innerHTML = `
 					<div class="wsm-bg-slate-900 wsm-border wsm-border-rose-500/20 wsm-rounded-3xl wsm-p-8 wsm-text-center wsm-text-rose-400">
-						خطا در دریافت اطلاعات کوپن تخفیف.
+						خطا در دریافت اطلاعات کد تخفیف.
 					</div>
 				`;
 				return;
@@ -174,12 +174,12 @@
 		}
 
 		const isNew = !couponData;
-		const pageTitle = isNew ? 'ایجاد کوپن جدید' : `ویرایش کوپن: ${WSM.escHtml(couponData.code)}`;
+		const pageTitle = isNew ? 'ایجاد کد تخفیف جدید' : `ویرایش کد تخفیف: ${WSM.escHtml(couponData.code)}`;
 
 		container.innerHTML = `
 			<div class="wsm-flex wsm-items-center wsm-space-x-3 wsm-space-x-reverse">
 				<a href="${window.wsmConfig.panelUrl}/coupons" class="wsm-text-slate-400 hover:wsm-text-slate-200">
-					&larr; بازگشت به کوپن‌ها
+					&larr; بازگشت به تخفیف‌ها
 				</a>
 				<span class="wsm-text-slate-600">/</span>
 				<h1 class="wsm-text-2xl wsm-font-bold wsm-text-slate-100">${pageTitle}</h1>
@@ -222,7 +222,7 @@
 						</div>
 
 						<div>
-							<label for="c-desc" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">توضیحات کوپن</label>
+							<label for="c-desc" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">توضیحات کد تخفیف</label>
 							<textarea id="c-desc" rows="3" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-p-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">${isNew ? '' : WSM.escHtml(couponData.description)}</textarea>
 						</div>
 					</div>
@@ -245,7 +245,7 @@
 						<div class="wsm-grid wsm-grid-cols-1 md:wsm-grid-cols-2 wsm-gap-4 wsm-pt-2">
 							<label class="wsm-flex wsm-items-center wsm-text-sm wsm-text-slate-400 wsm-cursor-pointer">
 								<input type="checkbox" id="c-individual" ${couponData?.individual_use ? 'checked' : ''} class="wsm-ml-2">
-								استفاده انفرادی؟ (عدم ترکیب با بقیه کوپن‌ها)
+								استفاده انفرادی؟ (عدم ترکیب با بقیه کدهای تخفیف)
 							</label>
 							<label class="wsm-flex wsm-items-center wsm-text-sm wsm-text-slate-400 wsm-cursor-pointer">
 								<input type="checkbox" id="c-exclude-sale" ${couponData?.exclude_sale_items ? 'checked' : ''} class="wsm-ml-2">
@@ -279,7 +279,7 @@
 					<!-- Submit Card -->
 					<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg">
 						<button type="submit" id="wsm-save-coupon-btn" class="wsm-w-full wsm-bg-indigo-600 hover:wsm-bg-indigo-500 wsm-text-white wsm-font-semibold wsm-rounded-2xl wsm-py-4 wsm-shadow-lg wsm-shadow-indigo-500/20 wsm-transition-colors">
-							<span>ذخیره نهایی کوپن</span>
+							<span>ذخیره نهایی کد تخفیف</span>
 						</button>
 					</div>
 				</div>

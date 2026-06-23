@@ -3,7 +3,7 @@
  * Custom Store Admin Panel Base Layout Template
  *
  * @package KarasuWooPannel
- * @version 1.0.9
+ * @version 1.0.10
  * @date 2026-06-23
  */
 
@@ -251,7 +251,7 @@ $current_user = wp_get_current_user();
 				</a>
 				<a href="<?php echo esc_url( wsm_panel_url( 'coupons' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('coupons') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<svg style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="wsm-ml-3"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-					<span>کوپن‌ها</span>
+					<span>تخفیف‌ها</span>
 				</a>
 				<a href="<?php echo esc_url( wsm_panel_url( 'reports' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('reports') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<svg style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="wsm-ml-3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
@@ -291,7 +291,7 @@ $current_user = wp_get_current_user();
 					$back_label = 'بازگشت به محصولات';
 				} elseif ( 'coupons/edit' === $view ) {
 					$back_url = wsm_panel_url( 'coupons' );
-					$back_label = 'بازگشت به کوپن‌ها';
+					$back_label = 'بازگشت به تخفیف‌ها';
 				} elseif ( in_array( $view, [ 'reports/sales', 'reports/products', 'reports/customers' ], true ) ) {
 					$back_url = wsm_panel_url( 'reports' );
 					$back_label = 'بازگشت به گزارش‌ها';

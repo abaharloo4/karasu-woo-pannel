@@ -3,7 +3,7 @@
  * Coupons List Panel View Template
  *
  * @package KarasuWooPannel
- * @version 1.0.9
+ * @version 1.0.10
  * @date 2026-06-23
  */
 
@@ -13,16 +13,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="wsm-space-y-6">
 	<div class="wsm-flex wsm-items-center wsm-justify-between">
-		<h1 class="wsm-text-2xl wsm-font-bold wsm-text-slate-100">مدیریت کوپن‌های تخفیف</h1>
+		<h1 class="wsm-text-2xl wsm-font-bold wsm-text-slate-100">مدیریت کدهای تخفیف</h1>
 		<a href="<?php echo esc_url( wsm_panel_url( 'coupons/new' ) ); ?>" class="wsm-bg-indigo-600 hover:wsm-bg-indigo-500 wsm-text-white wsm-font-semibold wsm-rounded-2xl wsm-px-5 wsm-py-3 wsm-text-sm wsm-shadow-lg wsm-shadow-indigo-500/20 wsm-transition-colors">
-			ایجاد کوپن جدید
+			ایجاد کد تخفیف جدید
 		</a>
 	</div>
 
 	<!-- Filters Row -->
 	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-4 wsm-shadow-lg wsm-flex wsm-flex-wrap wsm-gap-4 wsm-items-center">
 		<div class="wsm-flex-1 wsm-min-w-[200px]">
-			<input type="text" id="coupon-search" placeholder="جستجوی کد کوپن..." class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2.5 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
+			<input type="text" id="coupon-search" placeholder="جستجوی کد تخفیف..." class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2.5 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
 		</div>
 		<button id="clear-coupon-filters" class="wsm-px-4 wsm-py-2.5 wsm-text-xs wsm-bg-slate-950 wsm-border wsm-border-slate-850 hover:wsm-bg-slate-800 wsm-text-slate-400 wsm-rounded-2xl wsm-transition-colors">
 			پاک کردن فیلترها
@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<table class="wsm-w-full wsm-text-right wsm-border-collapse">
 				<thead>
 					<tr class="wsm-border-b wsm-border-slate-800 wsm-bg-slate-950/20">
-						<th class="wsm-px-6 wsm-py-3 wsm-text-xs wsm-text-slate-500">کد کوپن</th>
+						<th class="wsm-px-6 wsm-py-3 wsm-text-xs wsm-text-slate-500">کد تخفیف</th>
 						<th class="wsm-px-6 wsm-py-3 wsm-text-xs wsm-text-slate-500">نوع تخفیف</th>
 						<th class="wsm-px-6 wsm-py-3 wsm-text-xs wsm-text-slate-500">میزان تخفیف</th>
 						<th class="wsm-px-6 wsm-py-3 wsm-text-xs wsm-text-slate-500">تعداد استفاده</th>
@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- Pagination Footer -->
 		<div class="wsm-px-6 wsm-py-4 wsm-border-t wsm-border-slate-800 wsm-flex wsm-items-center wsm-justify-between">
 			<div class="wsm-text-xs wsm-text-slate-500">
-				نمایش <span id="coupons-count-start" class="wsm-font-semibold">۰</span> تا <span id="coupons-count-end" class="wsm-font-semibold">۰</span> از <span id="coupons-count-total" class="wsm-font-semibold">۰</span> کوپن تخفیف
+				نمایش <span id="coupons-count-start" class="wsm-font-semibold">۰</span> تا <span id="coupons-count-end" class="wsm-font-semibold">۰</span> از <span id="coupons-count-total" class="wsm-font-semibold">۰</span> کد تخفیف
 			</div>
 			<div id="coupons-pagination-controls" class="wsm-flex wsm-items-center wsm-space-x-2 wsm-space-x-reverse">
 				<!-- Loaded dynamically -->

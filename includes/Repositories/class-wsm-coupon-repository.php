@@ -3,7 +3,7 @@
  * WooCommerce Coupon CRUD Repository
  *
  * @package KarasuWooPannel
- * @version 1.0.9
+ * @version 1.0.10
  * @date 2026-06-23
  */
 
@@ -28,27 +28,34 @@ class WSM_Coupon_Repository {
 	 * @return array Array containing coupons list, total count, and pages.
 	 */
 	public function find_all( array $args ): array {
-		$limit = isset( $args['per_page'] ) ? absint( $args['per_page'] ) : 20;
-		$page  = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
+		$limit  = isset( $args['per_page'] ) ? absint( $args['per_page'] ) : 20;
+		$page   = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
+		$offset = ( $page - 1 ) * $limit;
 
 		$query_args = [
-			'limit'    => $limit,
-			'page'     => $page,
-			'paginate' => true,
-			'orderby'  => 'date',
-			'order'    => 'DESC',
+			'post_type'      => 'shop_coupon',
+			'post_status'    => 'any',
+			'posts_per_page' => $limit,
+			'offset'         => $offset,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
 		];
 
 		if ( ! empty( $args['search'] ) ) {
-			$query_args['search'] = sanitize_text_field( $args['search'] );
+			$query_args['s'] = sanitize_text_field( $args['search'] );
 		}
 
-		$results = wc_get_coupons( $query_args );
+		$query = new \WP_Query( $query_args );
+
+		$coupons = [];
+		foreach ( $query->posts as $post ) {
+			$coupons[] = new \WC_Coupon( $post->ID );
+		}
 
 		return [
-			'coupons' => $results->coupons,
-			'total'   => $results->total,
-			'pages'   => $results->max_num_pages,
+			'coupons' => $coupons,
+			'total'   => (int) $query->found_posts,
+			'pages'   => (int) $query->max_num_pages,
 		];
 	}
 

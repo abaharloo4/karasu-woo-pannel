@@ -1,6 +1,6 @@
 {
   "name": "karasu-woo-pannel",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A completely independent, RTL, TailwindCSS-based store management panel for WooCommerce.",
   "date": "2026-06-23",
   "devDependencies": {

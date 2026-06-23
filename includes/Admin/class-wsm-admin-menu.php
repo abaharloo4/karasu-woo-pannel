@@ -3,7 +3,7 @@
  * WordPress Admin Menu Registry
  *
  * @package KarasuWooPannel
- * @version 1.0.9
+ * @version 1.0.10
  * @date 2026-06-23
  */
 
@@ -800,7 +800,7 @@ class WSM_Admin_Menu {
 											<th style="text-align: center;">ورود به پنل</th>
 											<th style="text-align: center;">سفارش‌ها</th>
 											<th style="text-align: center;">محصولات</th>
-											<th style="text-align: center;">کوپن‌ها</th>
+											<th style="text-align: center;">تخفیف‌ها</th>
 											<th style="text-align: center;">گزارش‌ها</th>
 										</tr>
 									</thead>
@@ -814,7 +814,7 @@ class WSM_Admin_Menu {
 											'wsm_access_panel'    => 'ورود',
 											'wsm_manage_orders'   => 'سفارش',
 											'wsm_manage_products' => 'محصول',
-											'wsm_manage_coupons'  => 'کوپن',
+											'wsm_manage_coupons'  => 'تخفیف',
 											'wsm_view_reports'    => 'گزارش',
 										];
 

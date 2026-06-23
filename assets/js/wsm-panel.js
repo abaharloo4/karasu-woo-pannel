@@ -2,7 +2,7 @@
  * KarasuWooPannel Client JavaScript Library
  *
  * @package KarasuWooPannel
- * @version 1.0.9
+ * @version 1.0.10
  * @date 2026-06-23
  */
 
