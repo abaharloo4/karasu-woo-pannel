@@ -1,6 +1,6 @@
 # DEBUG LOG — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.2  
+**نسخه:** 1.0.3  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 
@@ -59,3 +59,11 @@ This log captures technical bugs, architectural adjustments, and security edge c
 * **Symptom:** WordPress settings page was unstyled/empty, and the dedicated store login page `/store-admin/login/` was blank.
 * **Cause:** The settings page HTML did not have a proper CSS layout or tab structure, and the login template `login.php` was located in the wrong directory, making `WSM_Router` fail to locate and load it.
 * **Resolution:** Re-designed the admin settings page with a premium, tabbed HTML/CSS layout (using custom-scoped CSS styles and jQuery/AJAX integration for SMS gateway connectivity checks). Moved `login.php` to `panel/views/login.php` to match `WSM_Router` layout loader expectations.
+
+### 11. Automatic Update Detection Delay / Transient Caching
+* **Symptom:** When a new release tag was published on GitHub, WordPress would not show the update banner in the plugin updates dashboard.
+* **Cause:** WordPress caches `update_plugins` transient for 12 hours, and our custom updater was caching GitHub API release info for 12 hours as well. If an API request failed, it cached the failure for 1 hour. This prevented immediate detection of updates when clicking "Check Again".
+* **Resolution:** 
+  1. Hooked into `site_transient_update_plugins` (runs on transient retrieval) in addition to `pre_set_site_transient_update_plugins` (runs on transient saving).
+  2. Bypassed and cleared our local GitHub API transient cache whenever `force-check=1` query parameter is present in the URL (which gets added when clicking "Check Again" in WordPress Updates page).
+  3. Ensured `$transient->response` is initialized before injecting the update object.

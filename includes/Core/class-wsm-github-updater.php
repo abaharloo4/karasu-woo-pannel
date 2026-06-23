@@ -3,7 +3,7 @@
  * GitHub Plugin Automatic Updater
  *
  * @package KarasuWooPannel
- * @version 1.0.2
+ * @version 1.0.3
  * @date 2026-06-23
  */
 
@@ -71,6 +71,7 @@ class WSM_GitHub_Updater {
 	 */
 	public function init(): void {
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
+		add_filter( 'site_transient_update_plugins', [ $this, 'check_update' ] );
 		add_filter( 'plugins_api', [ $this, 'plugin_popup' ], 20, 3 );
 		add_filter( 'upgrader_source_selection', [ $this, 'rename_source' ], 10, 4 );
 		add_action( 'delete_site_transient_update_plugins', [ $this, 'delete_transient' ] );
@@ -83,7 +84,14 @@ class WSM_GitHub_Updater {
 	 */
 	private function get_latest_release(): ?array {
 		$cache_key = 'wsm_github_release_info';
-		$release   = get_transient( $cache_key );
+		
+		// If force-check is requested in URL, bypass cache.
+		if ( isset( $_GET['force-check'] ) ) {
+			delete_transient( $cache_key );
+			$release = false;
+		} else {
+			$release = get_transient( $cache_key );
+		}
 
 		if ( 'failed' === $release ) {
 			return null;
@@ -131,6 +139,10 @@ class WSM_GitHub_Updater {
 	public function check_update( $transient ) {
 		if ( ! is_object( $transient ) || empty( $transient->checked ) ) {
 			return $transient;
+		}
+
+		if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+			$transient->response = [];
 		}
 
 		$release = $this->get_latest_release();

@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,7 +39,7 @@ Updates are queried directly from the public GitHub release tags. When a new rel
 
 == Changelog ==
 
-= 1.0.2 =
+= 1.0.3 =
 * Redesigned WP admin settings page into a premium tabbed layout with AJAX SMS gateway validation.
 * Fixed empty standalone panel login page caused by mismatched template directory path.
 

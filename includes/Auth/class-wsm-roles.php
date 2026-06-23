@@ -3,7 +3,7 @@
  * Role and Capability Management
  *
  * @package KarasuWooPannel
- * @version 1.0.2
+ * @version 1.0.3
  * @date 2026-06-23
  */
 
