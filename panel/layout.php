@@ -3,7 +3,7 @@
  * Custom Store Admin Panel Base Layout Template
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -105,6 +105,12 @@ $current_user = wp_get_current_user();
 				<a href="<?php echo esc_url( wsm_panel_url( 'reports' ) ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-rounded-xl wsm-transition-colors <?php echo $is_active('reports') ? 'wsm-bg-indigo-600/10 wsm-text-indigo-400' : 'wsm-text-slate-400 hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100'; ?>">
 					<span class="wsm-ml-3">گزارش‌ها</span>
 				</a>
+				
+				<!-- Back to Site Link -->
+				<a href="<?php echo esc_url( home_url() ); ?>" class="wsm-flex wsm-items-center wsm-px-4 wsm-py-3 wsm-text-sm wsm-font-medium wsm-text-slate-400 wsm-rounded-xl wsm-transition-colors hover:wsm-bg-slate-800/50 hover:wsm-text-slate-100">
+					<svg class="wsm-w-5 wsm-h-5 wsm-ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+					<span>بازگشت به سایت</span>
+				</a>
 			</nav>
 			<div class="wsm-p-4 wsm-border-t wsm-border-slate-800">
 				<!-- Using custom logout action link handler in our login form / JS instead of WP-login standard direct redirects -->
@@ -116,12 +122,44 @@ $current_user = wp_get_current_user();
 
 		<!-- Main Content View Area -->
 		<div class="wsm-flex-1 wsm-flex wsm-flex-col wsm-overflow-hidden">
+			<?php
+			$back_url = '';
+			$back_label = '';
+			if ( isset( $view ) && 'dashboard' !== $view ) {
+				if ( in_array( $view, [ 'orders/list', 'products/list', 'categories/list', 'coupons/list', 'reports/dashboard' ], true ) ) {
+					$back_url = wsm_panel_url();
+					$back_label = 'بازگشت به داشبورد';
+				} elseif ( 'orders/detail' === $view ) {
+					$back_url = wsm_panel_url( 'orders' );
+					$back_label = 'بازگشت به سفارش‌ها';
+				} elseif ( 'products/edit' === $view ) {
+					$back_url = wsm_panel_url( 'products' );
+					$back_label = 'بازگشت به محصولات';
+				} elseif ( 'coupons/edit' === $view ) {
+					$back_url = wsm_panel_url( 'coupons' );
+					$back_label = 'بازگشت به کوپن‌ها';
+				} elseif ( in_array( $view, [ 'reports/sales', 'reports/products', 'reports/customers' ], true ) ) {
+					$back_url = wsm_panel_url( 'reports' );
+					$back_label = 'بازگشت به گزارش‌ها';
+				}
+			}
+			?>
 			<!-- Header -->
 			<header class="wsm-h-16 wsm-bg-slate-900/40 wsm-backdrop-blur-md wsm-border-b wsm-border-slate-800 wsm-flex wsm-items-center wsm-justify-between wsm-px-6">
 				<div class="wsm-flex wsm-items-center md:wsm-hidden">
 					<span class="wsm-text-lg wsm-font-bold wsm-bg-gradient-to-r wsm-from-indigo-400 wsm-to-cyan-400 wsm-bg-clip-text wsm-text-transparent">KarasuWooPannel</span>
 				</div>
-				<div></div>
+				<div class="wsm-flex wsm-items-center wsm-space-x-3 wsm-space-x-reverse">
+					<?php if ( ! empty( $back_url ) ) : ?>
+						<a href="<?php echo esc_url( $back_url ); ?>" class="wsm-flex wsm-items-center wsm-gap-1.5 wsm-px-3 wsm-py-1.5 wsm-text-xs wsm-font-semibold wsm-text-indigo-400 wsm-bg-indigo-600/10 hover:wsm-bg-indigo-600/20 wsm-rounded-xl wsm-transition-colors">
+							<span>&rarr;</span> <?php echo esc_html( $back_label ); ?>
+						</a>
+					<?php elseif ( isset( $view ) && 'dashboard' === $view ) : ?>
+						<a href="<?php echo esc_url( home_url() ); ?>" class="wsm-flex wsm-items-center wsm-gap-1.5 wsm-px-3 wsm-py-1.5 wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-bg-slate-800/50 hover:wsm-bg-slate-800 wsm-rounded-xl wsm-transition-colors">
+							<svg class="wsm-w-3.5 wsm-h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> بازگشت به سایت
+						</a>
+					<?php endif; ?>
+				</div>
 				<div class="wsm-flex wsm-items-center wsm-space-x-4 wsm-space-x-reverse">
 					<span class="wsm-text-sm wsm-text-slate-400"><?php echo esc_html( $current_user->display_name ); ?></span>
 				</div>

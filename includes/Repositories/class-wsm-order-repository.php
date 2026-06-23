@@ -3,7 +3,7 @@
  * WooCommerce Order CRUD Repository
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -110,5 +110,25 @@ class WSM_Order_Repository {
 		}
 
 		return (int) $order->add_order_note( $note, $customer_note ? 1 : 0 );
+	}
+
+	/**
+	 * Delete or trash a WooCommerce order.
+	 *
+	 * @param int  $id Order ID.
+	 * @param bool $force_delete Force delete bypassing trash if true.
+	 * @return bool True if deleted successfully.
+	 */
+	public function delete( int $id, bool $force_delete = false ): bool {
+		$order = wc_get_order( $id );
+		if ( ! $order ) {
+			return false;
+		}
+
+		if ( $force_delete ) {
+			return (bool) $order->delete( true );
+		} else {
+			return (bool) $order->delete( false ); // move to trash
+		}
 	}
 }

@@ -3,7 +3,7 @@
  * REST Controller for WooCommerce Orders
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -65,6 +65,11 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 					'callback'            => [ $this, 'get_order_detail' ],
 					'permission_callback' => [ $this, 'check_permission' ],
 				],
+				[
+					'methods'             => 'DELETE',
+					'callback'            => [ $this, 'delete_order' ],
+					'permission_callback' => [ $this, 'check_permission' ],
+				],
 			]
 		);
 
@@ -87,6 +92,18 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'add_note' ],
+					'permission_callback' => [ $this, 'check_permission' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/orders/bulk',
+			[
+				[
+					'methods'             => 'POST',
+					'callback'            => [ $this, 'bulk_action' ],
 					'permission_callback' => [ $this, 'check_permission' ],
 				],
 			]
@@ -196,5 +213,72 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 		}
 
 		return WSM_Response::success( [ 'note_id' => $result ], __( 'یادداشت با موفقیت ثبت شد.', 'karasu-woo-pannel' ) );
+	}
+
+	/**
+	 * Delete/trash a single WooCommerce order.
+	 *
+	 * @param WP_REST_Request $request Request details.
+	 * @return WP_REST_Response|WP_Error Response or error details.
+	 */
+	public function delete_order( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$id = (int) $request->get_param( 'id' );
+		$result = $this->service->delete_order( $id, false ); // default to move to trash
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return WSM_Response::success( [ 'id' => $id ], __( 'سفارش با موفقیت به زباله‌دان منتقل شد.', 'karasu-woo-pannel' ) );
+	}
+
+	/**
+	 * Perform bulk operations (status updates / deletions) on multiple orders.
+	 *
+	 * @param WP_REST_Request $request Request body with ids, action, and optional status.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	public function bulk_action( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$body = json_decode( $request->get_body(), true );
+		$ids = isset( $body['ids'] ) ? array_map( 'absint', (array) $body['ids'] ) : [];
+		$action = sanitize_text_field( $body['action'] ?? '' );
+		$status = sanitize_text_field( $body['status'] ?? '' );
+
+		if ( empty( $ids ) ) {
+			return new WP_Error( 'wsm_missing_ids', __( 'هیچ سفارشی انتخاب نشده است.', 'karasu-woo-pannel' ), [ 'status' => 400 ] );
+		}
+
+		if ( ! in_array( $action, [ 'status', 'delete' ], true ) ) {
+			return new WP_Error( 'wsm_invalid_action', __( 'عملیات دسته جمعی نامعتبر است.', 'karasu-woo-pannel' ), [ 'status' => 400 ] );
+		}
+
+		$success_count = 0;
+		if ( 'status' === $action ) {
+			$allowed_statuses = [ 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed' ];
+			if ( ! in_array( $status, $allowed_statuses, true ) ) {
+				return new WP_Error( 'wsm_invalid_status', __( 'وضعیت سفارش نامعتبر است.', 'karasu-woo-pannel' ), [ 'status' => 400 ] );
+			}
+			foreach ( $ids as $id ) {
+				$result = $this->service->update_status( $id, $status );
+				if ( ! is_wp_error( $result ) ) {
+					$success_count++;
+				}
+			}
+		} elseif ( 'delete' === $action ) {
+			foreach ( $ids as $id ) {
+				$result = $this->service->delete_order( $id, false ); // Move to trash
+				if ( ! is_wp_error( $result ) ) {
+					$success_count++;
+				}
+			}
+		}
+
+		return WSM_Response::success(
+			[
+				'success_count' => $success_count,
+				'total_count'   => count( $ids ),
+			],
+			sprintf( __( 'عملیات دسته جمعی روی %d سفارش با موفقیت اعمال شد.', 'karasu-woo-pannel' ), $success_count )
+		);
 	}
 }

@@ -3,7 +3,7 @@
  * REST Controller for WooCommerce Products
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -87,6 +87,18 @@ class WSM_Products_Controller extends WSM_REST_Controller {
 				[
 					'methods'             => 'DELETE',
 					'callback'            => [ $this, 'delete_product' ],
+					'permission_callback' => [ $this, 'check_permission' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/products/bulk',
+			[
+				[
+					'methods'             => 'POST',
+					'callback'            => [ $this, 'bulk_action' ],
 					'permission_callback' => [ $this, 'check_permission' ],
 				],
 			]
@@ -353,5 +365,70 @@ class WSM_Products_Controller extends WSM_REST_Controller {
 		}
 
 		return WSM_Response::success( [ 'id' => $id ], __( 'دسته‌بندی با موفقیت حذف شد.', 'karasu-woo-pannel' ) );
+	}
+
+	/**
+	 * Perform bulk operations (status updates, stock status updates, deletions) on multiple products.
+	 *
+	 * @param WP_REST_Request $request Request properties.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	public function bulk_action( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$body   = json_decode( $request->get_body(), true );
+		$ids    = isset( $body['ids'] ) ? array_map( 'absint', (array) $body['ids'] ) : [];
+		$action = sanitize_text_field( $body['action'] ?? '' );
+
+		if ( empty( $ids ) ) {
+			return new WP_Error( 'wsm_missing_ids', __( 'هیچ محصولی انتخاب نشده است.', 'karasu-woo-pannel' ), [ 'status' => 400 ] );
+		}
+
+		if ( ! in_array( $action, [ 'status', 'stock_status', 'delete' ], true ) ) {
+			return new WP_Error( 'wsm_invalid_action', __( 'عملیات دسته جمعی نامعتبر است.', 'karasu-woo-pannel' ), [ 'status' => 400 ] );
+		}
+
+		$success_count = 0;
+		if ( 'status' === $action ) {
+			$status = sanitize_text_field( $body['status'] ?? '' );
+			if ( ! in_array( $status, [ 'publish', 'draft' ], true ) ) {
+				return new WP_Error( 'wsm_invalid_status', __( 'وضعیت نامعتبر است.', 'karasu-woo-pannel' ), [ 'status' => 400 ] );
+			}
+			foreach ( $ids as $id ) {
+				$product = wc_get_product( $id );
+				if ( $product ) {
+					$product->set_status( $status );
+					$product->save();
+					$success_count++;
+				}
+			}
+		} elseif ( 'stock_status' === $action ) {
+			$stock_status = sanitize_text_field( $body['stock_status'] ?? '' );
+			if ( ! in_array( $stock_status, [ 'instock', 'outofstock' ], true ) ) {
+				return new WP_Error( 'wsm_invalid_stock', __( 'وضعیت موجودی نامعتبر است.', 'karasu-woo-pannel' ), [ 'status' => 400 ] );
+			}
+			foreach ( $ids as $id ) {
+				$product = wc_get_product( $id );
+				if ( $product ) {
+					$product->set_stock_status( $stock_status );
+					$product->save();
+					$success_count++;
+				}
+			}
+		} elseif ( 'delete' === $action ) {
+			foreach ( $ids as $id ) {
+				$product = wc_get_product( $id );
+				if ( $product ) {
+					$product->delete( false ); // Move to trash
+					$success_count++;
+				}
+			}
+		}
+
+		return WSM_Response::success(
+			[
+				'success_count' => $success_count,
+				'total_count'   => count( $ids ),
+			],
+			sprintf( __( 'عملیات دسته جمعی روی %d محصول با موفقیت اعمال شد.', 'karasu-woo-pannel' ), $success_count )
+		);
 	}
 }

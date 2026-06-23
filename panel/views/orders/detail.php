@@ -3,7 +3,7 @@
  * Order Detail Panel View Template
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 

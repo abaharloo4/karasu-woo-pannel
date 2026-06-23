@@ -3,7 +3,7 @@
  * Orders List Panel View Template
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -54,12 +54,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 
+	<!-- Bulk Actions Panel (initially hidden) -->
+	<div id="orders-bulk-actions" class="wsm-hidden wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-4 wsm-flex wsm-items-center wsm-justify-between wsm-shadow-lg">
+		<div class="wsm-text-xs wsm-text-slate-400">
+			تعداد <span id="selected-orders-count" class="wsm-font-bold wsm-text-indigo-400">0</span> سفارش انتخاب شده است.
+		</div>
+		<div class="wsm-flex wsm-items-center wsm-gap-3">
+			<select id="orders-bulk-status" class="wsm-bg-slate-950 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-2 wsm-text-xs wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500 wsm-transition-colors">
+				<option value="">عملیات دسته جمعی...</option>
+				<option value="status_pending">تغییر وضعیت به: در انتظار پرداخت</option>
+				<option value="status_processing">تغییر وضعیت به: در حال انجام</option>
+				<option value="status_on-hold">تغییر وضعیت به: در انتظار بررسی</option>
+				<option value="status_completed">تغییر وضعیت به: تکمیل شده</option>
+				<option value="status_cancelled">تغییر وضعیت به: لغو شده</option>
+				<option value="status_refunded">تغییر وضعیت به: مسترد شده</option>
+				<option value="status_failed">تغییر وضعیت به: ناموفق</option>
+				<option value="delete">انتقال به زباله‌دان (حذف)</option>
+			</select>
+			<button id="apply-orders-bulk" class="wsm-px-4 wsm-py-2 wsm-bg-indigo-600 hover:wsm-bg-indigo-500 wsm-text-white wsm-text-xs wsm-font-semibold wsm-rounded-xl wsm-transition-colors">
+				اعمال تغییر
+			</button>
+		</div>
+	</div>
+
 	<!-- Table Panel -->
 	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-overflow-hidden wsm-shadow-lg">
 		<div class="wsm-overflow-x-auto">
 			<table class="wsm-w-full wsm-text-right wsm-border-collapse">
 				<thead>
 					<tr class="wsm-border-b wsm-border-slate-800 wsm-bg-slate-950/20">
+						<th class="wsm-px-6 wsm-py-4 wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-w-10">
+							<input type="checkbox" id="select-all-orders" class="wsm-rounded wsm-bg-slate-950 wsm-border-slate-800 focus:wsm-ring-indigo-500">
+						</th>
 						<th class="wsm-px-6 wsm-py-4 wsm-text-xs wsm-font-semibold wsm-text-slate-400">شماره سفارش</th>
 						<th class="wsm-px-6 wsm-py-4 wsm-text-xs wsm-font-semibold wsm-text-slate-400">مشتری</th>
 						<th class="wsm-px-6 wsm-py-4 wsm-text-xs wsm-font-semibold wsm-text-slate-400">تاریخ ثبت</th>
@@ -72,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tbody id="orders-table-body" class="wsm-divide-y wsm-divide-slate-800/50">
 					<!-- Loading Skeleton Placeholder -->
 					<tr>
-						<td colspan="7" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500">در حال بارگذاری اطلاعات سفارش‌ها...</td>
+						<td colspan="8" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500">در حال بارگذاری اطلاعات سفارش‌ها...</td>
 					</tr>
 				</tbody>
 			</table>

@@ -3,7 +3,7 @@
  * Business Service layer for WooCommerce Orders
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -223,5 +223,20 @@ class WSM_Order_Service {
 			'items'          => $items,
 			'notes'          => $notes,
 		];
+	}
+
+	/**
+	 * Delete/trash a single order.
+	 *
+	 * @param int  $id Order ID.
+	 * @param bool $force Force delete.
+	 * @return bool|WP_Error True if success, else error.
+	 */
+	public function delete_order( int $id, bool $force = false ): bool|WP_Error {
+		$deleted = $this->repository->delete( $id, $force );
+		if ( ! $deleted ) {
+			return new WP_Error( 'wsm_delete_failed', __( 'حذف سفارش ناموفق بود.', 'karasu-woo-pannel' ) );
+		}
+		return true;
 	}
 }

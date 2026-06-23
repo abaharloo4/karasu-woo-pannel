@@ -2,7 +2,7 @@
  * KarasuWooPannel Products Management Script
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -24,6 +24,28 @@
 	}
 
 	// 1. PRODUCTS LIST HANDLER
+	function updateBulkProductsPanel() {
+		const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+		const bulkPanel = document.getElementById('products-bulk-actions');
+		const countSpan = document.getElementById('selected-products-count');
+		const selectAll = document.getElementById('select-all-products');
+
+		if (!bulkPanel) return;
+
+		const count = checkboxes.length;
+		if (count > 0) {
+			bulkPanel.classList.remove('wsm-hidden');
+			countSpan.textContent = count.toLocaleString('fa-IR');
+		} else {
+			bulkPanel.classList.add('wsm-hidden');
+		}
+
+		const totalCheckboxes = document.querySelectorAll('.product-checkbox').length;
+		if (selectAll) {
+			selectAll.checked = totalCheckboxes > 0 && count === totalCheckboxes;
+		}
+	}
+
 	async function loadCategoriesFilter() {
 		const filterSelect = document.getElementById('product-category-filter');
 		if (!filterSelect) return;
@@ -50,9 +72,14 @@
 		const stockStatus = document.getElementById('product-stock-filter')?.value || '';
 		const status = document.getElementById('product-status-filter')?.value || '';
 
+		const selectAll = document.getElementById('select-all-products');
+		if (selectAll) selectAll.checked = false;
+		const bulkPanel = document.getElementById('products-bulk-actions');
+		if (bulkPanel) bulkPanel.classList.add('wsm-hidden');
+
 		tableBody.innerHTML = `
 			<tr>
-				<td colspan="8" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500 wsm-animate-pulse">
+				<td colspan="9" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500 wsm-animate-pulse">
 					در حال دریافت لیست محصولات...
 				</td>
 			</tr>
@@ -74,7 +101,7 @@
 			if (products.length === 0) {
 				tableBody.innerHTML = `
 					<tr>
-						<td colspan="8" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500">
+						<td colspan="9" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500">
 							هیچ محصولی یافت نشد.
 						</td>
 					</tr>
@@ -92,6 +119,9 @@
 
 				rowsHtml += `
 					<tr class="wsm-border-b wsm-border-slate-800/40 hover:wsm-bg-slate-900/20 wsm-transition-colors">
+						<td class="wsm-px-6 wsm-py-4">
+							<input type="checkbox" class="product-checkbox wsm-rounded wsm-bg-slate-950 wsm-border-slate-800 focus:wsm-ring-indigo-500" value="${p.id}">
+						</td>
 						<td class="wsm-px-6 wsm-py-4">
 							<img src="${imgUrl}" class="wsm-w-10 wsm-h-10 wsm-rounded-xl wsm-object-cover wsm-border wsm-border-slate-800" alt="${WSM.escHtml(p.name)}">
 						</td>
@@ -118,6 +148,11 @@
 			});
 
 			tableBody.innerHTML = rowsHtml;
+
+			// Bind checkboxes change
+			document.querySelectorAll('.product-checkbox').forEach(cb => {
+				cb.addEventListener('change', updateBulkProductsPanel);
+			});
 
 			// Bind inline stock triggers.
 			document.querySelectorAll('.toggle-stock-btn').forEach(btn => {
@@ -163,7 +198,7 @@
 		} catch (error) {
 			tableBody.innerHTML = `
 				<tr>
-					<td colspan="8" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-rose-400">
+					<td colspan="9" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-rose-400">
 						خطا در دریافت اطلاعات محصولات.
 					</td>
 				</tr>
@@ -1099,6 +1134,72 @@
 		if (tableBody) {
 			loadCategoriesFilter();
 			loadProductsList();
+
+			// Bind select-all products checkbox
+			const selectAllProducts = document.getElementById('select-all-products');
+			if (selectAllProducts) {
+				selectAllProducts.addEventListener('change', (e) => {
+					const checked = e.target.checked;
+					document.querySelectorAll('.product-checkbox').forEach(cb => {
+						cb.checked = checked;
+					});
+					updateBulkProductsPanel();
+				});
+			}
+
+			// Bind bulk action apply button for products
+			const applyProductsBulkBtn = document.getElementById('apply-products-bulk');
+			if (applyProductsBulkBtn) {
+				applyProductsBulkBtn.addEventListener('click', async (e) => {
+					e.preventDefault();
+					const actionSelect = document.getElementById('products-bulk-action-select');
+					const selectedVal = actionSelect.value;
+					if (!selectedVal) {
+						alert('لطفا یک عملیات دسته جمعی را انتخاب کنید.');
+						return;
+					}
+
+					const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+					const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+					if (ids.length === 0) return;
+
+					let confirmMsg = '';
+					let requestBody = { ids };
+
+					if (selectedVal.startsWith('status_')) {
+						const status = selectedVal.replace('status_', '');
+						requestBody.action = 'status';
+						requestBody.status = status;
+						confirmMsg = `آیا از تغییر وضعیت ${ids.length.toLocaleString('fa-IR')} محصول مطمئن هستید؟`;
+					} else if (selectedVal.startsWith('stock_')) {
+						const stockStatus = selectedVal.replace('stock_', '');
+						requestBody.action = 'stock_status';
+						requestBody.stock_status = stockStatus;
+						confirmMsg = `آیا از تغییر موجودی ${ids.length.toLocaleString('fa-IR')} محصول مطمئن هستید؟`;
+					} else if (selectedVal === 'delete') {
+						requestBody.action = 'delete';
+						confirmMsg = `آیا از انتقال ${ids.length.toLocaleString('fa-IR')} محصول به زباله‌دان مطمئن هستید؟`;
+					}
+
+					if (confirm(confirmMsg)) {
+						try {
+							applyProductsBulkBtn.disabled = true;
+							applyProductsBulkBtn.textContent = 'در حال اعمال...';
+							await WSM.fetch('/products/bulk', {
+								method: 'POST',
+								body: JSON.stringify(requestBody)
+							});
+							loadProductsList();
+						} catch (err) {
+							// Handled globally
+						} finally {
+							applyProductsBulkBtn.disabled = false;
+							applyProductsBulkBtn.textContent = 'اعمال تغییر';
+							actionSelect.value = '';
+						}
+					}
+				});
+			}
 
 			// Bind filters.
 			const search = document.getElementById('product-search');

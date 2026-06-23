@@ -2,7 +2,7 @@
  * KarasuWooPannel Orders Management Script
  *
  * @package KarasuWooPannel
- * @version 1.0.7
+ * @version 1.0.8
  * @date 2026-06-23
  */
 
@@ -34,6 +34,29 @@
 	}
 
 	// 1. ORDERS LIST HANDLER
+	function updateBulkOrdersPanel() {
+		const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+		const bulkPanel = document.getElementById('orders-bulk-actions');
+		const countSpan = document.getElementById('selected-orders-count');
+		const selectAll = document.getElementById('select-all-orders');
+
+		if (!bulkPanel) return;
+
+		const count = checkboxes.length;
+		if (count > 0) {
+			bulkPanel.classList.remove('wsm-hidden');
+			countSpan.textContent = count.toLocaleString('fa-IR');
+		} else {
+			bulkPanel.classList.add('wsm-hidden');
+		}
+
+		// Sync selectAll state
+		const totalCheckboxes = document.querySelectorAll('.order-checkbox').length;
+		if (selectAll) {
+			selectAll.checked = totalCheckboxes > 0 && count === totalCheckboxes;
+		}
+	}
+
 	async function loadOrdersList() {
 		const tableBody = document.getElementById('orders-table-body');
 		if (!tableBody) return;
@@ -44,9 +67,14 @@
 		const dateFrom = document.getElementById('order-date-from')?.value || '';
 		const dateTo = document.getElementById('order-date-to')?.value || '';
 
+		const selectAll = document.getElementById('select-all-orders');
+		if (selectAll) selectAll.checked = false;
+		const bulkPanel = document.getElementById('orders-bulk-actions');
+		if (bulkPanel) bulkPanel.classList.add('wsm-hidden');
+
 		tableBody.innerHTML = `
 			<tr>
-				<td colspan="7" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500 wsm-animate-pulse">
+				<td colspan="8" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500 wsm-animate-pulse">
 					در حال دریافت سفارش‌ها...
 				</td>
 			</tr>
@@ -68,7 +96,7 @@
 			if (orders.length === 0) {
 				tableBody.innerHTML = `
 					<tr>
-						<td colspan="7" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500">
+						<td colspan="8" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-slate-500">
 							هیچ سفارشی یافت نشد.
 						</td>
 					</tr>
@@ -84,6 +112,9 @@
 				const badgeClass = statusClasses[order.status] ?? 'wsm-bg-slate-500/10 wsm-text-slate-400 wsm-border-slate-500/20';
 				rowsHtml += `
 					<tr class="wsm-border-b wsm-border-slate-800/40 hover:wsm-bg-slate-900/20 wsm-transition-colors">
+						<td class="wsm-px-6 wsm-py-4">
+							<input type="checkbox" class="order-checkbox wsm-rounded wsm-bg-slate-950 wsm-border-slate-800 focus:wsm-ring-indigo-500" value="${order.id}">
+						</td>
 						<td class="wsm-px-6 wsm-py-4 wsm-text-sm wsm-font-bold wsm-text-slate-200">#${order.id}</td>
 						<td class="wsm-px-6 wsm-py-4 wsm-text-sm wsm-text-slate-300">${WSM.escHtml(order.customer_name)}</td>
 						<td class="wsm-px-6 wsm-py-4 wsm-text-sm wsm-text-slate-400">${order.date}</td>
@@ -98,12 +129,18 @@
 							<a href="${window.wsmConfig.panelUrl}/orders/view?id=${order.id}" class="wsm-text-indigo-400 hover:wsm-text-indigo-300 wsm-font-semibold">مشاهده</a>
 							<button class="quick-status-btn wsm-text-xs wsm-text-emerald-400 hover:wsm-text-emerald-300" data-id="${order.id}" data-status="completed">تکمیل</button>
 							<button class="quick-status-btn wsm-text-xs wsm-text-rose-400 hover:wsm-text-rose-300" data-id="${order.id}" data-status="cancelled">لغو</button>
+							<button class="delete-order-btn wsm-text-xs wsm-text-rose-500 hover:wsm-text-rose-400" data-id="${order.id}">حذف</button>
 						</td>
 					</tr>
 				`;
 			});
 
 			tableBody.innerHTML = rowsHtml;
+
+			// Bind inline checkboxes change
+			document.querySelectorAll('.order-checkbox').forEach(cb => {
+				cb.addEventListener('change', updateBulkOrdersPanel);
+			});
 
 			// Bind inline quick status updates.
 			document.querySelectorAll('.quick-status-btn').forEach(btn => {
@@ -125,6 +162,22 @@
 				});
 			});
 
+			// Bind delete order triggers.
+			document.querySelectorAll('.delete-order-btn').forEach(btn => {
+				btn.addEventListener('click', async (e) => {
+					e.preventDefault();
+					const orderId = btn.getAttribute('data-id');
+					if (confirm(`آیا از انتقال سفارش #${orderId} به زباله‌دان مطمئن هستید؟`)) {
+						try {
+							await WSM.fetch(`/orders/${orderId}`, { method: 'DELETE' });
+							loadOrdersList();
+						} catch (err) {
+							// WSM.fetch handles error alerts.
+						}
+					}
+				});
+			});
+
 			// Update Pagination stats.
 			const start = (currentPage - 1) * perPage + 1;
 			const end = Math.min(currentPage * perPage, total);
@@ -134,7 +187,7 @@
 		} catch (error) {
 			tableBody.innerHTML = `
 				<tr>
-					<td colspan="7" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-rose-400">
+					<td colspan="8" class="wsm-px-6 wsm-py-12 wsm-text-center wsm-text-rose-400">
 						خطا در بارگذاری اطلاعات.
 					</td>
 				</tr>
@@ -248,6 +301,9 @@
 						<h1 class="wsm-text-2xl wsm-font-bold wsm-text-slate-100">جزئیات سفارش #${order.id}</h1>
 					</div>
 					<div class="wsm-flex wsm-items-center wsm-space-x-3 wsm-space-x-reverse">
+						<button id="wsm-delete-order-detail" class="wsm-px-4 wsm-py-2 wsm-bg-rose-600/10 hover:wsm-bg-rose-600/20 wsm-text-rose-400 wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors" data-id="${order.id}">
+							حذف سفارش
+						</button>
 						<select id="wsm-detail-status" class="wsm-bg-slate-900 wsm-border wsm-border-slate-800 wsm-rounded-xl wsm-px-4 wsm-py-2 wsm-text-sm focus:wsm-outline-none">
 							<option value="pending" ${order.status === 'pending' ? 'selected' : ''}>در انتظار پرداخت</option>
 							<option value="processing" ${order.status === 'processing' ? 'selected' : ''}>در حال انجام</option>
@@ -372,6 +428,19 @@
 				}
 			});
 
+			// Bind delete button
+			document.getElementById('wsm-delete-order-detail').addEventListener('click', async (e) => {
+				e.preventDefault();
+				if (confirm('آیا از انتقال این سفارش به زباله‌دان مطمئن هستید؟')) {
+					try {
+						await WSM.fetch(`/orders/${orderId}`, { method: 'DELETE' });
+						window.location.href = `${window.wsmConfig.panelUrl}/orders`;
+					} catch (err) {
+						// Handled globally
+					}
+				}
+			});
+
 			// Bind add note form submit
 			document.getElementById('wsm-add-note-form').addEventListener('submit', async (e) => {
 				e.preventDefault();
@@ -417,6 +486,67 @@
 			const dateFromInput = document.getElementById('order-date-from');
 			const dateToInput = document.getElementById('order-date-to');
 			const clearBtn = document.getElementById('clear-filters-btn');
+
+			// Bind select-all checkbox change
+			const selectAll = document.getElementById('select-all-orders');
+			if (selectAll) {
+				selectAll.addEventListener('change', (e) => {
+					const checked = e.target.checked;
+					document.querySelectorAll('.order-checkbox').forEach(cb => {
+						cb.checked = checked;
+					});
+					updateBulkOrdersPanel();
+				});
+			}
+
+			// Bind bulk action apply button
+			const applyBulkBtn = document.getElementById('apply-orders-bulk');
+			if (applyBulkBtn) {
+				applyBulkBtn.addEventListener('click', async (e) => {
+					e.preventDefault();
+					const actionSelect = document.getElementById('orders-bulk-status');
+					const selectedVal = actionSelect.value;
+					if (!selectedVal) {
+						alert('لطفا یک عملیات دسته جمعی را انتخاب کنید.');
+						return;
+					}
+
+					const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+					const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+					if (ids.length === 0) return;
+
+					let confirmMsg = '';
+					let requestBody = { ids };
+
+					if (selectedVal.startsWith('status_')) {
+						const status = selectedVal.replace('status_', '');
+						requestBody.action = 'status';
+						requestBody.status = status;
+						confirmMsg = `آیا از تغییر وضعیت ${ids.length.toLocaleString('fa-IR')} سفارش مطمئن هستید؟`;
+					} else if (selectedVal === 'delete') {
+						requestBody.action = 'delete';
+						confirmMsg = `آیا از انتقال ${ids.length.toLocaleString('fa-IR')} سفارش به زباله‌دان مطمئن هستید؟`;
+					}
+
+					if (confirm(confirmMsg)) {
+						try {
+							applyBulkBtn.disabled = true;
+							applyBulkBtn.textContent = 'در حال اعمال...';
+							await WSM.fetch('/orders/bulk', {
+								method: 'POST',
+								body: JSON.stringify(requestBody)
+							});
+							loadOrdersList();
+						} catch (err) {
+							// Handled globally
+						} finally {
+							applyBulkBtn.disabled = false;
+							applyBulkBtn.textContent = 'اعمال تغییر';
+							actionSelect.value = '';
+						}
+					}
+				});
+			}
 
 			// Simple debounce search trigger.
 			let searchTimeout;
