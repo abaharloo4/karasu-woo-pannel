@@ -3,7 +3,7 @@
  * WooCommerce Order CRUD Repository
  *
  * @package KarasuWooPannel
- * @version 1.0.1
+ * @version 1.0.2
  * @date 2026-06-23
  */
 

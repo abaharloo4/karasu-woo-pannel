@@ -1,6 +1,6 @@
 # DEBUG LOG — KarasuWooPannel Plugin
 
-**نسخه:** 1.0.1  
+**نسخه:** 1.0.2  
 **تاریخ:** ۱۴۰۵/۰۴/۰۲  
 **وضعیت:** Stable / Released  
 
@@ -39,3 +39,23 @@ This log captures technical bugs, architectural adjustments, and security edge c
 * **Symptom:** Dashboard landing loaded slowly when multiple order records existed in WooCommerce.
 * **Cause:** `/reports/dashboard-stats` was querying WooCommerce database directly on each navigation.
 * **Resolution:** Wrapped results in a transient key `wsm_dashboard_stats_{version}` to match sales report cache performance.
+
+### 7. Reserved Word 'true' as Class/Type Hint Conflict
+* **Symptom:** Activating the plugin on PHP < 8.2 threw `Fatal error: Cannot use 'WooStoreManager\Auth\true' as class name as it is reserved...` in `class-wsm-auth.php`.
+* **Cause:** The word `true` was used as a type hint for login verification status. On PHP < 8.2, using `true` as a type hint/class is not permitted.
+* **Resolution:** Changed the type hint from `true` to `bool` in `WSM_Auth::login`.
+
+### 8. Strict Type Declaration Conflict on Overridden Namespace Property
+* **Symptom:** REST API requests failed with `Fatal error: Type of WooStoreManager\Api\WSM_REST_Controller::$namespace must not be defined (as in class WP_REST_Controller)...`.
+* **Cause:** The `$namespace` property in `WSM_REST_Controller` was type-hinted as `string`, which conflicts with the parent class `WP_REST_Controller` (which has no type hint for `$namespace` in typical WordPress core versions).
+* **Resolution:** Removed the `string` type hint from the `$namespace` property in `WSM_REST_Controller`.
+
+### 9. Concrete Method Redeclared Abstract Conflict
+* **Symptom:** Plugin activation triggered `Fatal error: Cannot make non abstract method WP_REST_Controller::register_routes() abstract...`.
+* **Cause:** In PHP, child classes cannot declare a concrete parent class method as abstract. `WSM_REST_Controller` declared `abstract public function register_routes()`.
+* **Resolution:** Removed the `abstract` keyword and definition from `WSM_REST_Controller::register_routes` since child classes will override the concrete implementation anyway.
+
+### 10. Blank/Unstyled Administration Settings UI and Empty Login Page
+* **Symptom:** WordPress settings page was unstyled/empty, and the dedicated store login page `/store-admin/login/` was blank.
+* **Cause:** The settings page HTML did not have a proper CSS layout or tab structure, and the login template `login.php` was located in the wrong directory, making `WSM_Router` fail to locate and load it.
+* **Resolution:** Re-designed the admin settings page with a premium, tabbed HTML/CSS layout (using custom-scoped CSS styles and jQuery/AJAX integration for SMS gateway connectivity checks). Moved `login.php` to `panel/views/login.php` to match `WSM_Router` layout loader expectations.
