@@ -14,10 +14,27 @@ if (fs.existsSync(distDir)) {
 }
 fs.mkdirSync(buildDir, { recursive: true });
 
-// Read .distignore
+// Read .distignore or use default ignores
 const ignoreFile = path.join(__dirname, '.distignore');
-const ignores = [];
+const ignores = [
+    'docs/',
+    'package.json',
+    'package-lock.json',
+    'tailwind.config.js',
+    'INSTALL.md',
+    'README.md',
+    'node_modules/',
+    '.git/',
+    '.github/',
+    '.gitignore',
+    '.distignore',
+    'src/',
+    'karasu-woo-pannel/',
+    'dist/',
+    'build.js'
+];
 if (fs.existsSync(ignoreFile)) {
+    ignores.length = 0; // Clear default ignores if file exists
     fs.readFileSync(ignoreFile, 'utf8')
         .split('\n')
         .map(line => line.trim())
