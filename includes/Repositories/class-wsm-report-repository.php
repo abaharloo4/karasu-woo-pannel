@@ -3,7 +3,7 @@
  * WooCommerce Reports Aggregation Repository
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -26,6 +26,13 @@ class WSM_Report_Repository {
 	 * @return array Sales aggregation totals and daily breakdown.
 	 */
 	public function get_sales_stats( string $start_date, string $end_date ): array {
+		$version = get_option( 'wsm_reports_cache_version', '1' );
+		$cache_key = 'wsm_rep_sales_stats_' . $version . '_' . md5( $start_date . '_' . $end_date );
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$orders = wc_get_orders( [
 			'limit'        => -1,
 			'status'       => [ 'processing', 'completed' ],
@@ -66,13 +73,16 @@ class WSM_Report_Repository {
 
 		ksort( $daily_data );
 
-		return [
+		$result = [
 			'total_sales'    => $total_sales,
 			'total_orders'   => $total_orders,
 			'total_items'    => $total_items,
 			'total_shipping' => $total_shipping,
 			'daily'          => array_values( $daily_data ),
 		];
+
+		set_transient( $cache_key, $result, 15 * MINUTE_IN_SECONDS );
+		return $result;
 	}
 
 	/**
@@ -82,6 +92,13 @@ class WSM_Report_Repository {
 	 * @return array Top products list.
 	 */
 	public function get_top_selling_products( int $limit = 5 ): array {
+		$version = get_option( 'wsm_reports_cache_version', '1' );
+		$cache_key = 'wsm_rep_top_selling_' . $version . '_' . $limit;
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$products = wc_get_products( [
 			'limit'    => $limit,
 			'orderby'  => 'meta_value_num',
@@ -99,6 +116,8 @@ class WSM_Report_Repository {
 				'stock'       => $product->get_stock_quantity(),
 			];
 		}
+
+		set_transient( $cache_key, $formatted, 15 * MINUTE_IN_SECONDS );
 		return $formatted;
 	}
 
@@ -110,6 +129,13 @@ class WSM_Report_Repository {
 	 * @return array Detailed orders list.
 	 */
 	public function sales_by_date_range( string $start_date, string $end_date ): array {
+		$version = get_option( 'wsm_reports_cache_version', '1' );
+		$cache_key = 'wsm_rep_sales_range_' . $version . '_' . md5( $start_date . '_' . $end_date );
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$orders = wc_get_orders( [
 			'limit'        => -1,
 			'status'       => [ 'processing', 'completed' ],
@@ -134,6 +160,8 @@ class WSM_Report_Repository {
 				'status'     => $order->get_status(),
 			];
 		}
+
+		set_transient( $cache_key, $formatted, 15 * MINUTE_IN_SECONDS );
 		return $formatted;
 	}
 
@@ -146,6 +174,13 @@ class WSM_Report_Repository {
 	 * @return array Products list.
 	 */
 	public function top_products( int $limit, string $start_date, string $end_date ): array {
+		$version = get_option( 'wsm_reports_cache_version', '1' );
+		$cache_key = 'wsm_rep_top_products_' . $version . '_' . $limit . '_' . md5( $start_date . '_' . $end_date );
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$orders = wc_get_orders( [
 			'limit'        => -1,
 			'status'       => [ 'processing', 'completed' ],
@@ -180,7 +215,9 @@ class WSM_Report_Repository {
 			}
 		);
 
-		return array_slice( $product_counts, 0, $limit );
+		$result = array_slice( $product_counts, 0, $limit );
+		set_transient( $cache_key, $result, 15 * MINUTE_IN_SECONDS );
+		return $result;
 	}
 
 	/**
@@ -190,26 +227,46 @@ class WSM_Report_Repository {
 	 * @return array Low stock products.
 	 */
 	public function low_stock_products( int $threshold ): array {
+		$version = get_option( 'wsm_reports_cache_version', '1' );
+		$cache_key = 'wsm_rep_low_stock_' . $version . '_' . $threshold;
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		// Perform database filter query instead of loading all products into memory.
 		$products = wc_get_products( [
-			'limit'  => -1,
-			'status' => 'publish',
+			'limit'        => -1,
+			'status'       => 'publish',
+			'meta_query'   => [
+				'relation' => 'AND',
+				[
+					'key'     => '_manage_stock',
+					'value'   => 'yes',
+					'compare' => '=',
+				],
+				[
+					'key'     => '_stock',
+					'value'     => $threshold,
+					'compare' => '<=',
+					'type'    => 'NUMERIC',
+				],
+			],
 		] );
 
 		$low_stock = [];
 		foreach ( $products as $product ) {
-			if ( $product->managing_stock() ) {
-				$qty = $product->get_stock_quantity();
-				if ( null !== $qty && $qty <= $threshold ) {
-					$low_stock[] = [
-						'id'        => $product->get_id(),
-						'name'      => $product->get_name(),
-						'sku'       => $product->get_sku() ?: '—',
-						'stock'     => $qty,
-						'threshold' => $threshold,
-					];
-				}
-			}
+			$qty = $product->get_stock_quantity();
+			$low_stock[] = [
+				'id'        => $product->get_id(),
+				'name'      => $product->get_name(),
+				'sku'       => $product->get_sku() ?: '—',
+				'stock'     => $qty,
+				'threshold' => $threshold,
+			];
 		}
+
+		set_transient( $cache_key, $low_stock, 15 * MINUTE_IN_SECONDS );
 		return $low_stock;
 	}
 
@@ -222,6 +279,13 @@ class WSM_Report_Repository {
 	 * @return array Customers data.
 	 */
 	public function customer_report( string $type, string $start_date, string $end_date ): array {
+		$version = get_option( 'wsm_reports_cache_version', '1' );
+		$cache_key = 'wsm_rep_customer_' . $version . '_' . $type . '_' . md5( $start_date . '_' . $end_date );
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		if ( 'new' === $type ) {
 			$users = get_users( [
 				'role'       => 'customer',
@@ -243,6 +307,7 @@ class WSM_Report_Repository {
 					'registered' => $user->user_registered,
 				];
 			}
+			set_transient( $cache_key, $formatted, 15 * MINUTE_IN_SECONDS );
 			return $formatted;
 		}
 
@@ -282,6 +347,8 @@ class WSM_Report_Repository {
 			}
 		);
 
-		return array_slice( $customers, 0, 10 );
+		$result = array_slice( $customers, 0, 10 );
+		set_transient( $cache_key, $result, 15 * MINUTE_IN_SECONDS );
+		return $result;
 	}
 }

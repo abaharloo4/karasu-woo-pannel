@@ -3,7 +3,7 @@
  * Media Upload Services
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -32,14 +32,30 @@ class WSM_Media_Service {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 
-		if ( empty( $_FILES[ $file_key ] ) ) {
+		if ( empty( $_FILES[ $file_key ] ) || empty( $_FILES[ $file_key ]['tmp_name'] ) ) {
 			return new WP_Error( 'wsm_no_file_uploaded', __( 'فایلی برای آپلود یافت نشد.', 'karasu-woo-pannel' ) );
 		}
 
-		// Verify file is an image.
-		$type = sanitize_text_field( wp_unslash( $_FILES[ $file_key ]['type'] ?? '' ) );
-		if ( ! str_starts_with( $type, 'image/' ) ) {
+		$file_path = $_FILES[ $file_key ]['tmp_name'];
+		$file_name = $_FILES[ $file_key ]['name'];
+		$file_size = $_FILES[ $file_key ]['size'];
+
+		// Enforce size limit (5MB).
+		$max_size = 5 * 1024 * 1024;
+		if ( $file_size > $max_size ) {
+			return new WP_Error( 'wsm_file_too_large', __( 'حجم فایل ارسالی بیشتر از حد مجاز (۵ مگابایت) است.', 'karasu-woo-pannel' ) );
+		}
+
+		// Verify file type and extension securely.
+		$check         = wp_check_filetype_and_ext( $file_path, $file_name );
+		$allowed_types = [ 'image/jpeg', 'image/png', 'image/gif', 'image/webp' ];
+		if ( empty( $check['type'] ) || ! in_array( $check['type'], $allowed_types, true ) ) {
 			return new WP_Error( 'wsm_invalid_file_type', __( 'تنها بارگذاری فایل‌های تصویری مجاز است.', 'karasu-woo-pannel' ) );
+		}
+
+		// Verify image integrity.
+		if ( false === @getimagesize( $file_path ) ) {
+			return new WP_Error( 'wsm_invalid_image', __( 'فایل ارسالی یک تصویر معتبر نیست.', 'karasu-woo-pannel' ) );
 		}
 
 		// Handle file upload and register attachment.

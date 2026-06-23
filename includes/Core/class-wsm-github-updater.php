@@ -103,7 +103,6 @@ class WSM_GitHub_Updater {
 					'User-Agent' => 'KarasuWooPannel-Updater',
 				],
 				'timeout'   => 15,
-				'sslverify' => false,
 			];
 
 			$url      = sprintf( 'https://api.github.com/repos/%s/%s/releases/latest', $this->username, $this->repo );
@@ -152,11 +151,34 @@ class WSM_GitHub_Updater {
 				$tag
 			);
 
+			// Validate zip URL hostname for security.
+			if ( ! $this->is_valid_github_url( $release['zip_url'] ) ) {
+				$release['zip_url'] = '';
+			}
+
 			// Cache success for 6 hours.
 			set_transient( $cache_key, $release, 6 * HOUR_IN_SECONDS );
 		}
 
 		return $release;
+	}
+
+	/**
+	 * Verify if a URL hostname belongs to GitHub.
+	 *
+	 * @param string $url Target URL.
+	 * @return bool True if valid.
+	 */
+	private function is_valid_github_url( string $url ): bool {
+		$parsed = wp_parse_url( $url );
+		if ( ! $parsed || empty( $parsed['host'] ) || empty( $parsed['scheme'] ) ) {
+			return false;
+		}
+		if ( 'https' !== strtolower( $parsed['scheme'] ) ) {
+			return false;
+		}
+		$host = strtolower( $parsed['host'] );
+		return 'github.com' === $host || 'api.github.com' === $host || str_ends_with( $host, '.github.com' );
 	}
 
 	/**
@@ -270,6 +292,20 @@ class WSM_GitHub_Updater {
 
 		if ( isset( $hook_extra['plugin'] ) && $hook_extra['plugin'] === $this->plugin ) {
 			$new_source = trailingslashit( $remote_source ) . $this->slug;
+
+			// Path verification / sanity checks
+			$canon_remote = wp_normalize_path( $remote_source );
+			$canon_source = wp_normalize_path( $source );
+			$canon_new    = wp_normalize_path( $new_source );
+
+			// Ensure both source and destination remain inside remote_source (prevent path traversal)
+			if ( 0 !== strpos( $canon_source, trailingslashit( $canon_remote ) ) ) {
+				return $source;
+			}
+			if ( 0 !== strpos( $canon_new, trailingslashit( $canon_remote ) ) ) {
+				return $source;
+			}
+
 			if ( $source !== $new_source ) {
 				if ( $wp_filesystem->move( $source, $new_source, true ) ) {
 					return $new_source;

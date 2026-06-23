@@ -3,7 +3,7 @@
  * Role and Capability Management
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -49,6 +49,7 @@ class WSM_Roles {
 			'wsm_manage_products',
 			'wsm_manage_coupons',
 			'wsm_view_reports',
+			'wsm_manage_sms',
 		];
 
 		$roles_to_update = [ 'administrator', 'shop_manager' ];

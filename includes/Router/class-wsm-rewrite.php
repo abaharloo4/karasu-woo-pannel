@@ -3,7 +3,7 @@
  * Custom Rewrite Rules Manager
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -50,6 +50,9 @@ class WSM_Rewrite {
 			return;
 		}
 
+		// Prevent search engine indexation.
+		header( 'X-Robots-Tag: noindex, nofollow', true );
+
 		// Authenticate and manually set the current user if custom session is active
 		// to bypass early anonymous user caching in WordPress.
 		if ( ! is_user_logged_in() ) {
@@ -76,5 +79,18 @@ class WSM_Rewrite {
 		$router = new WSM_Router();
 		$router->dispatch( get_query_var( 'wsm_path', '' ) );
 		exit;
+	}
+
+	/**
+	 * Disallow search crawlers from index the panel path in robots.txt.
+	 *
+	 * @param string $output Robots.txt output.
+	 * @param bool   $public Whether site is public.
+	 * @return string Modified robots.txt output.
+	 */
+	public function filter_robots_txt( string $output, bool $public ): string {
+		$slug = get_option( 'wsm_panel_slug', 'store-admin' );
+		$output .= "Disallow: /{$slug}/\n";
+		return $output;
 	}
 }

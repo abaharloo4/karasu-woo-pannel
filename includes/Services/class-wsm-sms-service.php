@@ -3,7 +3,7 @@
  * SMS Dispatcher and Notification Service
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -36,7 +36,7 @@ class WSM_Sms_Service {
 		}
 
 		$username = get_option( 'wsm_sms_username' );
-		$password = get_option( 'wsm_sms_password' );
+		$password = wsm_decrypt_password( get_option( 'wsm_sms_password' ) );
 		$from     = get_option( 'wsm_sms_from_line' );
 
 		// Check if credentials are not configured, fallback to mock logs.

@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.0.10
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,17 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.0 =
+* Fixed session token exposure in JavaScript by removing raw tokens and relying on secure HttpOnly cookies.
+* Enabled SSL verification in automatic updater and added host validation with path traversal check protection.
+* Prevented IP spoofing by adding Trust Proxies setting and implemented dual rate limiting for IP and username.
+* Added server-side validation for media uploads and enforced 5MB limit.
+* Encrypted SMS password storage in database using AES-256-CBC with salts.
+* Added dedicated UAC capability wsm_manage_sms for SMS settings.
+* Added daily database tables cleanup cron job.
+* Optimized stock level checks query in database.
+* Integrated local copies of Jalali datepicker to eliminate external CDN dependencies.
 
 = 1.0.10 =
 * Added User Access Control (UAC) tab to WP Admin Settings page to manage individual user capabilities.

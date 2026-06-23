@@ -3,7 +3,7 @@
  * WordPress Admin Menu Registry
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -84,6 +84,7 @@ class WSM_Admin_Menu {
 						'wsm_manage_products',
 						'wsm_manage_coupons',
 						'wsm_view_reports',
+						'wsm_manage_sms',
 					];
 
 					foreach ( $caps as $cap ) {
@@ -136,8 +137,11 @@ class WSM_Admin_Menu {
 		
 		$admin_mobile   = get_option( 'wsm_admin_mobile', '' );
 		$sms_username   = get_option( 'wsm_sms_username', '' );
-		$sms_password   = get_option( 'wsm_sms_password', '' );
+		$sms_password   = ''; // Always display SMS password empty in the form for security.
 		$sms_from_line  = get_option( 'wsm_sms_from_line', '' );
+
+		$trust_proxies  = get_option( 'wsm_trust_proxy_headers' ) ? 'checked' : '';
+		$log_retention  = (int) get_option( 'wsm_log_retention_days', 180 );
 
 		$evt_new_order    = get_option( 'wsm_sms_evt_new_order' ) ? 'checked' : '';
 		$evt_order_status = get_option( 'wsm_sms_evt_order_status' ) ? 'checked' : '';
@@ -482,10 +486,24 @@ class WSM_Admin_Menu {
 								<p class="wsm-field-desc">مدت زمان اعتبار کوکی مدیریت فروشگاه (حداکثر ۱۶۸ ساعت معادل ۱ هفته).</p>
 							</div>
 
-							<div class="wsm-field-group wsm-full-width">
+							<div class="wsm-field-group">
 								<label for="wsm_low_stock_threshold">آستانه هشدار موجودی کم انبار</label>
-								<input type="number" id="wsm_low_stock_threshold" name="wsm_low_stock_threshold" value="<?php echo esc_attr( $stock_thresh ); ?>" min="0" class="wsm-input-text" style="max-width: 200px;">
+								<input type="number" id="wsm_low_stock_threshold" name="wsm_low_stock_threshold" value="<?php echo esc_attr( $stock_thresh ); ?>" min="0" class="wsm-input-text">
 								<p class="wsm-field-desc">زمانی که موجودی محصولی از این عدد کمتر شود، هشدار کمبود موجودی انبار صادر می‌گردد.</p>
+							</div>
+
+							<div class="wsm-field-group">
+								<label for="wsm_log_retention_days">نگهداری لاگ‌های پیامک (روز)</label>
+								<input type="number" id="wsm_log_retention_days" name="wsm_log_retention_days" value="<?php echo esc_attr( $log_retention ); ?>" min="1" class="wsm-input-text">
+								<p class="wsm-field-desc">تعداد روزهای نگهداری لاگ‌های پیامک قبل از حذف خودکار (پیش‌فرض ۱۸۰ روز).</p>
+							</div>
+
+							<div class="wsm-field-group wsm-full-width">
+								<label class="wsm-checkbox-label">
+									<input type="checkbox" name="wsm_trust_proxy_headers" value="1" <?php echo $trust_proxies; ?>>
+									<span>اعتماد به هدرهای پروکسی (Trust Proxy Headers)</span>
+								</label>
+								<p class="wsm-field-desc">فقط در صورتی فعال کنید که سایت پشت Cloudflare یا یک Reverse Proxy معتبر است.</p>
 							</div>
 						</div>
 					</div>
@@ -502,7 +520,7 @@ class WSM_Admin_Menu {
 
 								<div class="wsm-field-group">
 									<label for="wsm_sms_password">رمز عبور ملی‌پیامک</label>
-									<input type="password" id="wsm_sms_password" name="wsm_sms_password" value="<?php echo esc_attr( $sms_password ); ?>" class="wsm-input-text">
+									<input type="password" id="wsm_sms_password" name="wsm_sms_password" value="" class="wsm-input-text" placeholder="برای تغییر رمز، مقدار جدید وارد کنید — برای حفظ رمز فعلی خالی بگذارید">
 								</div>
 
 								<div class="wsm-field-group">
@@ -802,6 +820,7 @@ class WSM_Admin_Menu {
 											<th style="text-align: center;">محصولات</th>
 											<th style="text-align: center;">تخفیف‌ها</th>
 											<th style="text-align: center;">گزارش‌ها</th>
+											<th style="text-align: center;">مدیریت پیامک</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -816,6 +835,7 @@ class WSM_Admin_Menu {
 											'wsm_manage_products' => 'محصول',
 											'wsm_manage_coupons'  => 'تخفیف',
 											'wsm_view_reports'    => 'گزارش',
+											'wsm_manage_sms'      => 'پیامک',
 										];
 
 										foreach ( $managers as $m_user ) {

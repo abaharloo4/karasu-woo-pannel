@@ -3,7 +3,7 @@
  * Plugin Name: KarasuWooPannel
  * Plugin URI:  https://github.com/abaharloo4/karasu-woo-pannel
  * Description: A completely independent, RTL, TailwindCSS-based store management panel for WooCommerce.
- * Version:     1.0.10
+ * Version:     1.1.0
  * Author:      karasu
  * Author URI:  https://github.com/abaharloo4
  * Text Domain: karasu-woo-pannel
@@ -12,7 +12,7 @@
  * Requires PHP: 8.0
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define core constants.
-define( 'WSM_VERSION', '1.0.10' );
+define( 'WSM_VERSION', '1.1.0' );
 define( 'WSM_PLUGIN_FILE', __FILE__ );
 define( 'WSM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WSM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -51,6 +51,10 @@ function wsm_run(): void {
 		add_action( 'admin_notices', 'wsm_woocommerce_missing_notice' );
 		return;
 	}
+
+	// Load i18n textdomain.
+	load_plugin_textdomain( 'karasu-woo-pannel', false, dirname( WSM_PLUGIN_BASENAME ) . '/languages' );
+
 	$plugin = \WooStoreManager\Core\WSM_Plugin::get_instance();
 	$plugin->run();
 }

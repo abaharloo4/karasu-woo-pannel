@@ -3,7 +3,7 @@
  * Settings Registry and Fields Registration
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -66,7 +66,7 @@ class WSM_Admin_Settings {
 			'wsm_sms_password',
 			[
 				'type'              => 'string',
-				'sanitize_callback' => 'sanitize_text_field',
+				'sanitize_callback' => [ $this, 'sanitize_sms_password' ],
 			]
 		);
 
@@ -113,6 +113,25 @@ class WSM_Admin_Settings {
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 				'default'           => 5,
+			]
+		);
+
+		register_setting(
+			'wsm_settings_group',
+			'wsm_trust_proxy_headers',
+			[
+				'type'    => 'boolean',
+				'default' => false,
+			]
+		);
+
+		register_setting(
+			'wsm_settings_group',
+			'wsm_log_retention_days',
+			[
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'default'           => 180,
 			]
 		);
 
@@ -338,5 +357,19 @@ class WSM_Admin_Settings {
 	public function render_sms_stock_field(): void {
 		$checked = get_option( 'wsm_sms_evt_low_stock' ) ? 'checked' : '';
 		echo '<input type="checkbox" name="wsm_sms_evt_low_stock" value="1" ' . $checked . '>';
+	}
+
+	/**
+	 * Sanitize and encrypt SMS password.
+	 *
+	 * @param string $password Raw input password.
+	 * @return string Encrypted password string.
+	 */
+	public function sanitize_sms_password( string $password ): string {
+		$password = sanitize_text_field( $password );
+		if ( empty( $password ) ) {
+			return get_option( 'wsm_sms_password', '' );
+		}
+		return wsm_encrypt_password( $password );
 	}
 }

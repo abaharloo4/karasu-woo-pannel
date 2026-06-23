@@ -3,7 +3,7 @@
  * View Router and Dispatcher
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -85,11 +85,93 @@ class WSM_Router {
 	}
 
 	/**
+	 * Register and enqueue panel assets.
+	 */
+	public function enqueue_panel_assets(): void {
+		// Setup filters to inject crossorigin and defer/integrity attributes
+		add_filter( 'style_loader_tag', [ $this, 'style_loader_tag_filters' ], 10, 2 );
+		add_filter( 'script_loader_tag', [ $this, 'script_loader_tag_filters' ], 10, 2 );
+
+		wp_register_style(
+			'wsm-font-vazirmatn',
+			'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap',
+			[],
+			WSM_VERSION
+		);
+
+		wp_register_style(
+			'wsm-jalalidatepicker-css',
+			WSM_PLUGIN_URL . 'assets/vendor/jalalidatepicker.min.css',
+			[],
+			WSM_VERSION
+		);
+
+		wp_register_style(
+			'wsm-panel-css',
+			WSM_PLUGIN_URL . 'assets/css/wsm-panel.css',
+			[ 'wsm-jalalidatepicker-css' ],
+			WSM_VERSION
+		);
+
+		wp_register_script(
+			'wsm-panel-js',
+			WSM_PLUGIN_URL . 'assets/js/wsm-panel.js',
+			[],
+			WSM_VERSION,
+			true
+		);
+
+		wp_register_script(
+			'wsm-jalalidatepicker-js',
+			WSM_PLUGIN_URL . 'assets/vendor/jalalidatepicker.min.js',
+			[],
+			WSM_VERSION,
+			true
+		);
+
+		wp_enqueue_style( 'wsm-font-vazirmatn' );
+		wp_enqueue_style( 'wsm-jalalidatepicker-css' );
+		wp_enqueue_style( 'wsm-panel-css' );
+		wp_enqueue_script( 'wsm-panel-js' );
+		wp_enqueue_script( 'wsm-jalalidatepicker-js' );
+	}
+
+	/**
+	 * Filter style tags to inject integrity/crossorigin.
+	 *
+	 * @param string $tag HTML link tag.
+	 * @param string $handle Script handle.
+	 * @return string Filtered tag.
+	 */
+	public function style_loader_tag_filters( string $tag, string $handle ): string {
+		if ( 'wsm-font-vazirmatn' === $handle ) {
+			$tag = str_replace( ' href=', ' crossorigin="anonymous" href=', $tag );
+		}
+		return $tag;
+	}
+
+	/**
+	 * Filter script tags to inject defer.
+	 *
+	 * @param string $tag HTML script tag.
+	 * @param string $handle Script handle.
+	 * @return string Filtered tag.
+	 */
+	public function script_loader_tag_filters( string $tag, string $handle ): string {
+		if ( 'wsm-jalalidatepicker-js' === $handle ) {
+			$tag = str_replace( ' src=', ' defer src=', $tag );
+		}
+		return $tag;
+	}
+
+	/**
 	 * Render the view template within the base layout.
 	 *
 	 * @param string $view View template file path base.
 	 */
 	private function render( string $view ): void {
+		$this->enqueue_panel_assets();
+
 		// Exposed to layout.php
 		$view_file = WSM_PLUGIN_DIR . 'panel/views/' . $view . '.php';
 

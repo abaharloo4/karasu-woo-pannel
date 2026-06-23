@@ -3,7 +3,7 @@
  * Global Helper Functions
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -53,4 +53,48 @@ function wsm_is_authenticated(): bool {
  */
 function wsm_get_setting( string $key, mixed $default = null ): mixed {
 	return get_option( 'wsm_' . $key, $default );
+}
+
+/**
+ * Encrypt a password string using AES-256-CBC.
+ *
+ * @param string $password Raw password string.
+ * @return string Hashed/encrypted base64 string.
+ */
+function wsm_encrypt_password( string $password ): string {
+	if ( empty( $password ) ) {
+		return '';
+	}
+	$key        = hash( 'sha256', wp_salt( 'auth' ) );
+	$method     = 'aes-256-cbc';
+	$iv_len     = openssl_cipher_iv_length( $method );
+	$iv         = openssl_random_pseudo_bytes( $iv_len );
+	$ciphertext = openssl_encrypt( $password, $method, $key, OPENSSL_RAW_DATA, $iv );
+	return base64_encode( $iv . $ciphertext );
+}
+
+/**
+ * Decrypt an encrypted password string.
+ *
+ * @param string $encrypted Encrypted base64 string or legacy plaintext.
+ * @return string Decrypted plaintext password.
+ */
+function wsm_decrypt_password( string $encrypted ): string {
+	if ( empty( $encrypted ) ) {
+		return '';
+	}
+	$decoded = base64_decode( $encrypted, true );
+	if ( false === $decoded ) {
+		return $encrypted; // Assume legacy plaintext if not valid base64.
+	}
+	$key    = hash( 'sha256', wp_salt( 'auth' ) );
+	$method = 'aes-256-cbc';
+	$iv_len = openssl_cipher_iv_length( $method );
+	if ( strlen( $decoded ) < $iv_len + 1 ) {
+		return $encrypted; // Too short, assume legacy plaintext.
+	}
+	$iv         = substr( $decoded, 0, $iv_len );
+	$ciphertext = substr( $decoded, $iv_len );
+	$decrypted  = openssl_decrypt( $ciphertext, $method, $key, OPENSSL_RAW_DATA, $iv );
+	return false !== $decrypted ? $decrypted : $encrypted;
 }

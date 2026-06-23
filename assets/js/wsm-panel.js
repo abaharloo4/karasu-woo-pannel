@@ -9,7 +9,7 @@
 (function() {
 	'use strict';
 
-	const { apiUrl, nonce, panelUrl, sessionToken } = window.wsmConfig ?? {};
+	const { apiUrl, nonce, panelUrl } = window.wsmConfig ?? {};
 
 	/**
 	 * Wrapper for communicating with KarasuWooPannel REST endpoints.
@@ -24,11 +24,8 @@
 				'Content-Type': 'application/json',
 				'X-WP-Nonce': nonce,
 			},
+			credentials: 'same-origin',
 		};
-
-		if (sessionToken) {
-			defaults.headers['X-WSM-Token'] = sessionToken;
-		}
 
 		const mergedOptions = {
 			...defaults,

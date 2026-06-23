@@ -3,7 +3,7 @@
  * Main Plugin Coordinator Class (Singleton)
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -50,6 +50,16 @@ final class WSM_Plugin {
 	private function __construct() {
 		$this->loader = new WSM_Loader();
 		$this->load_dependencies();
+		$this->check_upgrade();
+	}
+
+	/**
+	 * Check if database migration is required.
+	 */
+	private function check_upgrade(): void {
+		if ( get_option( 'wsm_db_version' ) !== WSM_VERSION ) {
+			\WooStoreManager\Core\WSM_Activator::activate();
+		}
 	}
 
 	/**
@@ -64,6 +74,7 @@ final class WSM_Plugin {
 		$admin_settings = new \WooStoreManager\Admin\WSM_Admin_Settings();
 		$auth_ctrl      = new \WooStoreManager\Api\WSM_Auth_Controller();
 		$sms_ctrl       = new \WooStoreManager\Api\WSM_Sms_Controller();
+		$cron           = new \WooStoreManager\Core\WSM_Cron();
 
 		// Repositories & Services
 		$order_repo      = new \WooStoreManager\Repositories\WSM_Order_Repository();
@@ -89,6 +100,7 @@ final class WSM_Plugin {
 		$this->loader->add_action( 'init', $rewrite, 'add_rewrite_rules' );
 		$this->loader->add_filter( 'query_vars', $rewrite, 'add_query_vars' );
 		$this->loader->add_action( 'template_redirect', $rewrite, 'handle_request' );
+		$this->loader->add_filter( 'robots_txt', $rewrite, 'filter_robots_txt', 10, 2 );
 
 		$this->loader->add_action( 'admin_menu', $admin_menu, 'add_admin_menu' );
 		$this->loader->add_action( 'admin_init', $admin_menu, 'handle_post_actions' );
@@ -99,6 +111,8 @@ final class WSM_Plugin {
 		$this->loader->add_action( 'rest_api_init', $sms_ctrl, 'register_routes' );
 		$this->loader->add_action( 'rest_api_init', $coupons_ctrl, 'register_routes' );
 		$this->loader->add_action( 'rest_api_init', $reports_ctrl, 'register_routes' );
+
+		$this->loader->add_action( 'wsm_daily_cleanup', $cron, 'daily_cleanup' );
 
 		// Purge report aggregation caches on checkout or order updates.
 		$this->loader->add_action( 'woocommerce_new_order', $reports_ctrl, 'clean_reports_cache' );

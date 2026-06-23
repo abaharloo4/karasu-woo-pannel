@@ -3,7 +3,7 @@
  * Authentication REST Controller
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -91,8 +91,8 @@ class WSM_Auth_Controller extends WSM_REST_Controller {
 		}
 
 		// 2. Verify Rate Limiting.
-		if ( $this->rate_limiter->is_blocked( $ip ) ) {
-			$lockout = $this->rate_limiter->get_remaining_lockout( $ip );
+		if ( $this->rate_limiter->is_blocked( $ip, $username ) ) {
+			$lockout = $this->rate_limiter->get_remaining_lockout( $ip, $username );
 			return WSM_Response::error(
 				sprintf(
 					/* translators: %d: minutes remaining */
@@ -108,12 +108,12 @@ class WSM_Auth_Controller extends WSM_REST_Controller {
 
 		if ( is_wp_error( $result ) ) {
 			// Record failed attempt in rate limiter.
-			$this->rate_limiter->record_attempt( $ip );
+			$this->rate_limiter->record_attempt( $ip, $username );
 			return WSM_Response::error( $result->get_error_message(), 401 );
 		}
 
 		// Success: Reset rate limiter history.
-		$this->rate_limiter->reset( $ip );
+		$this->rate_limiter->reset( $ip, $username );
 
 		return WSM_Response::success( null, __( 'ورود با موفقیت انجام شد.', 'karasu-woo-pannel' ) );
 	}

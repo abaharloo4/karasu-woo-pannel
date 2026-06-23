@@ -3,7 +3,7 @@
  * Plugin Deactivation Logic
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -22,6 +22,7 @@ class WSM_Deactivator {
 	 * Run on plugin deactivation.
 	 */
 	public static function deactivate(): void {
+		wp_clear_scheduled_hook( 'wsm_daily_cleanup' );
 		flush_rewrite_rules();
 	}
 }

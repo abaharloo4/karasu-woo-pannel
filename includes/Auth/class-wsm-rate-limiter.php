@@ -3,7 +3,7 @@
  * Rate Limiter for custom login page
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -34,16 +34,18 @@ class WSM_Rate_Limiter {
 	private const WINDOW_MINUTES = 15;
 
 	/**
-	 * Check if the given IP address is currently blocked.
+	 * Check if the given IP address or username is currently blocked.
 	 *
 	 * @param string $ip Client IP.
+	 * @param string $username Client username.
 	 * @return bool True if blocked.
 	 */
-	public function is_blocked( string $ip ): bool {
+	public function is_blocked( string $ip, string $username = '' ): bool {
 		global $wpdb;
 		$table = $wpdb->prefix . 'wsm_login_attempts';
 
-		$result = $wpdb->get_row(
+		// 1. Check if IP is blocked.
+		$result_ip = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT is_blocked, blocked_until FROM {$table}
 				 WHERE ip_address = %s
@@ -52,28 +54,44 @@ class WSM_Rate_Limiter {
 			)
 		);
 
-		if ( ! $result ) {
-			return false;
-		}
-
-		if ( $result->is_blocked && strtotime( $result->blocked_until . ' UTC' ) > time() ) {
+		if ( $result_ip && $result_ip->is_blocked && strtotime( $result_ip->blocked_until . ' UTC' ) > time() ) {
 			return true;
 		}
 
-		// If block duration has expired, reset attempt history.
-		if ( $result->is_blocked ) {
-			$this->reset( $ip );
+		if ( $result_ip && $result_ip->is_blocked ) {
+			$this->reset( $ip, '' );
+		}
+
+		// 2. Check if username is blocked.
+		if ( ! empty( $username ) ) {
+			$result_user = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT is_blocked, blocked_until FROM {$table}
+					 WHERE username = %s
+					 ORDER BY id DESC LIMIT 1",
+					$username
+				)
+			);
+
+			if ( $result_user && $result_user->is_blocked && strtotime( $result_user->blocked_until . ' UTC' ) > time() ) {
+				return true;
+			}
+
+			if ( $result_user && $result_user->is_blocked ) {
+				$this->reset( '', $username );
+			}
 		}
 
 		return false;
 	}
 
 	/**
-	 * Record a failed login attempt for the given IP.
+	 * Record a failed login attempt.
 	 *
 	 * @param string $ip Client IP.
+	 * @param string $username Client username.
 	 */
-	public function record_attempt( string $ip ): void {
+	public function record_attempt( string $ip, string $username = '' ): void {
 		global $wpdb;
 		$table = $wpdb->prefix . 'wsm_login_attempts';
 
@@ -81,14 +99,15 @@ class WSM_Rate_Limiter {
 			$table,
 			[
 				'ip_address'   => $ip,
+				'username'     => ! empty( $username ) ? $username : null,
 				'attempt_time' => current_time( 'mysql', true ), // Store as UTC
 				'is_blocked'   => 0,
 			],
-			[ '%s', '%s', '%d' ]
+			[ '%s', '%s', '%s', '%d' ]
 		);
 
-		// Count failed attempts in the window.
-		$attempts = $wpdb->get_var(
+		// Count failed attempts for IP in the window.
+		$attempts_ip = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
 				 WHERE ip_address = %s
@@ -99,50 +118,97 @@ class WSM_Rate_Limiter {
 			)
 		);
 
-		if ( (int) $attempts >= self::MAX_ATTEMPTS ) {
-			$this->block( $ip );
+		if ( $attempts_ip >= self::MAX_ATTEMPTS ) {
+			$this->block( $ip, '' );
+		}
+
+		// Count failed attempts for username in the window.
+		if ( ! empty( $username ) ) {
+			$attempts_user = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$table}
+					 WHERE username = %s
+					 AND attempt_time > DATE_SUB(UTC_TIMESTAMP(), INTERVAL %d MINUTE)
+					 AND is_blocked = 0",
+					$username,
+					self::WINDOW_MINUTES
+				)
+			);
+
+			if ( $attempts_user >= self::MAX_ATTEMPTS ) {
+				$this->block( '', $username );
+			}
 		}
 	}
 
 	/**
-	 * Lock out the IP.
+	 * Lock out the IP or username.
 	 *
 	 * @param string $ip Client IP.
+	 * @param string $username Client username.
 	 */
-	private function block( string $ip ): void {
+	private function block( string $ip, string $username = '' ): void {
 		global $wpdb;
 		$table = $wpdb->prefix . 'wsm_login_attempts';
 
 		// Block expiration in UTC GMT time.
 		$blocked_until = gmdate( 'Y-m-d H:i:s', time() + ( self::LOCKOUT_MINUTES * MINUTE_IN_SECONDS ) );
 
-		$wpdb->update(
-			$table,
-			[ 'is_blocked' => 1, 'blocked_until' => $blocked_until ],
-			[ 'ip_address' => $ip ],
-			[ '%d', '%s' ],
-			[ '%s' ]
-		);
+		if ( ! empty( $ip ) ) {
+			$wpdb->update(
+				$table,
+				[ 'is_blocked' => 1, 'blocked_until' => $blocked_until ],
+				[ 'ip_address' => $ip ],
+				[ '%d', '%s' ],
+				[ '%s' ]
+			);
+		}
+
+		if ( ! empty( $username ) ) {
+			$wpdb->update(
+				$table,
+				[ 'is_blocked' => 1, 'blocked_until' => $blocked_until ],
+				[ 'username' => $username ],
+				[ '%d', '%s' ],
+				[ '%s' ]
+			);
+		}
 	}
 
 	/**
-	 * Get the remaining lockout period in minutes for blocked IP.
+	 * Get the remaining lockout period in minutes for blocked IP or username.
 	 *
 	 * @param string $ip Client IP.
+	 * @param string $username Client username.
 	 * @return int Minutes remaining, or 0.
 	 */
-	public function get_remaining_lockout( string $ip ): int {
+	public function get_remaining_lockout( string $ip, string $username = '' ): int {
 		global $wpdb;
 		$table = $wpdb->prefix . 'wsm_login_attempts';
 
-		$blocked_until = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT blocked_until FROM {$table}
-				 WHERE ip_address = %s AND is_blocked = 1
-				 ORDER BY id DESC LIMIT 1",
-				$ip
-			)
-		);
+		$blocked_until = null;
+
+		if ( ! empty( $ip ) ) {
+			$blocked_until = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT blocked_until FROM {$table}
+					 WHERE ip_address = %s AND is_blocked = 1
+					 ORDER BY id DESC LIMIT 1",
+					$ip
+				)
+			);
+		}
+
+		if ( ! $blocked_until && ! empty( $username ) ) {
+			$blocked_until = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT blocked_until FROM {$table}
+					 WHERE username = %s AND is_blocked = 1
+					 ORDER BY id DESC LIMIT 1",
+					$username
+				)
+			);
+		}
 
 		if ( ! $blocked_until ) {
 			return 0;
@@ -153,13 +219,21 @@ class WSM_Rate_Limiter {
 	}
 
 	/**
-	 * Clear login attempt history for the IP.
+	 * Clear login attempt history for the IP or username.
 	 *
 	 * @param string $ip Client IP.
+	 * @param string $username Client username.
 	 */
-	public function reset( string $ip ): void {
+	public function reset( string $ip, string $username = '' ): void {
 		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'wsm_login_attempts', [ 'ip_address' => $ip ], [ '%s' ] );
+		$table = $wpdb->prefix . 'wsm_login_attempts';
+
+		if ( ! empty( $ip ) ) {
+			$wpdb->delete( $table, [ 'ip_address' => $ip ], [ '%s' ] );
+		}
+		if ( ! empty( $username ) ) {
+			$wpdb->delete( $table, [ 'username' => $username ], [ '%s' ] );
+		}
 	}
 
 	/**
@@ -168,6 +242,10 @@ class WSM_Rate_Limiter {
 	 * @return string Client IP.
 	 */
 	public static function get_client_ip(): string {
+		if ( ! get_option( 'wsm_trust_proxy_headers' ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0' ) );
+		}
+
 		$ip_keys = [ 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ];
 		foreach ( $ip_keys as $key ) {
 			if ( ! empty( $_SERVER[ $key ] ) ) {

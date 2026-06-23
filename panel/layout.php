@@ -3,7 +3,7 @@
  * Custom Store Admin Panel Base Layout Template
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -21,18 +21,8 @@ $current_user = wp_get_current_user();
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?php echo esc_html( get_bloginfo( 'name' ) ); ?> — <?php esc_html_e( 'پنل مدیریت فروشگاه', 'karasu-woo-pannel' ); ?></title>
 
-	<!-- Google Fonts: Vazirmatn -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
-
-
-
-	<!-- Base Custom Stylesheet -->
-	<link rel="stylesheet" href="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/css/wsm-panel.css' ); ?>">
-
-	<!-- Jalali Datepicker CSS CDN -->
-	<link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+	<meta name="robots" content="noindex, nofollow, noarchive">
+	<?php wp_print_styles( [ 'wsm-font-vazirmatn', 'wsm-jalalidatepicker-css', 'wsm-panel-css' ] ); ?>
 
 	<!-- Custom Checkbox, Jalali Datepicker & SVG styles -->
 	<style>
@@ -168,8 +158,7 @@ $current_user = wp_get_current_user();
 		window.wsmConfig = {
 			apiUrl: '<?php echo esc_url( rest_url( 'wsm/v1' ) ); ?>',
 			nonce: '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>',
-			panelUrl: '<?php echo esc_url( wsm_panel_url() ); ?>',
-			sessionToken: '<?php echo esc_js( $_COOKIE['wsm_session'] ?? '' ); ?>'
+			panelUrl: '<?php echo esc_url( wsm_panel_url() ); ?>'
 		};
 	</script>
 </head>
@@ -344,9 +333,7 @@ $current_user = wp_get_current_user();
 	</div>
 <?php endif; ?>
 
-<!-- Core JavaScript -->
-<script src="<?php echo esc_url( WSM_PLUGIN_URL . 'assets/js/wsm-panel.js' ); ?>"></script>
-<script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+<?php wp_print_scripts( [ 'wsm-panel-js', 'wsm-jalalidatepicker-js' ] ); ?>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 	const sidebar = document.getElementById("wsm-sidebar");

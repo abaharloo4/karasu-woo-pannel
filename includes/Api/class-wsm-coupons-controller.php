@@ -3,7 +3,7 @@
  * REST Controller for WooCommerce Coupons
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -91,20 +91,7 @@ class WSM_Coupons_Controller extends WSM_REST_Controller {
 	 * @return bool|WP_Error True if authorized, else WP_Error.
 	 */
 	public function check_permission( WP_REST_Request $request ): bool|WP_Error {
-		$auth_check = $this->wsm_check_permission( $request );
-		if ( is_wp_error( $auth_check ) ) {
-			return $auth_check;
-		}
-
-		if ( ! current_user_can( 'wsm_manage_coupons' ) && ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
-			return new WP_Error(
-				'wsm_forbidden',
-				__( 'دسترسی غیرمجاز. شما مجوز مدیریت کوپن‌ها را ندارید.', 'karasu-woo-pannel' ),
-				[ 'status' => 403 ]
-			);
-		}
-
-		return true;
+		return $this->check_capability_permission( $request, 'wsm_manage_coupons', __( 'دسترسی غیرمجاز. شما مجوز مدیریت کوپن‌ها را ندارید.', 'karasu-woo-pannel' ) );
 	}
 
 	/**

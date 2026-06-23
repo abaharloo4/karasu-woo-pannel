@@ -3,7 +3,7 @@
  * Custom Capabilities Constants
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -44,6 +44,11 @@ class WSM_Capabilities {
 	const VIEW_REPORTS = 'wsm_view_reports';
 
 	/**
+	 * Capability to manage SMS gateway settings.
+	 */
+	const MANAGE_SMS = 'wsm_manage_sms';
+
+	/**
 	 * Get list of all custom capabilities.
 	 *
 	 * @return string[] Capabilities list.
@@ -55,6 +60,7 @@ class WSM_Capabilities {
 			self::MANAGE_PRODUCTS,
 			self::MANAGE_COUPONS,
 			self::VIEW_REPORTS,
+			self::MANAGE_SMS,
 		];
 	}
 

@@ -3,7 +3,7 @@
  * Plugin Activation Logic
  *
  * @package KarasuWooPannel
- * @version 1.0.10
+ * @version 1.1.0
  * @date 2026-06-23
  */
 
@@ -55,11 +55,13 @@ class WSM_Activator {
 		$sql_login_attempts = "CREATE TABLE {$wpdb->prefix}wsm_login_attempts (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			ip_address varchar(45) NOT NULL,
+			username varchar(100) DEFAULT NULL,
 			attempt_time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 			is_blocked tinyint(1) NOT NULL DEFAULT 0,
 			blocked_until datetime DEFAULT NULL,
 			PRIMARY KEY  (id),
 			KEY ip_address (ip_address),
+			KEY username (username),
 			KEY attempt_time (attempt_time)
 		) $charset_collate;";
 
@@ -94,5 +96,10 @@ class WSM_Activator {
 
 		// Flush rewrite rules.
 		flush_rewrite_rules();
+
+		// Schedule daily cleanup cron.
+		if ( ! wp_next_scheduled( 'wsm_daily_cleanup' ) ) {
+			wp_schedule_event( time(), 'daily', 'wsm_daily_cleanup' );
+		}
 	}
 }
