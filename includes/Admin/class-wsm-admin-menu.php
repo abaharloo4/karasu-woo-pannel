@@ -459,6 +459,9 @@ class WSM_Admin_Menu {
 						<div class="wsm-tab-link <?php echo 'wsm-tab-templates-admin' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-templates-admin')">
 							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg> قالب‌های پیامک مدیر
 						</div>
+						<div class="wsm-tab-link <?php echo 'wsm-tab-pages' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-pages')">
+							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg> سفارشی‌سازی صفحات پنل
+						</div>
 						<div class="wsm-tab-link <?php echo 'wsm-tab-users' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-users')">
 							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg> مدیریت دسترسی کاربران
 						</div>
@@ -468,7 +471,7 @@ class WSM_Admin_Menu {
 				<!-- Left Content Area -->
 				<div class="wsm-settings-content">
 				<!-- Tab 1 & Tab 2: Options.php standard form -->
-				<form action="options.php" method="post" id="wsm-options-form" style="<?php echo in_array( $active_tab, [ 'wsm-tab-general', 'wsm-tab-sms' ], true ) ? '' : 'display: none;'; ?>">
+				<form action="options.php" method="post" id="wsm-options-form" style="<?php echo in_array( $active_tab, [ 'wsm-tab-general', 'wsm-tab-sms', 'wsm-tab-pages' ], true ) ? '' : 'display: none;'; ?>">
 					<?php settings_fields( 'wsm_settings_group' ); ?>
 					
 					<!-- Tab 1: General Settings -->
@@ -568,6 +571,40 @@ class WSM_Admin_Menu {
 							</div>
 							
 							<div id="wsm_test_alert" class="wsm-alert"></div>
+						</div>
+					</div>
+
+					<!-- Tab: Page Customizations -->
+					<div id="wsm-tab-pages" class="wsm-tab-content <?php echo 'wsm-tab-pages' === $active_tab ? 'active' : ''; ?>">
+						<div class="wsm-card">
+							<h3>سفارشی‌سازی و ویرایش صفحات پنل مدیریت</h3>
+							<p class="wsm-field-desc">در این بخش می‌توانید متن، پیغام یا کدهای HTML/JS دلخواه خود را برای هر یک از صفحات پنل مدیریت در فرانت‌اند تنظیم کنید. این اطلاعات در بالای هر صفحه نمایش داده خواهند شد.</p>
+							
+							<div class="wsm-form-grid" style="grid-template-columns: 1fr; gap: 20px; margin-top: 20px;">
+								<?php
+								$page_fields = [
+									'dashboard'  => 'صفحه داشبورد (Dashboard)',
+									'orders'     => 'صفحه سفارش‌ها (Orders)',
+									'products'   => 'صفحه محصولات (Products)',
+									'categories' => 'صفحه دسته‌بندی‌ها (Categories)',
+									'attributes' => 'صفحه ویژگی‌ها (Attributes)',
+									'brands'     => 'صفحه برندها (Brands)',
+									'coupons'    => 'صفحه کدهای تخفیف (Discounts)',
+									'reports'    => 'صفحه گزارش‌ها (Reports)',
+									'sms'        => 'صفحه تنظیمات پیامک (SMS Settings)',
+									'login'      => 'صفحه ورود (Login Page)',
+								];
+								foreach ( $page_fields as $page_key => $page_label ) {
+									$val = get_option( 'wsm_custom_content_' . $page_key, '' );
+									?>
+									<div class="wsm-field-group">
+										<label style="font-weight: bold; margin-bottom: 8px; display: block;"><?php echo esc_html( $page_label ); ?></label>
+										<textarea name="wsm_custom_content_<?php echo esc_attr( $page_key ); ?>" rows="5" class="wsm-input-text" style="font-family: monospace; font-size: 13px; width: 100%; border-radius: 8px; border: 1px solid #1e293b; padding: 10px; background: #0b0f19; color: #cbd5e1;" placeholder="کدهای HTML/JS یا متن دلخواه..."><?php echo esc_textarea( $val ); ?></textarea>
+									</div>
+									<?php
+								}
+								?>
+							</div>
 						</div>
 					</div>
 
@@ -983,7 +1020,7 @@ class WSM_Admin_Menu {
 				const optionsForm = document.getElementById('wsm-options-form');
 				const templatesForm = document.getElementById('wsm-templates-form');
 				
-				if (tabId === 'wsm-tab-general' || tabId === 'wsm-tab-sms') {
+				if (tabId === 'wsm-tab-general' || tabId === 'wsm-tab-sms' || tabId === 'wsm-tab-pages') {
 					if (optionsForm) optionsForm.style.display = 'block';
 					if (templatesForm) templatesForm.style.display = 'none';
 				} else if (tabId === 'wsm-tab-templates-customer' || tabId === 'wsm-tab-templates-admin') {

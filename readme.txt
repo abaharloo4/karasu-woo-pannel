@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,11 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.2 =
+* Added ability to customize and edit all frontend pages via the WP Admin panel.
+* Fixed stock status loading error by safeguarding .toLocaleString() calls.
+* Added support for displaying card-to-card receipts in order details.
 
 = 1.1.1 =
 * Fixed session token exposure in JavaScript by removing raw tokens and relying on secure HttpOnly cookies.

@@ -527,6 +527,34 @@ $current_user = wp_get_current_user();
 			<!-- Page Content View -->
 			<main class="wsm-flex-1 wsm-overflow-y-auto wsm-p-6 wsm-bg-slate-950">
 				<?php
+				// Output custom user content for the current page if configured.
+				$primary_view = 'dashboard';
+				if ( isset( $view ) ) {
+					if ( 0 === strpos( $view, 'orders/' ) ) {
+						$primary_view = 'orders';
+					} elseif ( 0 === strpos( $view, 'products/' ) ) {
+						$primary_view = 'products';
+					} elseif ( 0 === strpos( $view, 'categories/' ) ) {
+						$primary_view = 'categories';
+					} elseif ( 0 === strpos( $view, 'attributes/' ) ) {
+						$primary_view = 'attributes';
+					} elseif ( 0 === strpos( $view, 'brands/' ) ) {
+						$primary_view = 'brands';
+					} elseif ( 0 === strpos( $view, 'coupons/' ) ) {
+						$primary_view = 'coupons';
+					} elseif ( 0 === strpos( $view, 'reports/' ) ) {
+						$primary_view = 'reports';
+					} elseif ( 'sms/settings' === $view ) {
+						$primary_view = 'sms';
+					} elseif ( 'login' === $view ) {
+						$primary_view = 'login';
+					}
+				}
+				$custom_content = get_option( 'wsm_custom_content_' . $primary_view, '' );
+				if ( ! empty( $custom_content ) ) {
+					echo '<div class="wsm-custom-page-content wsm-mb-6 wsm-p-4 wsm-bg-slate-900/40 wsm-border wsm-border-slate-800/80 wsm-rounded-2xl">' . do_shortcode( $custom_content ) . '</div>';
+				}
+
 				if ( isset( $view_file ) && file_exists( $view_file ) ) {
 					require $view_file;
 				} else {

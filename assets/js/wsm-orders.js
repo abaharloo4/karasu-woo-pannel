@@ -291,6 +291,76 @@
 				`;
 			});
 
+			let receiptsHtml = '';
+			if (order.receipts && order.receipts.length > 0) {
+				let receiptsContent = '';
+				order.receipts.forEach(r => {
+					let url = r.image_url;
+					if (r.file_hash && url) {
+						url += `?_wpnonce=${window.wsmConfig.nonce}`;
+					}
+
+					if (url) {
+						const isPdf = (r.value && r.value.toLowerCase().endsWith('.pdf')) || url.toLowerCase().includes('.pdf');
+						if (isPdf) {
+							receiptsContent += `
+								<div class="wsm-flex wsm-flex-col sm:wsm-flex-row wsm-items-start sm:wsm-items-center wsm-justify-between wsm-gap-4 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
+									<div class="wsm-space-y-1">
+										<span class="wsm-text-xs wsm-text-slate-500 wsm-block">${WSM.escHtml(r.key)}</span>
+										<span class="wsm-text-sm wsm-font-semibold wsm-text-slate-200 wsm-block">${WSM.escHtml(r.label)}</span>
+										<span class="wsm-text-xs wsm-text-slate-400 wsm-block">فایل: ${WSM.escHtml(r.value)}</span>
+									</div>
+									<a href="${url}" target="_blank" class="wsm-px-4 wsm-py-2 wsm-bg-indigo-600 hover:wsm-bg-indigo-500 wsm-text-white wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors">
+										دانلود فایل PDF رسید
+									</a>
+								</div>
+							`;
+						} else {
+							receiptsContent += `
+								<div class="wsm-flex wsm-flex-col sm:wsm-flex-row wsm-items-start sm:wsm-items-center wsm-justify-between wsm-gap-4 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
+									<div class="wsm-space-y-1">
+										<span class="wsm-text-xs wsm-text-slate-500 wsm-block">${WSM.escHtml(r.key)}</span>
+										<span class="wsm-text-sm wsm-font-semibold wsm-text-slate-200 wsm-block">${WSM.escHtml(r.label)}</span>
+										<span class="wsm-text-xs wsm-text-slate-400 wsm-block">نام فایل: ${WSM.escHtml(r.value)}</span>
+									</div>
+									<div class="wsm-flex wsm-items-center wsm-gap-3">
+										<a href="${url}" target="_blank" class="wsm-block wsm-w-16 wsm-h-16 wsm-rounded-xl wsm-overflow-hidden wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500 wsm-transition-colors">
+											<img src="${url}" class="wsm-w-full wsm-h-full wsm-object-cover" alt="رسید پرداخت">
+										</a>
+										<a href="${url}" target="_blank" class="wsm-px-3 wsm-py-1.5 wsm-bg-indigo-600/10 hover:wsm-bg-indigo-600/20 wsm-text-indigo-400 wsm-rounded-lg wsm-text-xs wsm-font-semibold wsm-transition-colors">
+											مشاهده رسید
+										</a>
+									</div>
+								</div>
+							`;
+						}
+					} else {
+						receiptsContent += `
+							<div class="wsm-flex wsm-items-center wsm-justify-between wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
+								<div>
+									<span class="wsm-text-xs wsm-text-slate-500 wsm-block">${WSM.escHtml(r.key)}</span>
+									<span class="wsm-text-sm wsm-font-semibold wsm-text-slate-200 wsm-block">${WSM.escHtml(r.label)}</span>
+								</div>
+								<span class="wsm-text-sm wsm-font-mono wsm-text-indigo-400">${WSM.escHtml(r.value)}</span>
+							</div>
+						`;
+					}
+				});
+
+				receiptsHtml = `
+					<!-- Receipts Panel -->
+					<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-space-y-4">
+						<div class="wsm-flex wsm-items-center wsm-gap-2">
+							<svg style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="wsm-text-indigo-400"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+							<h3 class="wsm-font-semibold wsm-text-slate-200">اطلاعات فیش و رسید پرداخت</h3>
+						</div>
+						<div class="wsm-space-y-3">
+							${receiptsContent}
+						</div>
+					</div>
+				`;
+			}
+
 			container.innerHTML = `
 				<div class="wsm-flex wsm-items-center wsm-justify-between">
 					<div class="wsm-flex wsm-items-center wsm-space-x-3 wsm-space-x-reverse">
@@ -358,6 +428,8 @@
 								</div>
 							</div>
 						</div>
+
+						${receiptsHtml}
 
 						<!-- Billing & Shipping details -->
 						<div class="wsm-grid wsm-grid-cols-1 md:wsm-grid-cols-2 wsm-gap-6">

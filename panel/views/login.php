@@ -25,6 +25,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span id="login-error-message"></span>
 		</div>
 
+		<?php
+		$custom_login_content = get_option( 'wsm_custom_content_login', '' );
+		if ( ! empty( $custom_login_content ) ) {
+			echo '<div class="wsm-custom-page-content wsm-mb-6 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-800/80 wsm-rounded-2xl wsm-text-sm">' . do_shortcode( $custom_login_content ) . '</div>';
+		}
+		?>
+
 		<form id="wsm-login-form" class="wsm-space-y-6">
 			<!-- Nonce Field -->
 			<input type="hidden" name="wsm_login_nonce" id="wsm_login_nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsm_login_action' ) ); ?>">

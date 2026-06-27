@@ -305,13 +305,15 @@
 
 			let rows = '';
 			data.forEach(p => {
-				const isLow = p.stock <= p.threshold;
+				const stockVal = p.stock !== null && p.stock !== undefined ? p.stock : 0;
+				const thresholdVal = p.threshold !== null && p.threshold !== undefined ? p.threshold : 0;
+				const isLow = stockVal <= thresholdVal;
 				rows += `
 					<tr class="hover:wsm-bg-slate-900/10">
 						<td class="wsm-py-4 wsm-text-sm wsm-font-bold wsm-text-slate-400">#${p.id}</td>
 						<td class="wsm-py-4 wsm-text-sm wsm-font-semibold wsm-text-slate-300">${WSM.escHtml(p.name)}</td>
-						<td class="wsm-py-4 wsm-text-sm wsm-text-center wsm-font-bold ${isLow ? 'wsm-text-rose-500' : 'wsm-text-amber-500'}">${p.stock.toLocaleString('fa-IR')} عدد</td>
-						<td class="wsm-py-4 wsm-text-sm wsm-text-center wsm-text-slate-400">${p.threshold.toLocaleString('fa-IR')} عدد</td>
+						<td class="wsm-py-4 wsm-text-sm wsm-text-center wsm-font-bold ${isLow ? 'wsm-text-rose-500' : 'wsm-text-amber-500'}">${stockVal.toLocaleString('fa-IR')} عدد</td>
+						<td class="wsm-py-4 wsm-text-sm wsm-text-center wsm-text-slate-400">${thresholdVal.toLocaleString('fa-IR')} عدد</td>
 						<td class="wsm-py-4 wsm-text-sm wsm-text-center">
 							<span class="wsm-px-2.5 wsm-py-1 wsm-rounded-full wsm-text-xs wsm-font-semibold ${isLow ? 'wsm-bg-rose-900/30 wsm-text-rose-400' : 'wsm-bg-amber-900/30 wsm-text-amber-400'}">
 								${isLow ? 'اتمام موجودی / بحرانی' : 'رو به اتمام'}

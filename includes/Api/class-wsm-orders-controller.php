@@ -99,6 +99,18 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/orders/(?P<id>\d+)/receipts/(?P<hash>[a-zA-Z0-9]+)',
+			[
+				[
+					'methods'             => 'GET',
+					'callback'            => [ $this, 'download_receipt' ],
+					'permission_callback' => [ $this, 'check_permission' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/orders/bulk',
 			[
 				[
@@ -267,5 +279,59 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 			],
 			sprintf( __( 'عملیات دسته جمعی روی %d سفارش با موفقیت اعمال شد.', 'karasu-woo-pannel' ), $success_count )
 		);
+	}
+
+	/**
+	 * Serve a card-to-card receipt file securely for panel managers.
+	 *
+	 * @param WP_REST_Request $request REST request properties.
+	 */
+	public function download_receipt( \WP_REST_Request $request ): void {
+		$order_id  = (int) $request->get_param( 'id' );
+		$file_hash = sanitize_text_field( $request->get_param( 'hash' ) );
+
+		// Retrieve receipt from metadata of Karasu Payment Method
+		// Meta key: _kpm_receipt_files
+		$receipts = get_post_meta( $order_id, '_kpm_receipt_files', true );
+		if ( ! is_array( $receipts ) ) {
+			$receipts = [];
+		}
+
+		$found_receipt = null;
+		foreach ( $receipts as $receipt ) {
+			if ( isset( $receipt['file_hash'] ) && $receipt['file_hash'] === $file_hash ) {
+				$found_receipt = $receipt;
+				break;
+			}
+		}
+
+		if ( ! $found_receipt ) {
+			status_header( 404 );
+			echo 'File not found';
+			exit;
+		}
+
+		$wp_upload = wp_upload_dir();
+		$basedir   = trailingslashit( $wp_upload['basedir'] );
+		$full_path = $basedir . $found_receipt['file_path'];
+
+		if ( ! file_exists( $full_path ) ) {
+			status_header( 404 );
+			echo 'File not found on disk';
+			exit;
+		}
+
+		$orig_name = $found_receipt['file_name'] ?? basename( $full_path );
+		$finfo     = wp_check_filetype( $full_path );
+		$mime_type = ! empty( $finfo['type'] ) ? $finfo['type'] : 'application/octet-stream';
+
+		nocache_headers();
+		header( 'Content-Type: ' . $mime_type );
+		header( 'Content-Disposition: inline; filename="' . sanitize_file_name( $orig_name ) . '"' );
+		header( 'Content-Length: ' . filesize( $full_path ) );
+		header( 'Content-Transfer-Encoding: binary' );
+
+		readfile( $full_path );
+		exit;
 	}
 }

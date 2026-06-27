@@ -135,6 +135,20 @@ class WSM_Admin_Settings {
 			]
 		);
 
+		// Page Customization Options
+		$pages = [ 'dashboard', 'orders', 'products', 'categories', 'attributes', 'brands', 'coupons', 'reports', 'sms', 'login' ];
+		foreach ( $pages as $page ) {
+			register_setting(
+				'wsm_settings_group',
+				'wsm_custom_content_' . $page,
+				[
+					'type'              => 'string',
+					'sanitize_callback' => [ $this, 'sanitize_custom_html' ],
+					'default'           => '',
+				]
+			);
+		}
+
 		// 2. Define setting sections.
 		add_settings_section(
 			'wsm_general_section',
@@ -230,6 +244,19 @@ class WSM_Admin_Settings {
 			'wsm_settings',
 			'wsm_sms_section'
 		);
+	}
+
+	/**
+	 * Sanitize custom HTML input for pages, allowing full HTML if current user has unfiltered_html capability.
+	 *
+	 * @param string $html Input HTML.
+	 * @return string Sanitized HTML.
+	 */
+	public function sanitize_custom_html( string $html ): string {
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			return $html;
+		}
+		return wp_kses_post( $html );
 	}
 
 	/**

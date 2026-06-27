@@ -222,6 +222,108 @@ class WSM_Order_Service {
 			],
 			'items'          => $items,
 			'notes'          => $notes,
+			'receipts'       => (function() use ($order) {
+				$receipts = [];
+
+				// 1. Karasu Payment Method receipts
+				$kpm_receipts = $order->get_meta( '_kpm_receipt_files', true );
+				if ( is_array( $kpm_receipts ) && ! empty( $kpm_receipts ) ) {
+					foreach ( $kpm_receipts as $receipt ) {
+						$file_name = isset( $receipt['file_name'] ) ? $receipt['file_name'] : 'receipt';
+						$file_hash = isset( $receipt['file_hash'] ) ? $receipt['file_hash'] : '';
+						if ( ! empty( $file_hash ) ) {
+							$url = rest_url( 'wsm/v1/orders/' . $order->get_id() . '/receipts/' . $file_hash );
+							
+							$receipts[] = [
+								'key'       => '_kpm_receipt_files',
+								'label'     => __( 'رسید پرداخت کارت‌به‌کارت', 'karasu-woo-pannel' ),
+								'value'     => $file_name,
+								'image_url' => $url,
+								'file_hash' => $file_hash,
+							];
+						}
+					}
+				}
+
+				// 2. Generic metadata scanner for other card-to-card plugins
+				foreach ( $order->get_meta_data() as $meta ) {
+					$key   = $meta->key;
+					$value = $meta->value;
+
+					if ( empty( $value ) || '_kpm_receipt_files' === $key ) {
+						continue;
+					}
+
+					// Clean key to check for matches
+					$clean_key = strtolower( ltrim( $key, '_' ) );
+
+					// Check if key is related to card-to-card / receipt / fish / transaction
+					$is_receipt_key = false;
+					$keywords = [ 'receipt', 'card_to_card', 'card2card', 'payment_image', 'receipt_image', 'receipt_file', 'transaction_image', 'payment_receipt', 'fish', 'c2c' ];
+					foreach ( $keywords as $kw ) {
+						if ( false !== strpos( $clean_key, $kw ) ) {
+							$is_receipt_key = true;
+							break;
+						}
+					}
+
+					if ( $is_receipt_key ) {
+						$label = $meta->key; // fallback label
+						if ( false !== strpos( $clean_key, 'image' ) || false !== strpos( $clean_key, 'file' ) || false !== strpos( $clean_key, 'receipt' ) ) {
+							$label = __( 'تصویر/فایل رسید پرداخت', 'karasu-woo-pannel' );
+						} elseif ( false !== strpos( $clean_key, 'transaction_id' ) || false !== strpos( $clean_key, 'ref_id' ) || false !== strpos( $clean_key, 'track_id' ) ) {
+							$label = __( 'شماره پیگیری / تراکنش', 'karasu-woo-pannel' );
+						} elseif ( false !== strpos( $clean_key, 'card' ) ) {
+							$label = __( 'اطلاعات کارت به کارت', 'karasu-woo-pannel' );
+						}
+
+						// Check if value is an attachment ID or URL
+						$image_url = '';
+						if ( is_numeric( $value ) && (int) $value > 0 ) {
+							if ( wp_attachment_is_image( (int) $value ) ) {
+								$image_url = wp_get_attachment_image_url( (int) $value, 'full' );
+							} else {
+								$file_url = wp_get_attachment_url( (int) $value );
+								if ( $file_url ) {
+									$image_url = $file_url;
+								}
+							}
+						} elseif ( is_string( $value ) && ( 0 === strpos( $value, 'http://' ) || 0 === strpos( $value, 'https://' ) ) ) {
+							$image_url = $value;
+						}
+
+						$receipts[] = [
+							'key'       => $key,
+							'label'     => $label,
+							'value'     => $value,
+							'image_url' => $image_url,
+							'file_hash' => '',
+						];
+					}
+				}
+
+				// 3. WooCommerce default transaction ID
+				if ( ! empty( $order->get_transaction_id() ) ) {
+					$exists = false;
+					foreach ( $receipts as $r ) {
+						if ( $r['value'] === $order->get_transaction_id() ) {
+							$exists = true;
+							break;
+						}
+					}
+					if ( ! $exists ) {
+						$receipts[] = [
+							'key'       => '_transaction_id',
+							'label'     => __( 'شناسه تراکنش پرداخت', 'karasu-woo-pannel' ),
+							'value'     => $order->get_transaction_id(),
+							'image_url' => '',
+							'file_hash' => '',
+						];
+					}
+				}
+
+				return $receipts;
+			})(),
 		];
 	}
 
