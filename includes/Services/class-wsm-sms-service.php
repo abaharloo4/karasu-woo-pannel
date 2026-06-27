@@ -45,40 +45,133 @@ class WSM_Sms_Service {
 			return true;
 		}
 
-		$body = [
-			'username' => $username,
-			'password' => $password,
-			'to'       => $to,
-			'from'     => $from,
-			'text'     => $message,
-		];
+		$templates = self::get_templates();
+		$tmpl = $templates[ $event_type ] ?? null;
+		$sent = false;
+		$api_msg = '';
 
-		$response = wp_remote_post(
-			'https://rest.payamak-panel.com/api/SendSMS/SendSMS',
-			[
-				'headers' => [ 'Content-Type' => 'application/json' ],
-				'body'    => json_encode( $body ),
-				'timeout' => 15,
-			]
-		);
+		// 1. Try sending via Melipayamak shared pattern web service if body_id is configured
+		if ( $tmpl && ! empty( $tmpl['body_id'] ) && $related_id > 0 ) {
+			$body_id  = (int) $tmpl['body_id'];
+			$args_str = $tmpl['args'] ?? '';
 
-		if ( is_wp_error( $response ) ) {
-			$error_msg = $response->get_error_message();
-			$this->log_sms( $event_type, $to, $message, 0, $error_msg, $related_id );
-			return false;
+			// Load appropriate WooCommerce object
+			$object = null;
+			if ( 'admin_low_stock' === $event_type ) {
+				$object = wc_get_product( $related_id );
+			} else {
+				$object = wc_get_order( $related_id );
+			}
+
+			if ( $object ) {
+				$pattern_text = $this->get_pattern_text_values( $args_str, $object );
+				
+				$body = [
+					'username' => $username,
+					'password' => $password,
+					'to'       => $to,
+					'bodyId'   => $body_id,
+					'text'     => $pattern_text,
+				];
+
+				$response = wp_remote_post(
+					'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumberShared',
+					[
+						'headers' => [ 'Content-Type' => 'application/json' ],
+						'body'    => json_encode( $body ),
+						'timeout' => 15,
+					]
+				);
+
+				if ( ! is_wp_error( $response ) ) {
+					$res_body = wp_remote_retrieve_body( $response );
+					$res_data = json_decode( $res_body, true );
+					$retval   = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
+					
+					if ( $retval > 100 ) {
+						$sent = true;
+						$api_msg = 'Pattern Success (ID: ' . $retval . ')';
+						$this->log_sms( $event_type, $to, 'Pattern ID: ' . $body_id . ' | Args: ' . $pattern_text, 1, $api_msg, $related_id );
+					} else {
+						$api_msg = 'Pattern Failed (Code: ' . $retval . ')';
+						wsm_log_error( sprintf( 'Melipayamak pattern sending failed (Event: %s, To: %s, BodyId: %d, Response: %s)', $event_type, $to, $body_id, $res_body ) );
+					}
+				} else {
+					$api_msg = 'Pattern Error: ' . $response->get_error_message();
+					wsm_log_error( sprintf( 'Melipayamak pattern sending request error (Event: %s, To: %s, BodyId: %d, Error: %s)', $event_type, $to, $body_id, $api_msg ) );
+				}
+			}
 		}
 
-		$res_body = wp_remote_retrieve_body( $response );
-		$res_data = json_decode( $res_body, true );
+		// 2. Fallback to standard dedicated line SendSMS if pattern wasn't configured or failed
+		if ( ! $sent ) {
+			$body = [
+				'username' => $username,
+				'password' => $password,
+				'to'       => $to,
+				'from'     => $from,
+				'text'     => $message,
+			];
 
-		$retval = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
-		// A positive value greater than 100 is typically a successful message ID returned by MeliPayamak.
-		$status = $retval > 100 ? 1 : 0;
-		$api_msg = $status ? 'Message ID: ' . $retval : 'Error Code: ' . $retval;
+			$response = wp_remote_post(
+				'https://rest.payamak-panel.com/api/SendSMS/SendSMS',
+				[
+					'headers' => [ 'Content-Type' => 'application/json' ],
+					'body'    => json_encode( $body ),
+					'timeout' => 15,
+				]
+			);
 
-		$this->log_sms( $event_type, $to, $message, $status, $api_msg, $related_id );
+			if ( is_wp_error( $response ) ) {
+				$error_msg = $response->get_error_message();
+				$this->log_sms( $event_type, $to, $message, 0, $error_msg . ( ! empty( $api_msg ) ? ' (Fallback from: ' . $api_msg . ')' : '' ), $related_id );
+				wsm_log_error( sprintf( 'Melipayamak fallback send request error (Event: %s, To: %s, Error: %s)', $event_type, $to, $error_msg ) );
+				return false;
+			}
 
-		return (bool) $status;
+			$res_body = wp_remote_retrieve_body( $response );
+			$res_data = json_decode( $res_body, true );
+
+			$retval       = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
+			$status       = $retval > 100 ? 1 : 0;
+			$api_msg_full = $status ? 'Message ID: ' . $retval : 'Error Code: ' . $retval;
+			if ( ! empty( $api_msg ) ) {
+				$api_msg_full .= ' (Fallback from: ' . $api_msg . ')';
+			}
+
+			if ( ! $status ) {
+				wsm_log_error( sprintf( 'Melipayamak fallback sending failed (Event: %s, To: %s, Response: %s)', $event_type, $to, $res_body ) );
+			}
+
+			$this->log_sms( $event_type, $to, $message, $status, $api_msg_full, $related_id );
+			return (bool) $status;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Parse variables placeholder keys with actual values and return them as joined string.
+	 *
+	 * @param string $args_str  Comma-separated variables string (e.g. "{customer_name},{order_id}").
+	 * @param mixed  $object    WC_Order or WC_Product object.
+	 * @return string Joined variables string (separated by semicolon).
+	 */
+	public function get_pattern_text_values( string $args_str, $object ): string {
+		if ( empty( $args_str ) ) {
+			return '';
+		}
+
+		$variables = explode( ',', $args_str );
+		$values    = [];
+
+		foreach ( $variables as $var ) {
+			$var = trim( $var );
+			$parsed = $this->parse_variables( $var, $object );
+			$values[] = $parsed;
+		}
+
+		return implode( ';', $values );
 	}
 
 	/**
@@ -159,67 +252,99 @@ class WSM_Sms_Service {
 			'pending'          => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} ثبت شد و در انتظار پرداخت است.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'processing'       => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} با موفقیت ثبت شد و در حال پردازش است.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'on-hold'          => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} در وضعیت معلق قرار گرفت.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'completed'        => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی {customer_name}، سفارش #{order_id} تکمیل شد و فرآیند ارسال آغاز گردید. با تشکر.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'cancelled'        => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی، سفارش #{order_id} لغو شد.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'refunded'         => [
 				'enabled' => false,
 				'text'    => 'مشتری گرامی، سفارش #{order_id} مرجوع گردید و مبلغ آن مسترد شد.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'failed'           => [
 				'enabled' => false,
 				'text'    => 'پرداخت سفارش #{order_id} ناموفق بود و لغو گردید.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			// Admin templates.
 			'admin_pending'    => [
 				'enabled' => false,
 				'text'    => 'سفارش #{order_id} ثبت شد و در انتظار پرداخت است.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_processing' => [
 				'enabled' => false,
 				'text'    => 'سفارش #{order_id} پرداخت شد و در حال پردازش است.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_on-hold'    => [
 				'enabled' => false,
 				'text'    => 'سفارش #{order_id} به وضعیت معلق تغییر یافت.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_completed'  => [
 				'enabled' => false,
 				'text'    => 'سفارش #{order_id} تکمیل و ارسال شد.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_cancelled'  => [
 				'enabled' => false,
 				'text'    => 'سفارش #{order_id} لغو شد.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_refunded'   => [
 				'enabled' => false,
 				'text'    => 'سفارش #{order_id} مرجوع شد.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_failed'     => [
 				'enabled' => false,
 				'text'    => 'سفارش #{order_id} پرداخت ناموفق داشت.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_new_order'  => [
 				'enabled' => false,
 				'text'    => 'سفارش جدید #{order_id} به مبلغ {order_total} تومان ثبت شد.',
+				'body_id' => '',
+				'args'    => '',
 			],
 			'admin_low_stock'  => [
 				'enabled' => false,
 				'text'    => 'هشدار کمبود موجودی: محصول {product_name} به تعداد {stock_qty} رسیده است.',
+				'body_id' => '',
+				'args'    => '',
 			],
 		];
 
@@ -258,6 +383,8 @@ class WSM_Sms_Service {
 				$sanitized[ $key ] = [
 					'enabled' => (bool) ( $templates[ $key ]['enabled'] ?? false ),
 					'text'    => sanitize_textarea_field( $templates[ $key ]['text'] ?? '' ),
+					'body_id' => sanitize_text_field( $templates[ $key ]['body_id'] ?? '' ),
+					'args'    => sanitize_text_field( $templates[ $key ]['args'] ?? '' ),
 				];
 			}
 		}

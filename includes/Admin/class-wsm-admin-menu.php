@@ -121,6 +121,14 @@ class WSM_Admin_Menu {
 			wp_safe_redirect( add_query_arg( [ 'page' => 'wsm_settings', 'settings-updated' => 'true', 'tab' => $redirect_tab ], admin_url( 'admin.php' ) ) );
 			exit;
 		}
+
+		// 3. Clear Error Logs
+		if ( isset( $_POST['wsm_clear_error_logs'] ) ) {
+			check_admin_referer( 'wsm_clear_error_logs_action', 'wsm_clear_error_logs_nonce' );
+			wsm_clear_error_logs();
+			wp_safe_redirect( add_query_arg( [ 'page' => 'wsm_settings', 'settings-updated' => 'true', 'tab' => 'wsm-tab-logs' ], admin_url( 'admin.php' ) ) );
+			exit;
+		}
 	}
 
 	/**
@@ -465,6 +473,9 @@ class WSM_Admin_Menu {
 						<div class="wsm-tab-link <?php echo 'wsm-tab-users' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-users')">
 							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg> مدیریت دسترسی کاربران
 						</div>
+						<div class="wsm-tab-link <?php echo 'wsm-tab-logs' === $active_tab ? 'active' : ''; ?>" onclick="wsmSwitchTab(event, 'wsm-tab-logs')">
+							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> مشاهده لاگ‌ها
+						</div>
 					</div>
 				</div>
 
@@ -724,7 +735,23 @@ class WSM_Admin_Menu {
 													<span style="font-size: 13px; color: #94a3b8;">فعال</span>
 												</label>
 											</div>
-											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" id="wsm-textarea-<?php echo esc_attr( $key ); ?>" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											
+											<div style="margin-bottom: 8px;">
+												<label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">متن پیامک پیش‌فرض (فالبک)</label>
+												<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" id="wsm-textarea-<?php echo esc_attr( $key ); ?>" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											</div>
+
+											<div style="margin-bottom: 10px; display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+												<div>
+													<label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">کد الگوی خدماتی (Body ID)</label>
+													<input type="text" name="wsm_templates[<?php echo esc_attr( $key ); ?>][body_id]" class="wsm-input-text" style="width: 100%; font-size: 12px; padding: 6px 10px;" value="<?php echo esc_attr( $tmpl['body_id'] ?? '' ); ?>" placeholder="مثال: 12345">
+												</div>
+												<div>
+													<label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">متغیرهای الگو (به ترتیب با کاما جدا شوند)</label>
+													<input type="text" name="wsm_templates[<?php echo esc_attr( $key ); ?>][args]" class="wsm-input-text" style="width: 100%; font-size: 12px; padding: 6px 10px; direction: ltr;" value="<?php echo esc_attr( $tmpl['args'] ?? '' ); ?>" placeholder="مثال: {customer_name},{order_id}">
+												</div>
+											</div>
+
 											<div class="wsm-template-vars" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
 												<span style="font-size: 11px; color: #64748b; margin-left: 4px;">متغیرها (کلیک برای درج):</span>
 												<button type="button" class="wsm-var-badge" data-target="wsm-textarea-<?php echo esc_attr( $key ); ?>" data-val="{order_id}">{order_id} (شناسه)</button>
@@ -804,7 +831,23 @@ class WSM_Admin_Menu {
 													<span style="font-size: 13px; color: #94a3b8;">فعال</span>
 												</label>
 											</div>
-											<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" id="wsm-textarea-<?php echo esc_attr( $key ); ?>" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											
+											<div style="margin-bottom: 8px;">
+												<label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">متن پیامک پیش‌فرض (فالبک)</label>
+												<textarea name="wsm_templates[<?php echo esc_attr( $key ); ?>][text]" id="wsm-textarea-<?php echo esc_attr( $key ); ?>" rows="2" class="wsm-input-text" style="width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px;" placeholder="متن پیامک..."><?php echo esc_textarea( $tmpl['text'] ); ?></textarea>
+											</div>
+
+											<div style="margin-bottom: 10px; display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+												<div>
+													<label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">کد الگوی خدماتی (Body ID)</label>
+													<input type="text" name="wsm_templates[<?php echo esc_attr( $key ); ?>][body_id]" class="wsm-input-text" style="width: 100%; font-size: 12px; padding: 6px 10px;" value="<?php echo esc_attr( $tmpl['body_id'] ?? '' ); ?>" placeholder="مثال: 12345">
+												</div>
+												<div>
+													<label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">متغیرهای الگو (به ترتیب با کاما جدا شوند)</label>
+													<input type="text" name="wsm_templates[<?php echo esc_attr( $key ); ?>][args]" class="wsm-input-text" style="width: 100%; font-size: 12px; padding: 6px 10px; direction: ltr;" value="<?php echo esc_attr( $tmpl['args'] ?? '' ); ?>" placeholder="مثال: {customer_name},{order_id}">
+												</div>
+											</div>
+
 											<?php if ( $is_low_stock ) : ?>
 												<div class="wsm-template-vars" style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
 													<span style="font-size: 11px; color: #64748b; margin-left: 4px;">متغیرها (کلیک برای درج):</span>
@@ -986,6 +1029,75 @@ class WSM_Admin_Menu {
 							<button type="submit" class="wsm-save-btn">ذخیره دسترسی کاربران</button>
 						</div>
 					</form>
+				</div>
+
+				<!-- Tab 7: Logs Viewer Tab -->
+				<div id="wsm-tab-logs" class="wsm-tab-content <?php echo 'wsm-tab-logs' === $active_tab ? 'active' : ''; ?>">
+					<div class="wsm-card">
+						<h3>لاگ خطاهای افزونه (Debug & Error Logs)</h3>
+						<p class="wsm-field-desc" style="margin-bottom: 15px;">خطاها، مشکلات ارتباطی با درگاه پیامک و سایر اشکالات فنی افزونه در این بخش ثبت و نمایش داده می‌شوند.</p>
+						
+						<form action="" method="post" style="margin-bottom: 20px;">
+							<?php wp_nonce_field( 'wsm_clear_error_logs_action', 'wsm_clear_error_logs_nonce' ); ?>
+							<input type="hidden" name="wsm_clear_error_logs" value="1">
+							
+							<textarea readonly rows="12" class="wsm-input-text" style="font-family: monospace; font-size: 13px; width: 100%; border-radius: 12px; border: 1px solid #334155; padding: 15px; background: #020617; color: #f1f5f9; line-height: 1.6; direction: ltr; text-align: left;" placeholder="No errors logged yet."><?php echo esc_textarea( wsm_get_error_logs() ); ?></textarea>
+							
+							<div style="margin-top: 15px; display: flex; justify-content: flex-end;">
+								<button type="submit" class="wsm-test-btn" style="background: #e11d48; border-color: #f43f5e;" onclick="return confirm('آیا از پاک کردن لاگ خطاهای افزونه مطمئن هستید؟');">پاک کردن لاگ خطاها</button>
+							</div>
+						</form>
+					</div>
+
+					<div class="wsm-card">
+						<h3>لاگ پیامک‌های ارسالی (SMS logs)</h3>
+						<p class="wsm-field-desc" style="margin-bottom: 20px;">فهرست آخرین ۱۰۰ پیامک ارسال شده توسط افزونه به خریداران و مدیران فروشگاه.</p>
+						
+						<div style="overflow-x: auto; border: 1px solid #1e293b; border-radius: 12px; background: #0f172a;">
+							<table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: right; color: #cbd5e1;">
+								<thead>
+									<tr style="background: #1e293b; border-bottom: 1px solid #334155; color: #f8fafc;">
+										<th style="padding: 12px; text-align: center;">وضعیت</th>
+										<th style="padding: 12px;">گیرنده</th>
+										<th style="padding: 12px;">رویداد</th>
+										<th style="padding: 12px; width: 40%;">متن پیامک</th>
+										<th style="padding: 12px;">پاسخ درگاه</th>
+										<th style="padding: 12px; text-align: center;">تاریخ ارسال</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									global $wpdb;
+									$sms_logs_table = $wpdb->prefix . 'wsm_sms_log';
+									$sms_logs = [];
+									if ( $wpdb->get_var( "SHOW TABLES LIKE '$sms_logs_table'" ) === $sms_logs_table ) {
+										$sms_logs = $wpdb->get_results( "SELECT * FROM $sms_logs_table ORDER BY sent_at DESC LIMIT 100" );
+									}
+
+									if ( empty( $sms_logs ) ) {
+										echo '<tr><td colspan="6" style="padding: 25px; text-align: center; color: #64748b;">هیچ پیامکی ارسال یا لاگ نشده است.</td></tr>';
+									} else {
+										foreach ( $sms_logs as $log ) {
+											$status_badge = $log->status 
+												? '<span style="background: #065f46; color: #34d399; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">موفق</span>' 
+												: '<span style="background: #991b1b; color: #fca5a5; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">ناموفق</span>';
+											?>
+											<tr style="border-bottom: 1px solid #1e293b; background: #0b0f19;">
+												<td style="padding: 12px; text-align: center; vertical-align: middle;"><?php echo $status_badge; ?></td>
+												<td style="padding: 12px; font-weight: 600; direction: ltr; text-align: right;"><?php echo esc_html( $log->recipient ); ?></td>
+												<td style="padding: 12px; color: #38bdf8;"><?php echo esc_html( $log->event_type ); ?></td>
+												<td style="padding: 12px; line-height: 1.6;"><?php echo esc_html( $log->message ); ?></td>
+												<td style="padding: 12px; font-family: monospace; font-size: 12px; color: #94a3b8;"><?php echo esc_html( $log->api_response ); ?></td>
+												<td style="padding: 12px; text-align: center; color: #64748b; font-size: 12px;"><?php echo esc_html( $log->sent_at ); ?></td>
+											</tr>
+											<?php
+										}
+									}
+									?>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
 
 				<!-- Tab 6: Status & About Info Tab -->

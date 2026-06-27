@@ -98,3 +98,47 @@ function wsm_decrypt_password( string $encrypted ): string {
 	$decrypted  = openssl_decrypt( $ciphertext, $method, $key, OPENSSL_RAW_DATA, $iv );
 	return false !== $decrypted ? $decrypted : $encrypted;
 }
+
+/**
+ * Write a debug/error message to the plugin's custom error log.
+ *
+ * @param string $message The log message.
+ */
+function wsm_log_error( string $message ): void {
+	$upload_dir = wp_upload_dir();
+	$log_dir = path_join( $upload_dir['basedir'], 'wsm-logs' );
+	if ( ! file_exists( $log_dir ) ) {
+		wp_mkdir_p( $log_dir );
+		file_put_contents( path_join( $log_dir, 'index.html' ), '' );
+		file_put_contents( path_join( $log_dir, '.htaccess' ), "Deny from all" );
+	}
+	$log_file = path_join( $log_dir, 'error.log' );
+	$timestamp = current_time( 'mysql' );
+	$formatted = sprintf( "[%s] %s\n", $timestamp, $message );
+	file_put_contents( $log_file, $formatted, FILE_APPEND );
+}
+
+/**
+ * Retrieve the contents of the plugin custom error log.
+ *
+ * @return string Log file contents.
+ */
+function wsm_get_error_logs(): string {
+	$upload_dir = wp_upload_dir();
+	$log_file = path_join( $upload_dir['basedir'], 'wsm-logs/error.log' );
+	if ( file_exists( $log_file ) ) {
+		return file_get_contents( $log_file );
+	}
+	return '';
+}
+
+/**
+ * Clear the custom error log file.
+ */
+function wsm_clear_error_logs(): void {
+	$upload_dir = wp_upload_dir();
+	$log_file = path_join( $upload_dir['basedir'], 'wsm-logs/error.log' );
+	if ( file_exists( $log_file ) ) {
+		file_put_contents( $log_file, '' );
+	}
+}

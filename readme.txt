@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,11 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.4 =
+* Added Logs Viewer tab in WP-Admin featuring SMS logs table and custom error log viewer.
+* Added support for Melipayamak shared pattern/template service sending (BaseServiceNumberShared).
+* Integrated custom fallback to user's dedicated line standard SendSMS when pattern sending fails.
 
 = 1.1.3 =
 * Localized all plugin titles and header brands to Persian when system locale is set to Farsi.
