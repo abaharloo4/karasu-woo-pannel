@@ -104,7 +104,7 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 				[
 					'methods'             => 'GET',
 					'callback'            => [ $this, 'download_receipt' ],
-					'permission_callback' => [ $this, 'check_permission' ],
+					'permission_callback' => [ $this, 'check_receipt_permission' ],
 				],
 			]
 		);
@@ -130,6 +130,31 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 	 */
 	public function check_permission( WP_REST_Request $request ): bool|WP_Error {
 		return $this->check_capability_permission( $request, 'wsm_manage_orders', __( 'دسترسی غیرمجاز. شما مجوز مدیریت سفارش‌ها را ندارید.', 'karasu-woo-pannel' ) );
+	}
+
+	/**
+	 * Check receipt file access permission.
+	 * Accepts both panel session auth AND standard WordPress admin cookies.
+	 *
+	 * @param WP_REST_Request $request Request properties.
+	 * @return bool|WP_Error True if authorized, else WP_Error.
+	 */
+	public function check_receipt_permission( WP_REST_Request $request ): bool|WP_Error {
+		// First try standard panel session auth
+		if ( wsm_is_authenticated() && current_user_can( 'wsm_manage_orders' ) ) {
+			return true;
+		}
+
+		// Fallback: allow WordPress logged-in admin users with WooCommerce management capability
+		if ( is_user_logged_in() && current_user_can( 'manage_woocommerce' ) ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'wsm_unauthorized',
+			__( 'دسترسی غیرمجاز. برای مشاهده رسید باید وارد پنل شده باشید.', 'karasu-woo-pannel' ),
+			[ 'status' => 401 ]
+		);
 	}
 
 	/**
@@ -325,9 +350,12 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 		$finfo     = wp_check_filetype( $full_path );
 		$mime_type = ! empty( $finfo['type'] ) ? $finfo['type'] : 'application/octet-stream';
 
+		$action = $request->get_param( 'action' );
+		$disposition = ( 'download' === $action ) ? 'attachment' : 'inline';
+
 		nocache_headers();
 		header( 'Content-Type: ' . $mime_type );
-		header( 'Content-Disposition: inline; filename="' . sanitize_file_name( $orig_name ) . '"' );
+		header( 'Content-Disposition: ' . $disposition . '; filename="' . sanitize_file_name( $orig_name ) . '"' );
 		header( 'Content-Length: ' . filesize( $full_path ) );
 		header( 'Content-Transfer-Encoding: binary' );
 

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const version = '1.1.6';
+const version = '1.1.7';
 const pluginSlug = 'karasu-woo-pannel';
 const distDir = path.join(__dirname, 'dist');
 const buildDir = path.join(distDir, pluginSlug);

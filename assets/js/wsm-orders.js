@@ -294,7 +294,7 @@
 			let receiptsHtml = '';
 			if (order.receipts && order.receipts.length > 0) {
 				let receiptsContent = '';
-				order.receipts.forEach(r => {
+				order.receipts.forEach((r, idx) => {
 					let url = r.image_url;
 					if (r.file_hash && url) {
 						url += `?_wpnonce=${window.wsmConfig.nonce}`;
@@ -302,6 +302,13 @@
 
 					if (url) {
 						const isPdf = (r.value && r.value.toLowerCase().endsWith('.pdf')) || url.toLowerCase().includes('.pdf');
+						const isImage = !isPdf && (
+							/\.(jpe?g|png|gif|webp|bmp|svg)/i.test(r.value || '') ||
+							/\.(jpe?g|png|gif|webp|bmp|svg)/i.test(url) ||
+							(r.key === '_kpm_receipt_files')
+						);
+						const downloadUrl = url + (url.includes('?') ? '&' : '?') + 'action=download';
+
 						if (isPdf) {
 							receiptsContent += `
 								<div class="wsm-flex wsm-flex-col sm:wsm-flex-row wsm-items-start sm:wsm-items-center wsm-justify-between wsm-gap-4 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
@@ -310,12 +317,19 @@
 										<span class="wsm-text-sm wsm-font-semibold wsm-text-slate-200 wsm-block">${WSM.escHtml(r.label)}</span>
 										<span class="wsm-text-xs wsm-text-slate-400 wsm-block">فایل: ${WSM.escHtml(r.value)}</span>
 									</div>
-									<a href="${url}" target="_blank" class="wsm-px-4 wsm-py-2 wsm-bg-indigo-600 hover:wsm-bg-indigo-500 wsm-text-white wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors">
-										دانلود فایل PDF رسید
-									</a>
+									<div class="wsm-flex wsm-items-center wsm-gap-2">
+										<a href="${url}" target="_blank" class="wsm-px-3 wsm-py-2 wsm-bg-indigo-600/15 hover:wsm-bg-indigo-600/25 wsm-text-indigo-400 wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5">
+											<svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+											پیش‌نمایش
+										</a>
+										<a href="${downloadUrl}" class="wsm-px-3 wsm-py-2 wsm-bg-emerald-600/15 hover:wsm-bg-emerald-600/25 wsm-text-emerald-400 wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5" download>
+											<svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+											دانلود
+										</a>
+									</div>
 								</div>
 							`;
-						} else {
+						} else if (isImage) {
 							receiptsContent += `
 								<div class="wsm-flex wsm-flex-col sm:wsm-flex-row wsm-items-start sm:wsm-items-center wsm-justify-between wsm-gap-4 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
 									<div class="wsm-space-y-1">
@@ -324,11 +338,39 @@
 										<span class="wsm-text-xs wsm-text-slate-400 wsm-block">نام فایل: ${WSM.escHtml(r.value)}</span>
 									</div>
 									<div class="wsm-flex wsm-items-center wsm-gap-3">
-										<a href="${url}" target="_blank" class="wsm-block wsm-w-16 wsm-h-16 wsm-rounded-xl wsm-overflow-hidden wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500 wsm-transition-colors">
-											<img src="${url}" class="wsm-w-full wsm-h-full wsm-object-cover" alt="رسید پرداخت">
+										<div class="wsm-block wsm-w-16 wsm-h-16 wsm-rounded-xl wsm-overflow-hidden wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500 wsm-transition-colors wsm-cursor-pointer" onclick="wsmOpenReceiptLightbox('${url}')">
+											<img src="${url}" class="wsm-w-full wsm-h-full wsm-object-cover" alt="رسید پرداخت" onerror="this.parentElement.style.display='none'">
+										</div>
+										<div class="wsm-flex wsm-flex-col wsm-gap-1.5">
+											<button type="button" onclick="wsmOpenReceiptLightbox('${url}')" class="wsm-px-3 wsm-py-1.5 wsm-bg-indigo-600/15 hover:wsm-bg-indigo-600/25 wsm-text-indigo-400 wsm-rounded-lg wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5 wsm-cursor-pointer" style="border:none;outline:none;">
+												<svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+												پیش‌نمایش
+											</button>
+											<a href="${downloadUrl}" class="wsm-px-3 wsm-py-1.5 wsm-bg-emerald-600/15 hover:wsm-bg-emerald-600/25 wsm-text-emerald-400 wsm-rounded-lg wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5" download>
+												<svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+												دانلود
+											</a>
+										</div>
+									</div>
+								</div>
+							`;
+						} else {
+							// Generic file
+							receiptsContent += `
+								<div class="wsm-flex wsm-flex-col sm:wsm-flex-row wsm-items-start sm:wsm-items-center wsm-justify-between wsm-gap-4 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
+									<div class="wsm-space-y-1">
+										<span class="wsm-text-xs wsm-text-slate-500 wsm-block">${WSM.escHtml(r.key)}</span>
+										<span class="wsm-text-sm wsm-font-semibold wsm-text-slate-200 wsm-block">${WSM.escHtml(r.label)}</span>
+										<span class="wsm-text-xs wsm-text-slate-400 wsm-block">فایل: ${WSM.escHtml(r.value)}</span>
+									</div>
+									<div class="wsm-flex wsm-items-center wsm-gap-2">
+										<a href="${url}" target="_blank" class="wsm-px-3 wsm-py-2 wsm-bg-indigo-600/15 hover:wsm-bg-indigo-600/25 wsm-text-indigo-400 wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5">
+											<svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+											مشاهده
 										</a>
-										<a href="${url}" target="_blank" class="wsm-px-3 wsm-py-1.5 wsm-bg-indigo-600/10 hover:wsm-bg-indigo-600/20 wsm-text-indigo-400 wsm-rounded-lg wsm-text-xs wsm-font-semibold wsm-transition-colors">
-											مشاهده رسید
+										<a href="${downloadUrl}" class="wsm-px-3 wsm-py-2 wsm-bg-emerald-600/15 hover:wsm-bg-emerald-600/25 wsm-text-emerald-400 wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5" download>
+											<svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+											دانلود
 										</a>
 									</div>
 								</div>
@@ -665,3 +707,55 @@
 	});
 
 })();
+
+/**
+ * Open a fullscreen lightbox overlay to preview a receipt image.
+ * @param {string} imageUrl The image URL to display.
+ */
+function wsmOpenReceiptLightbox(imageUrl) {
+	// Remove existing lightbox if any
+	const existing = document.getElementById('wsm-receipt-lightbox');
+	if (existing) existing.remove();
+
+	const downloadUrl = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 'action=download';
+
+	const overlay = document.createElement('div');
+	overlay.id = 'wsm-receipt-lightbox';
+	overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.88);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:wsmFadeIn .2s ease;';
+
+	overlay.innerHTML = `
+		<style>
+			@keyframes wsmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+			#wsm-receipt-lightbox img { max-width: 90vw; max-height: 80vh; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); object-fit: contain; }
+		</style>
+		<div style="position:absolute;top:20px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center;z-index:100000;">
+			<div style="display:flex;gap:10px;">
+				<a href="${downloadUrl}" download style="padding:8px 16px;background:rgba(16,185,129,0.2);color:#34d399;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px;transition:background .2s;font-family:inherit;" onmouseover="this.style.background='rgba(16,185,129,0.3)'" onmouseout="this.style.background='rgba(16,185,129,0.2)'">
+					<svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+					دانلود فایل
+				</a>
+				<a href="${imageUrl}" target="_blank" style="padding:8px 16px;background:rgba(99,102,241,0.2);color:#818cf8;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px;transition:background .2s;font-family:inherit;" onmouseover="this.style.background='rgba(99,102,241,0.3)'" onmouseout="this.style.background='rgba(99,102,241,0.2)'">
+					<svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+					باز کردن در تب جدید
+				</a>
+			</div>
+			<button onclick="document.getElementById('wsm-receipt-lightbox').remove()" style="width:40px;height:40px;border-radius:50%;background:rgba(239,68,68,0.2);border:none;color:#f87171;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='rgba(239,68,68,0.35)'" onmouseout="this.style.background='rgba(239,68,68,0.2)'">&times;</button>
+		</div>
+		<img src="${imageUrl}" alt="پیش‌نمایش رسید پرداخت" onclick="event.stopPropagation()">
+		<p style="color:#94a3b8;font-size:12px;margin-top:12px;text-align:center;">برای بستن، روی پس‌زمینه تیره یا دکمه × کلیک کنید</p>
+	`;
+
+	overlay.addEventListener('click', function(e) {
+		if (e.target === overlay) overlay.remove();
+	});
+
+	document.addEventListener('keydown', function escHandler(e) {
+		if (e.key === 'Escape') {
+			const lb = document.getElementById('wsm-receipt-lightbox');
+			if (lb) lb.remove();
+			document.removeEventListener('keydown', escHandler);
+		}
+	});
+
+	document.body.appendChild(overlay);
+}
