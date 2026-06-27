@@ -62,7 +62,28 @@ abstract class WSM_REST_Controller extends WP_REST_Controller {
 			return $auth_check;
 		}
 
-		if ( ! current_user_can( $capability ) && ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
+		// Check if the corresponding section is globally enabled
+		$cap_to_section = [
+			'wsm_access_panel'    => 'dashboard',
+			'wsm_manage_orders'   => 'orders',
+			'wsm_manage_products' => 'products',
+			'wsm_manage_coupons'  => 'coupons',
+			'wsm_view_reports'    => 'reports',
+			'wsm_manage_sms'      => 'sms',
+		];
+
+		if ( isset( $cap_to_section[ $capability ] ) ) {
+			$sec = $cap_to_section[ $capability ];
+			if ( get_option( 'wsm_enable_' . $sec, 'yes' ) !== 'yes' ) {
+				return new WP_Error(
+					'wsm_forbidden',
+					__( 'این بخش از پنل غیرفعال شده است.', 'karasu-woo-pannel' ),
+					[ 'status' => 403 ]
+				);
+			}
+		}
+
+		if ( ! current_user_can( $capability ) ) {
 			if ( empty( $error_message ) ) {
 				$error_message = __( 'دسترسی غیرمجاز.', 'karasu-woo-pannel' );
 			}

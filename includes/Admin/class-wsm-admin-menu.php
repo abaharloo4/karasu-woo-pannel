@@ -26,8 +26,8 @@ class WSM_Admin_Menu {
 	 */
 	public function add_admin_menu(): void {
 		add_menu_page(
-			__( 'تنظیمات KarasuWooPannel', 'karasu-woo-pannel' ),
-			__( 'KarasuWooPannel', 'karasu-woo-pannel' ),
+			__( 'تنظیمات پنل مدیریت کاراسو', 'karasu-woo-pannel' ),
+			__( 'پنل مدیریت کاراسو', 'karasu-woo-pannel' ),
 			'manage_options',
 			'wsm_settings',
 			[ $this, 'render_settings_page' ],
@@ -432,7 +432,7 @@ class WSM_Admin_Menu {
 		<div class="wsm-settings-wrap">
 			<div class="wsm-settings-header">
 				<div class="wsm-title-area">
-					<h1>تنظیمات افزونه KarasuWooPannel</h1>
+					<h1>تنظیمات افزونه پنل مدیریت کاراسو</h1>
 					<p>پیکربندی پنل مدیریت اختصاصی، درگاه پیامک و سطح دسترسی کاربران</p>
 				</div>
 				<a href="<?php echo esc_url( home_url( '/' . $panel_slug ) ); ?>" class="wsm-launch-btn" target="_blank">
@@ -500,13 +500,64 @@ class WSM_Admin_Menu {
 								<input type="number" id="wsm_log_retention_days" name="wsm_log_retention_days" value="<?php echo esc_attr( $log_retention ); ?>" min="1" class="wsm-input-text">
 								<p class="wsm-field-desc">تعداد روزهای نگهداری لاگ‌های پیامک قبل از حذف خودکار (پیش‌فرض ۱۸۰ روز).</p>
 							</div>
-
 							<div class="wsm-field-group wsm-full-width">
 								<label class="wsm-checkbox-label">
 									<input type="checkbox" name="wsm_trust_proxy_headers" value="1" <?php echo $trust_proxies; ?>>
 									<span>اعتماد به هدرهای پروکسی (Trust Proxy Headers)</span>
 								</label>
 								<p class="wsm-field-desc">فقط در صورتی فعال کنید که سایت پشت Cloudflare یا یک Reverse Proxy معتبر است.</p>
+							</div>
+
+							<div class="wsm-field-group wsm-full-width" style="margin-top: 20px; border-top: 1px solid #1e293b; padding-top: 20px;">
+								<label style="font-weight: bold; margin-bottom: 10px; display: block;">فعال‌سازی بخش‌های پنل (منوی کناری)</label>
+								<p class="wsm-field-desc" style="margin-bottom: 15px;">بخش‌هایی که مایلید در پنل نمایش داده شوند و کاربران مجاز بتوانند به آن‌ها دسترسی داشته باشند را مشخص کنید.</p>
+								
+								<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+									<?php
+									$sections = [
+										'dashboard'  => 'داشبورد (Dashboard)',
+										'orders'     => 'سفارش‌ها (Orders)',
+										'products'   => 'محصولات (Products)',
+										'categories' => 'دسته‌بندی‌ها (Categories)',
+										'attributes' => 'ویژگی‌ها (Attributes)',
+										'brands'     => 'برندها (Brands)',
+										'coupons'    => 'کدهای تخفیف (Discounts)',
+										'reports'    => 'گزارش‌ها (Reports)',
+										'sms'        => 'تنظیمات پیامک (SMS Settings)',
+									];
+									foreach ( $sections as $sec_key => $sec_label ) {
+										$is_enabled = get_option( 'wsm_enable_' . $sec_key, 'yes' ) === 'yes' ? 'checked' : '';
+										?>
+										<label class="wsm-checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #cbd5e1;">
+											<input type="checkbox" name="wsm_enable_<?php echo esc_attr( $sec_key ); ?>" value="yes" <?php echo $is_enabled; ?> style="cursor: pointer;">
+											<span><?php echo esc_html( $sec_label ); ?></span>
+										</label>
+										<?php
+									}
+									?>
+								</div>
+							</div>
+
+							<div class="wsm-field-group wsm-full-width" style="margin-top: 20px; border-top: 1px solid #1e293b; padding-top: 20px;">
+								<label style="font-weight: bold; margin-bottom: 10px; display: block;">تنظیمات رنگ‌بندی اختصاصی پنل</label>
+								<p class="wsm-field-desc" style="margin-bottom: 15px;">رنگ‌های مورد نظر خود را برای استایل فرانت‌اند پنل مدیریت انتخاب کنید.</p>
+								
+								<div style="display: flex; gap: 40px; flex-wrap: wrap;">
+									<div class="wsm-field-group" style="flex: 0 1 auto; min-width: 200px; display: flex; align-items: center; gap: 15px;">
+										<div>
+											<label for="wsm_primary_color" style="font-weight: 600; display: block; color: #94a3b8;">رنگ اصلی (Primary Color)</label>
+											<p class="wsm-field-desc" style="margin-top: 2px;">پیش‌فرض: #6366f1 (بنفش/نیلی)</p>
+										</div>
+										<input type="color" id="wsm_primary_color" name="wsm_primary_color" value="<?php echo esc_attr( get_option( 'wsm_primary_color', '#6366f1' ) ); ?>" style="width: 50px; height: 35px; padding: 0; border: 1px solid #334155; border-radius: 6px; cursor: pointer; background: transparent;">
+									</div>
+									<div class="wsm-field-group" style="flex: 0 1 auto; min-width: 200px; display: flex; align-items: center; gap: 15px;">
+										<div>
+											<label for="wsm_accent_color" style="font-weight: 600; display: block; color: #94a3b8;">رنگ فرعی/آکاردئونی (Accent Color)</label>
+											<p class="wsm-field-desc" style="margin-top: 2px;">پیش‌فرض: #06b6d4 (آبی/فیروزه‌ای)</p>
+										</div>
+										<input type="color" id="wsm_accent_color" name="wsm_accent_color" value="<?php echo esc_attr( get_option( 'wsm_accent_color', '#06b6d4' ) ); ?>" style="width: 50px; height: 35px; padding: 0; border: 1px solid #334155; border-radius: 6px; cursor: pointer; background: transparent;">
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -578,7 +629,7 @@ class WSM_Admin_Menu {
 					<div id="wsm-tab-pages" class="wsm-tab-content <?php echo 'wsm-tab-pages' === $active_tab ? 'active' : ''; ?>">
 						<div class="wsm-card">
 							<h3>سفارشی‌سازی و ویرایش صفحات پنل مدیریت</h3>
-							<p class="wsm-field-desc">در این بخش می‌توانید متن، پیغام یا کدهای HTML/JS دلخواه خود را برای هر یک از صفحات پنل مدیریت در فرانت‌اند تنظیم کنید. این اطلاعات در بالای هر صفحه نمایش داده خواهند شد.</p>
+							<p class="wsm-field-desc">در این بخش می‌توانید کدهای HTML، CSS و JS اختصاصی خود را برای هر یک از صفحات پنل مدیریت تنظیم کنید. کدهای HTML در بالای صفحه نمایش داده خواهند شد و استایل‌ها/اسکریپت‌ها به آن صفحه اعمال می‌شوند.</p>
 							
 							<div class="wsm-form-grid" style="grid-template-columns: 1fr; gap: 20px; margin-top: 20px;">
 								<?php
@@ -595,11 +646,29 @@ class WSM_Admin_Menu {
 									'login'      => 'صفحه ورود (Login Page)',
 								];
 								foreach ( $page_fields as $page_key => $page_label ) {
-									$val = get_option( 'wsm_custom_content_' . $page_key, '' );
+									$html_val = get_option( 'wsm_custom_html_' . $page_key, '' );
+									$css_val  = get_option( 'wsm_custom_css_' . $page_key, '' );
+									$js_val   = get_option( 'wsm_custom_js_' . $page_key, '' );
 									?>
-									<div class="wsm-field-group">
-										<label style="font-weight: bold; margin-bottom: 8px; display: block;"><?php echo esc_html( $page_label ); ?></label>
-										<textarea name="wsm_custom_content_<?php echo esc_attr( $page_key ); ?>" rows="5" class="wsm-input-text" style="font-family: monospace; font-size: 13px; width: 100%; border-radius: 8px; border: 1px solid #1e293b; padding: 10px; background: #0b0f19; color: #cbd5e1;" placeholder="کدهای HTML/JS یا متن دلخواه..."><?php echo esc_textarea( $val ); ?></textarea>
+									<div class="wsm-card wsm-page-collapsible" style="border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 5px; background: #0f172a; padding: 0;">
+										<div class="wsm-page-header" style="padding: 15px; background: #1e293b; color: #f8fafc; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="wsmTogglePageCode(this)">
+											<span><?php echo esc_html( $page_label ); ?></span>
+											<span class="wsm-arrow" style="transition: transform 0.2s;">▼</span>
+										</div>
+										<div class="wsm-page-body" style="padding: 20px; display: none; flex-direction: column; gap: 15px; border-top: 1px solid #1e293b;">
+											<div class="wsm-field-group">
+												<label style="font-weight: 600; margin-bottom: 6px; display: block; color: #94a3b8;">کد HTML سفارشی</label>
+												<textarea name="wsm_custom_html_<?php echo esc_attr( $page_key ); ?>" rows="4" class="wsm-input-text" style="font-family: monospace; font-size: 13px; width: 100%; border-radius: 8px; border: 1px solid #334155; padding: 10px; background: #020617; color: #cbd5e1;" placeholder="<div>کدهای HTML یا متن دلخواه...</div>"><?php echo esc_textarea( $html_val ); ?></textarea>
+											</div>
+											<div class="wsm-field-group">
+												<label style="font-weight: 600; margin-bottom: 6px; display: block; color: #94a3b8;">کد CSS سفارشی (بدون نیاز به تگ style)</label>
+												<textarea name="wsm_custom_css_<?php echo esc_attr( $page_key ); ?>" rows="4" class="wsm-input-text" style="font-family: monospace; font-size: 13px; width: 100%; border-radius: 8px; border: 1px solid #334155; padding: 10px; background: #020617; color: #cbd5e1;" placeholder=".selector { color: red; }"><?php echo esc_textarea( $css_val ); ?></textarea>
+											</div>
+											<div class="wsm-field-group">
+												<label style="font-weight: 600; margin-bottom: 6px; display: block; color: #94a3b8;">کد JS سفارشی (بدون نیاز به تگ script)</label>
+												<textarea name="wsm_custom_js_<?php echo esc_attr( $page_key ); ?>" rows="4" class="wsm-input-text" style="font-family: monospace; font-size: 13px; width: 100%; border-radius: 8px; border: 1px solid #334155; padding: 10px; background: #020617; color: #cbd5e1;" placeholder="console.log('Hello');"><?php echo esc_textarea( $js_val ); ?></textarea>
+											</div>
+										</div>
 									</div>
 									<?php
 								}
@@ -922,9 +991,9 @@ class WSM_Admin_Menu {
 				<!-- Tab 6: Status & About Info Tab -->
 				<div id="wsm-tab-status" class="wsm-tab-content <?php echo 'wsm-tab-status' === $active_tab ? 'active' : ''; ?>">
 					<div class="wsm-card">
-						<h3>معرفی افزونه KarasuWooPannel</h3>
+						<h3>معرفی افزونه پنل مدیریت کاراسو</h3>
 						<p class="wsm-field-desc" style="line-height: 1.8; color: #cbd5e1; font-size: 13.5px; margin-bottom: 20px;">
-							افزونه <strong>KarasuWooPannel</strong> یک ابزار پیشرفته و مدرن است که مدیریت فروشگاه ووکامرس شما را متحول می‌کند. این افزونه با راه‌اندازی یک پنل مدیریت اختصاصی و سریع با زیبایی بصری مدرن، امکان مدیریت محصولات ساده و متغیر، دسته‌بندی‌ها، کوپن‌ها، بررسی دقیق سفارش‌ها و مشاهده گزارش‌های پیشرفته با تقویم شمسی جلالی را به ارمغان می‌آورد. همچنین سیستم هوشمند اطلاع‌رسانی پیامکی ملی‌پیامک خریداران و مدیران را از آخرین رویدادهای خرید آگاه می‌سازد.
+							افزونه <strong>پنل مدیریت کاراسو</strong> یک ابزار پیشرفته و مدرن است که مدیریت فروشگاه ووکامرس شما را متحول می‌کند. این افزونه با راه‌اندازی یک پنل مدیریت اختصاصی و سریع با زیبایی بصری مدرن، امکان مدیریت محصولات ساده و متغیر، دسته‌بندی‌ها، کوپن‌ها، بررسی دقیق سفارش‌ها و مشاهده گزارش‌های پیشرفته با تقویم شمسی جلالی را به ارمغان می‌آورد. همچنین سیستم هوشمند اطلاع‌رسانی پیامکی ملی‌پیامک خریداران و مدیران را از آخرین رویدادهای خرید آگاه می‌سازد.
 						</p>
 					</div>
 
@@ -1107,6 +1176,17 @@ class WSM_Admin_Menu {
 					textarea.value += text;
 				}
 				textarea.focus();
+			}
+			function wsmTogglePageCode(header) {
+				const body = header.nextElementSibling;
+				const arrow = header.querySelector('.wsm-arrow');
+				if (body.style.display === 'none' || !body.style.display) {
+					body.style.display = 'flex';
+					arrow.style.transform = 'rotate(180deg)';
+				} else {
+					body.style.display = 'none';
+					arrow.style.transform = 'rotate(0deg)';
+				}
 			}
 		</script>
 		<?php

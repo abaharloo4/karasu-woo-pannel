@@ -83,6 +83,86 @@ class WSM_Router {
 			return;
 		}
 
+		// Verify global settings and capability for this specific view
+		$view_permissions = [
+			'dashboard' => [
+				'enable_key' => 'wsm_enable_dashboard',
+				'capability' => 'wsm_access_panel',
+			],
+			'orders/list' => [
+				'enable_key' => 'wsm_enable_orders',
+				'capability' => 'wsm_manage_orders',
+			],
+			'orders/detail' => [
+				'enable_key' => 'wsm_enable_orders',
+				'capability' => 'wsm_manage_orders',
+			],
+			'products/list' => [
+				'enable_key' => 'wsm_enable_products',
+				'capability' => 'wsm_manage_products',
+			],
+			'products/edit' => [
+				'enable_key' => 'wsm_enable_products',
+				'capability' => 'wsm_manage_products',
+			],
+			'categories/list' => [
+				'enable_key' => 'wsm_enable_categories',
+				'capability' => 'wsm_manage_products',
+			],
+			'coupons/list' => [
+				'enable_key' => 'wsm_enable_coupons',
+				'capability' => 'wsm_manage_coupons',
+			],
+			'coupons/edit' => [
+				'enable_key' => 'wsm_enable_coupons',
+				'capability' => 'wsm_manage_coupons',
+			],
+			'attributes/list' => [
+				'enable_key' => 'wsm_enable_attributes',
+				'capability' => 'wsm_manage_products',
+			],
+			'brands/list' => [
+				'enable_key' => 'wsm_enable_brands',
+				'capability' => 'wsm_manage_products',
+			],
+			'reports/dashboard' => [
+				'enable_key' => 'wsm_enable_reports',
+				'capability' => 'wsm_view_reports',
+			],
+			'reports/sales' => [
+				'enable_key' => 'wsm_enable_reports',
+				'capability' => 'wsm_view_reports',
+			],
+			'reports/products' => [
+				'enable_key' => 'wsm_enable_reports',
+				'capability' => 'wsm_view_reports',
+			],
+			'reports/customers' => [
+				'enable_key' => 'wsm_enable_reports',
+				'capability' => 'wsm_view_reports',
+			],
+			'sms/settings' => [
+				'enable_key' => 'wsm_enable_sms',
+				'capability' => 'wsm_manage_sms',
+			],
+		];
+
+		if ( isset( $view_permissions[ $view ] ) ) {
+			$perm = $view_permissions[ $view ];
+			
+			// Check if the section is globally enabled
+			if ( get_option( $perm['enable_key'], 'yes' ) !== 'yes' ) {
+				$this->render( '404' );
+				return;
+			}
+
+			// Check user capability strictly
+			if ( ! current_user_can( $perm['capability'] ) ) {
+				wp_die( esc_html__( 'دسترسی غیرمجاز. شما مجوز دسترسی به این بخش را ندارید.', 'karasu-woo-pannel' ), esc_html__( 'دسترسی غیرمجاز', 'karasu-woo-pannel' ), [ 'response' => 403 ] );
+				return;
+			}
+		}
+
 		$this->render( $view );
 	}
 

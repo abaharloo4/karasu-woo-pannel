@@ -135,16 +135,53 @@ class WSM_Admin_Settings {
 			]
 		);
 
-		// Page Customization Options
+		// Page Customization Options (HTML, CSS, JS separate for each page)
 		$pages = [ 'dashboard', 'orders', 'products', 'categories', 'attributes', 'brands', 'coupons', 'reports', 'sms', 'login' ];
+		$types = [ 'html', 'css', 'js' ];
 		foreach ( $pages as $page ) {
+			foreach ( $types as $type ) {
+				register_setting(
+					'wsm_settings_group',
+					'wsm_custom_' . $type . '_' . $page,
+					[
+						'type'              => 'string',
+						'sanitize_callback' => [ $this, 'sanitize_custom_code' ],
+						'default'           => '',
+					]
+				);
+			}
+		}
+
+		// Color Styling Settings
+		register_setting(
+			'wsm_settings_group',
+			'wsm_primary_color',
+			[
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_hex_color',
+				'default'           => '#6366f1',
+			]
+		);
+		register_setting(
+			'wsm_settings_group',
+			'wsm_accent_color',
+			[
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_hex_color',
+				'default'           => '#06b6d4',
+			]
+		);
+
+		// Section Enable/Disable Switches
+		$sections = [ 'dashboard', 'orders', 'products', 'categories', 'attributes', 'brands', 'coupons', 'reports', 'sms' ];
+		foreach ( $sections as $sec ) {
 			register_setting(
 				'wsm_settings_group',
-				'wsm_custom_content_' . $page,
+				'wsm_enable_' . $sec,
 				[
 					'type'              => 'string',
-					'sanitize_callback' => [ $this, 'sanitize_custom_html' ],
-					'default'           => '',
+					'sanitize_callback' => 'sanitize_text_field',
+					'default'           => 'yes',
 				]
 			);
 		}
@@ -247,16 +284,16 @@ class WSM_Admin_Settings {
 	}
 
 	/**
-	 * Sanitize custom HTML input for pages, allowing full HTML if current user has unfiltered_html capability.
+	 * Sanitize custom HTML/CSS/JS code, allowing full code if current user has unfiltered_html capability.
 	 *
-	 * @param string $html Input HTML.
-	 * @return string Sanitized HTML.
+	 * @param string $code Input code.
+	 * @return string Sanitized code.
 	 */
-	public function sanitize_custom_html( string $html ): string {
+	public function sanitize_custom_code( string $code ): string {
 		if ( current_user_can( 'unfiltered_html' ) ) {
-			return $html;
+			return $code;
 		}
-		return wp_kses_post( $html );
+		return wp_kses_post( $code );
 	}
 
 	/**

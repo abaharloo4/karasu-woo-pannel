@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,13 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.3 =
+* Localized all plugin titles and header brands to Persian when system locale is set to Farsi.
+* Added custom color pickers for primary and accent theme styling on the frontend panel.
+* Split page custom editors into separate HTML, CSS, and JS collapsible input areas.
+* Added settings to globally toggle each panel section/page on or off.
+* Enforced strict UAC capability validation for all administrators to allow selective section disabling.
 
 = 1.1.2 =
 * Added ability to customize and edit all frontend pages via the WP Admin panel.

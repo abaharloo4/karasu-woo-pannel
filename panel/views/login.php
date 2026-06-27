@@ -7,15 +7,67 @@
  * @date 2026-06-23
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+$primary_color = get_option( 'wsm_primary_color', '#6366f1' );
+$accent_color  = get_option( 'wsm_accent_color', '#06b6d4' );
+
+if ( ! function_exists( 'wsm_hex2rgb' ) ) {
+	function wsm_hex2rgb( $hex ) {
+		$hex = str_replace( '#', '', $hex );
+		if ( strlen( $hex ) == 3 ) {
+			$r = hexdec( substr( $hex, 0, 1 ) . substr( $hex, 0, 1 ) );
+			$g = hexdec( substr( $hex, 1, 1 ) . substr( $hex, 1, 1 ) );
+			$b = hexdec( substr( $hex, 2, 1 ) . substr( $hex, 2, 1 ) );
+		} else {
+			$r = hexdec( substr( $hex, 0, 2 ) );
+			$g = hexdec( substr( $hex, 2, 2 ) );
+			$b = hexdec( substr( $hex, 4, 2 ) );
+		}
+		return "$r, $g, $b";
+	}
 }
+
+$primary_rgb = wsm_hex2rgb( $primary_color );
+$accent_rgb  = wsm_hex2rgb( $accent_color );
 ?>
+<!-- Dynamic user custom theme colors -->
+<style>
+	:root {
+		--wsm-primary: <?php echo esc_html( $primary_color ); ?>;
+		--wsm-accent: <?php echo esc_html( $accent_color ); ?>;
+		--wsm-primary-rgb: <?php echo esc_html( $primary_rgb ); ?>;
+		--wsm-accent-rgb: <?php echo esc_html( $accent_rgb ); ?>;
+	}
+
+	/* Theme overrides */
+	.wsm-bg-indigo-600 {
+		background-color: var(--wsm-primary) !important;
+	}
+	.hover\:wsm-bg-indigo-500:hover {
+		background-color: var(--wsm-primary) !important;
+		filter: brightness(1.1) !important;
+	}
+	.wsm-text-indigo-400 {
+		color: var(--wsm-primary) !important;
+		filter: brightness(1.2) !important;
+	}
+	.wsm-border-indigo-500, .focus\:wsm-border-indigo-500:focus, .hover\:wsm-border-indigo-500:hover {
+		border-color: var(--wsm-primary) !important;
+	}
+	.wsm-from-indigo-400 {
+		--tw-gradient-from: var(--wsm-primary) !important;
+		--tw-gradient-to: rgba(var(--wsm-primary-rgb), 0) !important;
+		--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+	}
+	.wsm-to-cyan-400 {
+		--tw-gradient-to: var(--wsm-accent) !important;
+	}
+</style>
+
 <div class="wsm-w-full wsm-max-w-md">
 	<div class="wsm-bg-slate-900/60 wsm-backdrop-blur-xl wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-shadow-2xl wsm-overflow-hidden wsm-p-8 md:wsm-p-10">
 		<div class="wsm-text-center wsm-mb-8">
 			<h1 class="wsm-text-2xl wsm-font-bold wsm-bg-gradient-to-r wsm-from-indigo-400 wsm-to-cyan-400 wsm-bg-clip-text wsm-text-transparent wsm-mb-2">
-				KarasuWooPannel
+				<?php echo esc_html( __( 'پنل مدیریت کاراسو', 'karasu-woo-pannel' ) ); ?>
 			</h1>
 			<p class="wsm-text-sm wsm-text-slate-400"><?php echo esc_html( __( 'Log in to your dedicated store management panel', 'karasu-woo-pannel' ) ); ?></p>
 		</div>
@@ -26,9 +78,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 
 		<?php
-		$custom_login_content = get_option( 'wsm_custom_content_login', '' );
-		if ( ! empty( $custom_login_content ) ) {
-			echo '<div class="wsm-custom-page-content wsm-mb-6 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-800/80 wsm-rounded-2xl wsm-text-sm">' . do_shortcode( $custom_login_content ) . '</div>';
+		$custom_login_html = get_option( 'wsm_custom_html_login', '' );
+		$custom_login_css  = get_option( 'wsm_custom_css_login', '' );
+		$custom_login_js   = get_option( 'wsm_custom_js_login', '' );
+
+		if ( ! empty( $custom_login_css ) ) {
+			echo '<style>' . $custom_login_css . '</style>';
+		}
+		if ( ! empty( $custom_login_html ) ) {
+			echo '<div class="wsm-custom-page-content wsm-mb-6 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-800/80 wsm-rounded-2xl wsm-text-sm">' . do_shortcode( $custom_login_html ) . '</div>';
+		}
+		if ( ! empty( $custom_login_js ) ) {
+			echo '<script>' . $custom_login_js . '</script>';
 		}
 		?>
 
