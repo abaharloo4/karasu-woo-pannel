@@ -237,6 +237,7 @@ class WSM_Sms_Service {
 
 				$this->log_sms( $event_type, $to, $message, $status, $api_msg_full, $related_id );
 				return (bool) $status;
+			}
 		}
 
 		return true;

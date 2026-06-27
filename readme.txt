@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,9 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.6 =
+* Fixed PHP syntax bracket parse error inside class-wsm-sms-service.php send_sms method.
 
 = 1.1.5 =
 * Added support for Melipayamak API Token / Auth Key console sending, bypassing username/password requirements.
