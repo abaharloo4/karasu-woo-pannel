@@ -578,8 +578,14 @@ class WSM_Admin_Menu {
 						<div class="wsm-card">
 							<h3>اعتبارنامه درگاه ملی‌پیامک</h3>
 							<div class="wsm-form-grid">
+								<div class="wsm-field-group" style="grid-column: span 2;">
+									<label for="wsm_sms_token">کلید API یا توکن ملی‌پیامک (Auth Token - توصیه شده)</label>
+									<input type="text" id="wsm_sms_token" name="wsm_sms_token" value="<?php echo esc_attr( get_option( 'wsm_sms_token', '' ) ); ?>" class="wsm-input-text" placeholder="توکن دریافتی از کنسول جدید ملی‌پیامک">
+									<p class="wsm-field-desc">اگر از سیستم کنسول جدید ملی‌پیامک استفاده می‌کنید، توکن خود را در اینجا وارد کنید تا نیازی به ورود نام کاربری و رمز عبور نباشد.</p>
+								</div>
+
 								<div class="wsm-field-group">
-									<label for="wsm_sms_username">نام کاربری ملی‌پیامک</label>
+									<label for="wsm_sms_username">نام کاربری ملی‌پیامک (اختیاری در صورت استفاده از توکن)</label>
 									<input type="text" id="wsm_sms_username" name="wsm_sms_username" value="<?php echo esc_attr( $sms_username ); ?>" class="wsm-input-text">
 								</div>
 
@@ -1098,6 +1104,39 @@ class WSM_Admin_Menu {
 							</table>
 						</div>
 					</div>
+
+					<div class="wsm-card" style="margin-top: 20px;">
+						<h3 style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin: 0;" onclick="wsmToggleGuide(this)">
+							<span>راهنمای کدهای پاسخ و خطاهای درگاه ملی‌پیامک</span>
+							<span class="wsm-guide-arrow" style="transition: transform 0.2s; font-size: 14px;">▼</span>
+						</h3>
+						<div class="wsm-guide-body" style="display: none; margin-top: 15px; border-top: 1px solid #1e293b; padding-top: 15px; font-size: 13px; line-height: 1.8; color: #cbd5e1;">
+							<p style="margin-bottom: 15px; color: #94a3b8;">در زمان ارسال پیامک، درگاه ملی‌پیامک یک کد پاسخ (RetVal یا RetStatus) برمی‌گرداند. مقادیر بالای ۱۰۰ نشان‌دهنده موفقیت (شناسه پیامک) و مقادیر دیگر نشان‌دهنده خطا هستند:</p>
+							<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-family: inherit;">
+								<div>
+									<strong style="color: #fca5a5;">کد ۳۵ / InvalidData:</strong>
+									<p style="margin: 3px 0 10px 0; color: #94a3b8;">شماره موبایل گیرنده در <strong>لیست سیاه (Blacklist) مخابرات</strong> قرار دارد و دریافت پیامک‌های تبلیغاتی را مسدود کرده است. برای ارسال به این خطوط، حتماً باید از الگو در «وب‌سرویس خدماتی» استفاده کنید.</p>
+									
+									<strong style="color: #fca5a5;">کد ۰ یا ۱:</strong>
+									<p style="margin: 3px 0 10px 0; color: #94a3b8;">نام کاربری، رمز عبور یا توکن API وارد شده اشتباه یا نامعتبر است.</p>
+									
+									<strong style="color: #fca5a5;">کد ۲:</strong>
+									<p style="margin: 3px 0 10px 0; color: #94a3b8;">پنل کاربری ملی‌پیامک شما غیرفعال یا مسدود شده است.</p>
+								</div>
+								<div>
+									<strong style="color: #fca5a5;">کد ۳:</strong>
+									<p style="margin: 3px 0 10px 0; color: #94a3b8;">اعتبار مالی (شارژ) پنل کاربری شما کافی نیست.</p>
+									
+									<strong style="color: #fca5a5;">کد ۴ یا ۵:</strong>
+									<p style="margin: 3px 0 10px 0; color: #94a3b8;">شماره فرستنده انتخابی (Sender Line) معتبر نیست یا به درستی تنظیم نشده است.</p>
+									
+									<strong style="color: #fca5a5;">کد ۶:</strong>
+									<p style="margin: 3px 0 10px 0; color: #94a3b8;">فرمت شماره گیرنده نامعتبر است (باید با ۰۹ شروع شود).</p>
+								</div>
+							</div>
+							<p style="margin-top: 15px; border-top: 1px solid #1e293b; padding-top: 10px; color: #64748b; font-size: 11px;">توجه: دکمه تست پیامک به علت ارسال پیام متنی خام، به صورت مستقیم از شماره اختصاصی شما (Promotional Line) ارسال می‌شود و در صورت بلک‌لیست بودن شماره با خطای ۳۵ مواجه می‌شوید، اما ارسال‌های خدماتی سفارش با الگو بدون مشکل ارسال خواهند شد.</p>
+						</div>
+					</div>
 				</div>
 
 				<!-- Tab 6: Status & About Info Tab -->
@@ -1165,7 +1204,13 @@ class WSM_Admin_Menu {
 							<tr>
 								<td>اتصال درگاه ملی‌پیامک</td>
 								<td>
-									<?php if ( ! empty( $sms_username ) && ! empty( $sms_password ) ) : ?>
+									<?php
+									$sms_token = get_option( 'wsm_sms_token', '' );
+									$has_db_password = ! empty( get_option( 'wsm_sms_password', '' ) );
+									if ( ! empty( $sms_token ) ) :
+										?>
+										<span class="wsm-status-badge" style="background: rgba(16,185,129,0.15); color: #34d399;">پیکربندی شده (با کلید API)</span>
+									<?php elseif ( ! empty( $sms_username ) && $has_db_password ) : ?>
 										<span class="wsm-status-badge" style="background: rgba(16,185,129,0.15); color: #34d399;">پیکربندی شده (نام کاربری: <?php echo esc_html( $sms_username ); ?>)</span>
 									<?php else : ?>
 										<span class="wsm-status-badge" style="background: rgba(239,68,68,0.15); color: #f87171;">پیکربندی نشده</span>
@@ -1294,6 +1339,17 @@ class WSM_Admin_Menu {
 				const arrow = header.querySelector('.wsm-arrow');
 				if (body.style.display === 'none' || !body.style.display) {
 					body.style.display = 'flex';
+					arrow.style.transform = 'rotate(180deg)';
+				} else {
+					body.style.display = 'none';
+					arrow.style.transform = 'rotate(0deg)';
+				}
+			}
+			function wsmToggleGuide(header) {
+				const body = header.nextElementSibling;
+				const arrow = header.querySelector('.wsm-guide-arrow');
+				if (body.style.display === 'none' || !body.style.display) {
+					body.style.display = 'block';
 					arrow.style.transform = 'rotate(180deg)';
 				} else {
 					body.style.display = 'none';

@@ -72,6 +72,15 @@ class WSM_Admin_Settings {
 
 		register_setting(
 			'wsm_settings_group',
+			'wsm_sms_token',
+			[
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			]
+		);
+
+		register_setting(
+			'wsm_settings_group',
 			'wsm_sms_from_line',
 			[
 				'type'              => 'string',

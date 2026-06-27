@@ -38,9 +38,10 @@ class WSM_Sms_Service {
 		$username = get_option( 'wsm_sms_username' );
 		$password = wsm_decrypt_password( get_option( 'wsm_sms_password' ) );
 		$from     = get_option( 'wsm_sms_from_line' );
+		$token    = get_option( 'wsm_sms_token' );
 
 		// Check if credentials are not configured, fallback to mock logs.
-		if ( empty( $username ) || empty( $password ) ) {
+		if ( empty( $token ) && ( empty( $username ) || empty( $password ) ) ) {
 			$this->log_sms( $event_type, $to, $message, 1, 'MOCKED_SUCCESS', $related_id );
 			return true;
 		}
@@ -66,16 +67,96 @@ class WSM_Sms_Service {
 			if ( $object ) {
 				$pattern_text = $this->get_pattern_text_values( $args_str, $object );
 				
+				if ( ! empty( $token ) ) {
+					// Use REST console API (Token Auth)
+					$pattern_args = explode( ';', $pattern_text );
+					$pattern_args = array_map( 'trim', $pattern_args );
+
+					$body = [
+						'to'     => $to,
+						'bodyId' => $body_id,
+						'args'   => $pattern_args,
+					];
+
+					$response = wp_remote_post(
+						'https://console.melipayamak.com/api/send/shared/' . $token,
+						[
+							'headers' => [ 'Content-Type' => 'application/json' ],
+							'body'    => json_encode( $body ),
+							'timeout' => 15,
+						]
+					);
+
+					if ( ! is_wp_error( $response ) ) {
+						$res_body = wp_remote_retrieve_body( $response );
+						$res_data = json_decode( $res_body, true );
+						
+						$val = $res_data['recId'] ?? $res_data['value'] ?? $res_data['Value'] ?? '';
+						if ( ! empty( $val ) && ( ! isset( $res_data['status'] ) || $res_data['status'] !== 'error' ) ) {
+							$sent = true;
+							$api_msg = 'Pattern Success (ID: ' . $val . ')';
+							$this->log_sms( $event_type, $to, 'Pattern ID: ' . $body_id . ' | Args: ' . $pattern_text, 1, $api_msg, $related_id );
+						} else {
+							$err_code = $res_data['code'] ?? $res_data['RetStatus'] ?? '';
+							$api_msg = 'Pattern Failed' . ( ! empty( $err_code ) ? ' (Code: ' . $err_code . ')' : '' );
+							wsm_log_error( sprintf( 'Melipayamak API Token pattern sending failed (Event: %s, To: %s, BodyId: %d, Response: %s)', $event_type, $to, $body_id, $res_body ) );
+						}
+					} else {
+						$api_msg = 'Pattern Request Error: ' . $response->get_error_message();
+						wsm_log_error( sprintf( 'Melipayamak API Token pattern sending request error (Event: %s, To: %s, BodyId: %d, Error: %s)', $event_type, $to, $body_id, $api_msg ) );
+					}
+				} else {
+					// Use legacy SOAP/REST API (Username/Password Auth)
+					$body = [
+						'username' => $username,
+						'password' => $password,
+						'to'       => $to,
+						'bodyId'   => $body_id,
+						'text'     => $pattern_text,
+					];
+
+					$response = wp_remote_post(
+						'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumberShared',
+						[
+							'headers' => [ 'Content-Type' => 'application/json' ],
+							'body'    => json_encode( $body ),
+							'timeout' => 15,
+						]
+					);
+
+					if ( ! is_wp_error( $response ) ) {
+						$res_body = wp_remote_retrieve_body( $response );
+						$res_data = json_decode( $res_body, true );
+						$retval   = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
+						
+						if ( $retval > 100 ) {
+							$sent = true;
+							$api_msg = 'Pattern Success (ID: ' . $retval . ')';
+							$this->log_sms( $event_type, $to, 'Pattern ID: ' . $body_id . ' | Args: ' . $pattern_text, 1, $api_msg, $related_id );
+						} else {
+							$api_msg = 'Pattern Failed (Code: ' . $retval . ')';
+							wsm_log_error( sprintf( 'Melipayamak pattern sending failed (Event: %s, To: %s, BodyId: %d, Response: %s)', $event_type, $to, $body_id, $res_body ) );
+						}
+					} else {
+						$api_msg = 'Pattern Error: ' . $response->get_error_message();
+						wsm_log_error( sprintf( 'Melipayamak pattern sending request error (Event: %s, To: %s, BodyId: %d, Error: %s)', $event_type, $to, $body_id, $api_msg ) );
+					}
+				}
+			}
+		}
+
+		// 2. Fallback to standard dedicated line SendSMS if pattern wasn't configured or failed
+		if ( ! $sent ) {
+			if ( ! empty( $token ) ) {
+				// Use REST console API fallback
 				$body = [
-					'username' => $username,
-					'password' => $password,
-					'to'       => $to,
-					'bodyId'   => $body_id,
-					'text'     => $pattern_text,
+					'to'   => $to,
+					'from' => $from,
+					'text' => $message,
 				];
 
 				$response = wp_remote_post(
-					'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumberShared',
+					'https://console.melipayamak.com/api/send/simple/' . $token,
 					[
 						'headers' => [ 'Content-Type' => 'application/json' ],
 						'body'    => json_encode( $body ),
@@ -83,68 +164,79 @@ class WSM_Sms_Service {
 					]
 				);
 
-				if ( ! is_wp_error( $response ) ) {
-					$res_body = wp_remote_retrieve_body( $response );
-					$res_data = json_decode( $res_body, true );
-					$retval   = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
-					
-					if ( $retval > 100 ) {
-						$sent = true;
-						$api_msg = 'Pattern Success (ID: ' . $retval . ')';
-						$this->log_sms( $event_type, $to, 'Pattern ID: ' . $body_id . ' | Args: ' . $pattern_text, 1, $api_msg, $related_id );
-					} else {
-						$api_msg = 'Pattern Failed (Code: ' . $retval . ')';
-						wsm_log_error( sprintf( 'Melipayamak pattern sending failed (Event: %s, To: %s, BodyId: %d, Response: %s)', $event_type, $to, $body_id, $res_body ) );
-					}
-				} else {
-					$api_msg = 'Pattern Error: ' . $response->get_error_message();
-					wsm_log_error( sprintf( 'Melipayamak pattern sending request error (Event: %s, To: %s, BodyId: %d, Error: %s)', $event_type, $to, $body_id, $api_msg ) );
+				if ( is_wp_error( $response ) ) {
+					$error_msg = $response->get_error_message();
+					$this->log_sms( $event_type, $to, $message, 0, $error_msg . ( ! empty( $api_msg ) ? ' (Fallback from: ' . $api_msg . ')' : '' ), $related_id );
+					wsm_log_error( sprintf( 'Melipayamak API Token fallback send request error (Event: %s, To: %s, Error: %s)', $event_type, $to, $error_msg ) );
+					return false;
 				}
-			}
-		}
 
-		// 2. Fallback to standard dedicated line SendSMS if pattern wasn't configured or failed
-		if ( ! $sent ) {
-			$body = [
-				'username' => $username,
-				'password' => $password,
-				'to'       => $to,
-				'from'     => $from,
-				'text'     => $message,
-			];
+				$res_body = wp_remote_retrieve_body( $response );
+				$res_data = json_decode( $res_body, true );
 
-			$response = wp_remote_post(
-				'https://rest.payamak-panel.com/api/SendSMS/SendSMS',
-				[
-					'headers' => [ 'Content-Type' => 'application/json' ],
-					'body'    => json_encode( $body ),
-					'timeout' => 15,
-				]
-			);
+				$val    = $res_data['recId'] ?? $res_data['value'] ?? $res_data['Value'] ?? '';
+				$status = ( ! empty( $val ) && ( ! isset( $res_data['status'] ) || $res_data['status'] !== 'error' ) ) ? 1 : 0;
+				
+				$api_msg_full = '';
+				if ( $status ) {
+					$api_msg_full = 'Message ID: ' . $val;
+				} else {
+					$err_code = $res_data['code'] ?? $res_data['RetStatus'] ?? 'Unknown';
+					$api_msg_full = 'Error Code: ' . $err_code;
+				}
 
-			if ( is_wp_error( $response ) ) {
-				$error_msg = $response->get_error_message();
-				$this->log_sms( $event_type, $to, $message, 0, $error_msg . ( ! empty( $api_msg ) ? ' (Fallback from: ' . $api_msg . ')' : '' ), $related_id );
-				wsm_log_error( sprintf( 'Melipayamak fallback send request error (Event: %s, To: %s, Error: %s)', $event_type, $to, $error_msg ) );
-				return false;
-			}
+				if ( ! empty( $api_msg ) ) {
+					$api_msg_full .= ' (Fallback from: ' . $api_msg . ')';
+				}
 
-			$res_body = wp_remote_retrieve_body( $response );
-			$res_data = json_decode( $res_body, true );
+				if ( ! $status ) {
+					wsm_log_error( sprintf( 'Melipayamak API Token fallback sending failed (Event: %s, To: %s, Response: %s)', $event_type, $to, $res_body ) );
+				}
 
-			$retval       = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
-			$status       = $retval > 100 ? 1 : 0;
-			$api_msg_full = $status ? 'Message ID: ' . $retval : 'Error Code: ' . $retval;
-			if ( ! empty( $api_msg ) ) {
-				$api_msg_full .= ' (Fallback from: ' . $api_msg . ')';
-			}
+				$this->log_sms( $event_type, $to, $message, $status, $api_msg_full, $related_id );
+				return (bool) $status;
+			} else {
+				// Use legacy SOAP/REST API fallback
+				$body = [
+					'username' => $username,
+					'password' => $password,
+					'to'       => $to,
+					'from'     => $from,
+					'text'     => $message,
+				];
 
-			if ( ! $status ) {
-				wsm_log_error( sprintf( 'Melipayamak fallback sending failed (Event: %s, To: %s, Response: %s)', $event_type, $to, $res_body ) );
-			}
+				$response = wp_remote_post(
+					'https://rest.payamak-panel.com/api/SendSMS/SendSMS',
+					[
+						'headers' => [ 'Content-Type' => 'application/json' ],
+						'body'    => json_encode( $body ),
+						'timeout' => 15,
+					]
+				);
 
-			$this->log_sms( $event_type, $to, $message, $status, $api_msg_full, $related_id );
-			return (bool) $status;
+				if ( is_wp_error( $response ) ) {
+					$error_msg = $response->get_error_message();
+					$this->log_sms( $event_type, $to, $message, 0, $error_msg . ( ! empty( $api_msg ) ? ' (Fallback from: ' . $api_msg . ')' : '' ), $related_id );
+					wsm_log_error( sprintf( 'Melipayamak fallback send request error (Event: %s, To: %s, Error: %s)', $event_type, $to, $error_msg ) );
+					return false;
+				}
+
+				$res_body = wp_remote_retrieve_body( $response );
+				$res_data = json_decode( $res_body, true );
+
+				$retval       = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
+				$status       = $retval > 100 ? 1 : 0;
+				$api_msg_full = $status ? 'Message ID: ' . $retval : 'Error Code: ' . $retval;
+				if ( ! empty( $api_msg ) ) {
+					$api_msg_full .= ' (Fallback from: ' . $api_msg . ')';
+				}
+
+				if ( ! $status ) {
+					wsm_log_error( sprintf( 'Melipayamak fallback sending failed (Event: %s, To: %s, Response: %s)', $event_type, $to, $res_body ) );
+				}
+
+				$this->log_sms( $event_type, $to, $message, $status, $api_msg_full, $related_id );
+				return (bool) $status;
 		}
 
 		return true;
