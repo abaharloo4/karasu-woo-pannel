@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,13 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.9 =
+* Fixed product details wiping issue when changing stock status.
+* Updated product sanitizer to support partial updates and brand IDs.
+* Corrected Melipayamak SMS pattern sending endpoint.
+* Added a clear button for SMS logs in both the WP Admin settings and Karasu dashboard.
+* Added success notifications for test SMS sending and saving templates.
 
 = 1.1.8 =
 * Fixed receipt file lookup 404 error when High-Performance Order Storage (HPOS) is active.

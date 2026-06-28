@@ -95,7 +95,7 @@ class WSM_Product_Service {
 	 * @return bool|WP_Error True if success, else WP_Error.
 	 */
 	public function update_product( int $id, array $data ): bool|WP_Error {
-		$sanitized = WSM_Sanitizer::product_data( $data );
+		$sanitized = WSM_Sanitizer::product_data( $data, true );
 		return $this->repository->update( $id, $sanitized );
 	}
 

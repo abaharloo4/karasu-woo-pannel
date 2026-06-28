@@ -129,6 +129,18 @@ class WSM_Admin_Menu {
 			wp_safe_redirect( add_query_arg( [ 'page' => 'wsm_settings', 'settings-updated' => 'true', 'tab' => 'wsm-tab-logs' ], admin_url( 'admin.php' ) ) );
 			exit;
 		}
+
+		// 4. Clear SMS Logs
+		if ( isset( $_POST['wsm_clear_sms_logs'] ) ) {
+			check_admin_referer( 'wsm_clear_sms_logs_action', 'wsm_clear_sms_logs_nonce' );
+			global $wpdb;
+			$sms_logs_table = $wpdb->prefix . 'wsm_sms_log';
+			if ( $wpdb->get_var( "SHOW TABLES LIKE '$sms_logs_table'" ) === $sms_logs_table ) {
+				$wpdb->query( "DELETE FROM $sms_logs_table" );
+			}
+			wp_safe_redirect( add_query_arg( [ 'page' => 'wsm_settings', 'settings-updated' => 'true', 'tab' => 'wsm-tab-logs' ], admin_url( 'admin.php' ) ) );
+			exit;
+		}
 	}
 
 	/**
@@ -1103,6 +1115,12 @@ class WSM_Admin_Menu {
 								</tbody>
 							</table>
 						</div>
+
+						<form action="" method="post" style="margin-top: 15px; display: flex; justify-content: flex-end;">
+							<?php wp_nonce_field( 'wsm_clear_sms_logs_action', 'wsm_clear_sms_logs_nonce' ); ?>
+							<input type="hidden" name="wsm_clear_sms_logs" value="1">
+							<button type="submit" class="wsm-test-btn" style="background: #e11d48; border-color: #f43f5e;" onclick="return confirm('آیا از پاک کردن لاگ پیامک‌های ارسالی مطمئن هستید؟');">پاک کردن لاگ پیامک‌ها</button>
+						</form>
 					</div>
 
 					<div class="wsm-card" style="margin-top: 20px;">

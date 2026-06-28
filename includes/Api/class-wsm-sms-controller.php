@@ -68,6 +68,11 @@ class WSM_Sms_Controller extends WSM_REST_Controller {
 					'callback'            => [ $this, 'get_logs' ],
 					'permission_callback' => [ $this, 'check_permission' ],
 				],
+				[
+					'methods'             => 'DELETE',
+					'callback'            => [ $this, 'clear_logs' ],
+					'permission_callback' => [ $this, 'check_permission' ],
+				],
 			]
 		);
 
@@ -180,5 +185,17 @@ class WSM_Sms_Controller extends WSM_REST_Controller {
 		} else {
 			return WSM_Response::error( __( 'ارسال پیامک تست ناموفق بود. لاگ‌ها را بررسی کنید.', 'karasu-woo-pannel' ) );
 		}
+	}
+
+	/**
+	 * Clear all SMS logs.
+	 *
+	 * @return WP_REST_Response REST API Response.
+	 */
+	public function clear_logs(): WP_REST_Response {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wsm_sms_log';
+		$wpdb->query( "DELETE FROM $table_name" );
+		return WSM_Response::success( null, __( 'لاگ‌های پیامک با موفقیت پاکسازی شدند.', 'karasu-woo-pannel' ) );
 	}
 }

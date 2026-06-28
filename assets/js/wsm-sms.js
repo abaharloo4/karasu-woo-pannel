@@ -96,6 +96,7 @@
 				method: 'POST',
 				body: JSON.stringify(payload)
 			});
+			alert('تنظیمات قالب‌ها با موفقیت ذخیره شدند.');
 		} catch (err) {
 			// Handled globally
 		} finally {
@@ -122,10 +123,11 @@
 		btn.innerHTML = 'در حال ارسال...';
 
 		try {
-			await WSM.fetch('/sms/test', {
+			const res = await WSM.fetch('/sms/test', {
 				method: 'POST',
 				body: JSON.stringify({ phone, message })
 			});
+			alert(res.message || 'پیامک تست با موفقیت ارسال شد.');
 		} catch (err) {
 			// Handled globally
 		} finally {
@@ -341,6 +343,22 @@
 
 		document.getElementById('wsm-sms-settings-form')?.addEventListener('submit', saveSmsTemplates);
 		document.getElementById('wsm-send-test-sms-btn')?.addEventListener('click', sendTestSms);
+
+		const clearLogsBtn = document.getElementById('wsm-clear-sms-logs-btn');
+		if (clearLogsBtn) {
+			clearLogsBtn.addEventListener('click', async (e) => {
+				e.preventDefault();
+				if (confirm('آیا از پاکسازی تمام لاگ‌های پیامک مطمئن هستید؟')) {
+					try {
+						await WSM.fetch('/sms/logs', { method: 'DELETE' });
+						currentLogPage = 1;
+						loadSmsLogs();
+					} catch (err) {
+						// Error handled globally
+					}
+				}
+			});
+		}
 	});
 
 })();

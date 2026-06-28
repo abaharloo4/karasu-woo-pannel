@@ -116,7 +116,7 @@ class WSM_Sms_Service {
 					];
 
 					$response = wp_remote_post(
-						'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumberShared',
+						'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumber',
 						[
 							'headers' => [ 'Content-Type' => 'application/json' ],
 							'body'    => json_encode( $body ),

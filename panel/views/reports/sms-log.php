@@ -14,6 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wsm-space-y-6">
 	<div class="wsm-flex wsm-items-center wsm-justify-between">
 		<h1 class="wsm-text-2xl wsm-font-bold wsm-text-slate-100">تاریخچه پیامک‌های ارسالی</h1>
+		<button id="wsm-clear-sms-logs-btn" class="wsm-px-5 wsm-py-3 wsm-bg-rose-600 hover:wsm-bg-rose-500 wsm-text-white wsm-text-sm wsm-font-semibold wsm-rounded-2xl wsm-shadow-lg wsm-shadow-rose-500/20 wsm-transition-all">
+			پاکسازی لاگ‌ها
+		</button>
 	</div>
 
 	<!-- Logs Table Card -->
