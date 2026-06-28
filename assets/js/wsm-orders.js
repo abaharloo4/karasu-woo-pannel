@@ -331,26 +331,26 @@
 							`;
 						} else if (isImage) {
 							receiptsContent += `
-								<div class="wsm-flex wsm-flex-col sm:wsm-flex-row wsm-items-start sm:wsm-items-center wsm-justify-between wsm-gap-4 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
-									<div class="wsm-space-y-1">
-										<span class="wsm-text-xs wsm-text-slate-500 wsm-block">${WSM.escHtml(r.key)}</span>
-										<span class="wsm-text-sm wsm-font-semibold wsm-text-slate-200 wsm-block">${WSM.escHtml(r.label)}</span>
-										<span class="wsm-text-xs wsm-text-slate-400 wsm-block">نام فایل: ${WSM.escHtml(r.value)}</span>
-									</div>
-									<div class="wsm-flex wsm-items-center wsm-gap-3">
-										<div class="wsm-block wsm-w-16 wsm-h-16 wsm-rounded-xl wsm-overflow-hidden wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500 wsm-transition-colors wsm-cursor-pointer" onclick="wsmOpenReceiptLightbox('${url}')">
-											<img src="${url}" class="wsm-w-full wsm-h-full wsm-object-cover" alt="رسید پرداخت" onerror="this.parentElement.style.display='none'">
+								<div class="wsm-flex wsm-flex-col wsm-gap-4 wsm-p-4 wsm-bg-slate-950/40 wsm-border wsm-border-slate-900 wsm-rounded-2xl wsm-w-full">
+									<div class="wsm-flex wsm-flex-col sm:wsm-flex-row wsm-items-start sm:wsm-items-center wsm-justify-between wsm-gap-4">
+										<div class="wsm-space-y-1">
+											<span class="wsm-text-xs wsm-text-slate-500 wsm-block">${WSM.escHtml(r.key)}</span>
+											<span class="wsm-text-sm wsm-font-semibold wsm-text-slate-200 wsm-block">${WSM.escHtml(r.label)}</span>
+											<span class="wsm-text-xs wsm-text-slate-400 wsm-block">نام فایل: ${WSM.escHtml(r.value)}</span>
 										</div>
-										<div class="wsm-flex wsm-flex-col wsm-gap-1.5">
+										<div class="wsm-flex wsm-items-center wsm-gap-2">
 											<button type="button" onclick="wsmOpenReceiptLightbox('${url}')" class="wsm-px-3 wsm-py-1.5 wsm-bg-indigo-600/15 hover:wsm-bg-indigo-600/25 wsm-text-indigo-400 wsm-rounded-lg wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5 wsm-cursor-pointer" style="border:none;outline:none;">
 												<svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-												پیش‌نمایش
+												بزرگنمایی
 											</button>
 											<a href="${downloadUrl}" class="wsm-px-3 wsm-py-1.5 wsm-bg-emerald-600/15 hover:wsm-bg-emerald-600/25 wsm-text-emerald-400 wsm-rounded-lg wsm-text-xs wsm-font-semibold wsm-transition-colors wsm-flex wsm-items-center wsm-gap-1.5" download>
 												<svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-												دانلود
+												دانلود رسید
 											</a>
 										</div>
+									</div>
+									<div class="wsm-relative wsm-w-full wsm-rounded-xl wsm-overflow-hidden wsm-border wsm-border-slate-800 hover:wsm-border-indigo-500 wsm-transition-colors wsm-cursor-pointer" style="max-height:240px; background:rgba(0,0,0,0.15);" onclick="wsmOpenReceiptLightbox('${url}')">
+										<img src="${url}" class="wsm-w-full wsm-object-contain" style="max-height:240px; display:block; margin:0 auto;" alt="رسید پرداخت" onerror="this.parentElement.style.display='none'">
 									</div>
 								</div>
 							`;

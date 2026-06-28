@@ -315,9 +315,16 @@ class WSM_Orders_Controller extends WSM_REST_Controller {
 		$order_id  = (int) $request->get_param( 'id' );
 		$file_hash = sanitize_text_field( $request->get_param( 'hash' ) );
 
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			status_header( 404 );
+			echo 'Order not found';
+			exit;
+		}
+
 		// Retrieve receipt from metadata of Karasu Payment Method
 		// Meta key: _kpm_receipt_files
-		$receipts = get_post_meta( $order_id, '_kpm_receipt_files', true );
+		$receipts = $order->get_meta( '_kpm_receipt_files', true );
 		if ( ! is_array( $receipts ) ) {
 			$receipts = [];
 		}

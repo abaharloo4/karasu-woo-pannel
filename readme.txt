@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,12 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.8 =
+* Fixed receipt file lookup 404 error when High-Performance Order Storage (HPOS) is active.
+* Swapped get_post_meta with HPOS-safe order meta getter.
+* Redesigned receipt images in order details to automatically show in-line preview without clicking.
+* Created a markdown integration guide for the custom card-to-card plugin compatibility.
 
 = 1.1.7 =
 * Fixed receipt file access: now accepts both panel session and standard WordPress admin cookies.
