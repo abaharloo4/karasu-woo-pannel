@@ -36,6 +36,10 @@
 			}
 		};
 
+		if (typeof FormData !== 'undefined' && mergedOptions.body instanceof FormData) {
+			delete mergedOptions.headers['Content-Type'];
+		}
+
 		try {
 			const response = await fetch(apiUrl + endpoint, mergedOptions);
 
