@@ -398,6 +398,7 @@ class WSM_Admin_Settings {
 	public function render_sms_pass_field(): void {
 		$value = wsm_decrypt_password( get_option( 'wsm_sms_password', '' ) );
 		echo '<input type="text" name="wsm_sms_password" value="' . esc_attr( $value ) . '" class="regular-text">';
+		echo '<p class="description">' . esc_html__( 'اگر در تنظیمات پنل ملی‌پیامک خود گزینه «الزام استفاده از ApiKey» را فعال کرده‌اید، کلید امنیتی (ApiKey) خود را به جای پسورد در این فیلد وارد نمایید.', 'karasu-woo-pannel' ) . '</p>';
 	}
 
 	/**

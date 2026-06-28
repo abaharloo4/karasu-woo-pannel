@@ -602,9 +602,10 @@ class WSM_Admin_Menu {
 								</div>
 
 								<div class="wsm-field-group">
-									<label for="wsm_sms_password">رمز عبور ملی‌پیامک</label>
+									<label for="wsm_sms_password">رمز عبور یا کلید امنیتی (ApiKey) ملی‌پیامک</label>
 									<?php $sms_pass = wsm_decrypt_password( get_option( 'wsm_sms_password', '' ) ); ?>
 									<input type="text" id="wsm_sms_password" name="wsm_sms_password" value="<?php echo esc_attr( $sms_pass ); ?>" class="wsm-input-text">
+									<p class="wsm-field-desc">اگر در تنظیمات پنل ملی‌پیامک خود گزینه «الزام استفاده از ApiKey» فعال است، باید **کلید امنیتی (ApiKey)** خود را به جای رمز عبور در این فیلد وارد نمایید.</p>
 								</div>
 
 								<div class="wsm-field-group">
