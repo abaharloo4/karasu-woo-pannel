@@ -176,7 +176,8 @@ class WSM_Admin_Menu {
 			.wsm-settings-wrap {
 				font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 				direction: rtl;
-				max-width: 900px;
+				width: 98%;
+				max-width: 1400px;
 				margin: 30px auto;
 				background: #0f172a;
 				color: #cbd5e1;
@@ -1262,6 +1263,12 @@ class WSM_Admin_Menu {
 				
 				document.getElementById(tabId).classList.add('active');
 				evt.currentTarget.classList.add('active');
+
+				if (window.history.replaceState) {
+					const url = new URL(window.location.href);
+					url.searchParams.set('tab', tabId);
+					window.history.replaceState(null, '', url.toString());
+				}
 
 				const optionsForm = document.getElementById('wsm-options-form');
 				const templatesForm = document.getElementById('wsm-templates-form');

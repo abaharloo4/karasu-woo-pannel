@@ -47,15 +47,11 @@ class WSM_Order_Repository {
 		}
 
 		// Handle Date Created queries (must be in Gregorian format)
-		if ( ! empty( $args['date_from'] ) || ! empty( $args['date_to'] ) ) {
-			$date_query = [];
-			if ( ! empty( $args['date_from'] ) ) {
-				$date_query['after'] = sanitize_text_field( $args['date_from'] ) . ' 00:00:00';
-			}
-			if ( ! empty( $args['date_to'] ) ) {
-				$date_query['before'] = sanitize_text_field( $args['date_to'] ) . ' 23:59:59';
-			}
-			$query_args['date_created'] = $date_query;
+		if ( ! empty( $args['date_from'] ) ) {
+			$query_args['date_after'] = sanitize_text_field( $args['date_from'] ) . ' 00:00:00';
+		}
+		if ( ! empty( $args['date_to'] ) ) {
+			$query_args['date_before'] = sanitize_text_field( $args['date_to'] ) . ' 23:59:59';
 		}
 
 		$results = wc_get_orders( $query_args );
