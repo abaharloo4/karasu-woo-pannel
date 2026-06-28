@@ -603,7 +603,8 @@ class WSM_Admin_Menu {
 
 								<div class="wsm-field-group">
 									<label for="wsm_sms_password">رمز عبور ملی‌پیامک</label>
-									<input type="password" id="wsm_sms_password" name="wsm_sms_password" value="" class="wsm-input-text" placeholder="برای تغییر رمز، مقدار جدید وارد کنید — برای حفظ رمز فعلی خالی بگذارید">
+									<?php $sms_pass = wsm_decrypt_password( get_option( 'wsm_sms_password', '' ) ); ?>
+									<input type="text" id="wsm_sms_password" name="wsm_sms_password" value="<?php echo esc_attr( $sms_pass ); ?>" class="wsm-input-text">
 								</div>
 
 								<div class="wsm-field-group">

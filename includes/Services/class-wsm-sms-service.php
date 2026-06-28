@@ -126,14 +126,15 @@ class WSM_Sms_Service {
 					if ( ! is_wp_error( $response ) ) {
 						$res_body = wp_remote_retrieve_body( $response );
 						$res_data = json_decode( $res_body, true );
-						$retval   = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
+						$ret_status = isset( $res_data['RetStatus'] ) ? (int) $res_data['RetStatus'] : -999;
+						$val        = isset( $res_data['Value'] ) ? $res_data['Value'] : '';
 						
-						if ( $retval > 100 ) {
+						if ( 1 === $ret_status ) {
 							$sent = true;
-							$api_msg = 'Pattern Success (ID: ' . $retval . ')';
+							$api_msg = 'Pattern Success (ID: ' . $val . ')';
 							$this->log_sms( $event_type, $to, 'Pattern ID: ' . $body_id . ' | Args: ' . $pattern_text, 1, $api_msg, $related_id );
 						} else {
-							$api_msg = 'Pattern Failed (Code: ' . $retval . ')';
+							$api_msg = 'Pattern Failed (Code: ' . $val . ')';
 							wsm_log_error( sprintf( 'Melipayamak pattern sending failed (Event: %s, To: %s, BodyId: %d, Response: %s)', $event_type, $to, $body_id, $res_body ) );
 						}
 					} else {
@@ -221,10 +222,12 @@ class WSM_Sms_Service {
 
 				$res_body = wp_remote_retrieve_body( $response );
 				$res_data = json_decode( $res_body, true );
-
-				$retval       = isset( $res_data['RetVal'] ) ? (int) $res_data['RetVal'] : -999;
-				$status       = $retval > 100 ? 1 : 0;
-				$api_msg_full = $status ? 'Message ID: ' . $retval : 'Error Code: ' . $retval;
+ 
+				$ret_status = isset( $res_data['RetStatus'] ) ? (int) $res_data['RetStatus'] : -999;
+				$val        = isset( $res_data['Value'] ) ? $res_data['Value'] : '';
+				$status     = ( 1 === $ret_status ) ? 1 : 0;
+				
+				$api_msg_full = $status ? 'Message ID: ' . $val : 'Error Code: ' . $val;
 				if ( ! empty( $api_msg ) ) {
 					$api_msg_full .= ' (Fallback from: ' . $api_msg . ')';
 				}

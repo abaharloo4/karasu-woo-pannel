@@ -396,8 +396,8 @@ class WSM_Admin_Settings {
 	 * Render SMS password.
 	 */
 	public function render_sms_pass_field(): void {
-		$value = get_option( 'wsm_sms_password', '' );
-		echo '<input type="password" name="wsm_sms_password" value="' . esc_attr( $value ) . '" class="regular-text">';
+		$value = wsm_decrypt_password( get_option( 'wsm_sms_password', '' ) );
+		echo '<input type="text" name="wsm_sms_password" value="' . esc_attr( $value ) . '" class="regular-text">';
 	}
 
 	/**
