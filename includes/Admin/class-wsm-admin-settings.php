@@ -439,7 +439,7 @@ class WSM_Admin_Settings {
 	 * @return string Encrypted password string.
 	 */
 	public function sanitize_sms_password( string $password ): string {
-		$password = sanitize_text_field( $password );
+		$password = trim( $password );
 		if ( empty( $password ) ) {
 			return get_option( 'wsm_sms_password', '' );
 		}
