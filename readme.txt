@@ -3,7 +3,7 @@ Contributors: abaharloo4
 Tags: woocommerce, panel, shop manager, rtl, melipayamak, chart, reports, coupons, elementor
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 1.1.14
+Stable tag: 1.1.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,12 @@ Yes, this plugin is an extension for WooCommerce and will automatically deactiva
 Updates are queried directly from the public GitHub release tags. When a new release is published on GitHub, WordPress will notify you in your plugins list.
 
 == Changelog ==
+
+= 1.1.15 =
+* Added support for all WooCommerce product types (Simple, Variable, Grouped, External/Affiliate, Virtual, Downloadable).
+* Added Order Cancellation from the panel with a transition state-machine and automatic internal auditing notes.
+* Enforced telemetry/updater hardcodes and added toggle to completely disable automatic GitHub update checking.
+* Self-hosted Vazirmatn font to eliminate external Google Fonts CDN dependencies.
 
 = 1.1.14 =
 * Fixed WooCommerce orders filter 500 crash by using date_after/date_before query parameters.
@@ -134,3 +140,9 @@ Updates are queried directly from the public GitHub release tags. When a new rel
 
 = 1.0.0 =
 * Initial release containing products editor, variation combos, categories tree, Jalali reports, MeliPayamak SMS notifier, Elementor login widget, and GitHub updater.
+
+== Network Communication ==
+This plugin may initiate external outbound network requests to the following domains:
+1. api.github.com - Used solely by the automatic updater to check for new releases and updates. No personal data or site metrics are sent. This check can be completely disabled in the settings panel.
+2. SMS Gateway (api.melipayamak.com) - Used to send transactional SMS notifications (e.g., order status changes, new orders, low stock warnings) based on the gateway credentials provided by the administrator.
+

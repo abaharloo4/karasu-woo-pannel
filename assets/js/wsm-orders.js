@@ -403,6 +403,13 @@
 				`;
 			}
 
+			const isCancelable = ['pending', 'processing', 'on-hold', 'failed'].includes(order.status);
+			const cancelBtnHtml = isCancelable ? `
+				<button id="wsm-cancel-order-detail" class="wsm-px-4 wsm-py-2 wsm-bg-amber-600/10 hover:wsm-bg-amber-600/20 wsm-text-amber-400 wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors" data-id="${order.id}">
+					لغو سفارش
+				</button>
+			` : '';
+
 			container.innerHTML = `
 				<div class="wsm-flex wsm-items-center wsm-justify-between">
 					<div class="wsm-flex wsm-items-center wsm-space-x-3 wsm-space-x-reverse">
@@ -413,6 +420,7 @@
 						<h1 class="wsm-text-2xl wsm-font-bold wsm-text-slate-100">جزئیات سفارش #${order.id}</h1>
 					</div>
 					<div class="wsm-flex wsm-items-center wsm-space-x-3 wsm-space-x-reverse">
+						${cancelBtnHtml}
 						<button id="wsm-delete-order-detail" class="wsm-px-4 wsm-py-2 wsm-bg-rose-600/10 hover:wsm-bg-rose-600/20 wsm-text-rose-400 wsm-rounded-xl wsm-text-xs wsm-font-semibold wsm-transition-colors" data-id="${order.id}">
 							حذف سفارش
 						</button>
@@ -539,6 +547,22 @@
 					loadOrderDetail(orderId);
 				} catch (err) {
 					// WSM.fetch handles error alerts.
+				}
+			});
+
+			// Bind cancel button
+			document.getElementById('wsm-cancel-order-detail')?.addEventListener('click', async (e) => {
+				e.preventDefault();
+				if (confirm('آیا از لغو این سفارش مطمئن هستید؟ این عمل موجودی انبار را باز می‌گرداند.')) {
+					try {
+						await WSM.fetch(`/orders/${orderId}/status`, {
+							method: 'PATCH',
+							body: JSON.stringify({ status: 'cancelled' })
+						});
+						loadOrderDetail(orderId);
+					} catch (err) {
+						// Handled globally
+					}
 				}
 			});
 

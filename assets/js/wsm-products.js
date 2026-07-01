@@ -340,7 +340,19 @@
 							<select id="p-type" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm focus:wsm-outline-none">
 								<option value="simple" ${productData?.type === 'simple' || isNew ? 'selected' : ''}>محصول ساده</option>
 								<option value="variable" ${productData?.type === 'variable' ? 'selected' : ''}>محصول متغیر</option>
+								<option value="grouped" ${productData?.type === 'grouped' ? 'selected' : ''}>محصول گروهی</option>
+								<option value="external" ${productData?.type === 'external' ? 'selected' : ''}>محصول وابسته / خارجی (Affiliate)</option>
 							</select>
+							<div class="wsm-flex wsm-gap-6 wsm-mt-3">
+								<label class="wsm-flex wsm-items-center wsm-text-sm wsm-text-slate-400 wsm-cursor-pointer">
+									<input type="checkbox" id="p-virtual" ${productData?.virtual ? 'checked' : ''} class="wsm-ml-2 wsm-rounded wsm-bg-slate-950 wsm-border-slate-800 focus:wsm-ring-indigo-500">
+									مجازی (Virtual)
+								</label>
+								<label class="wsm-flex wsm-items-center wsm-text-sm wsm-text-slate-400 wsm-cursor-pointer">
+									<input type="checkbox" id="p-downloadable" ${productData?.downloadable ? 'checked' : ''} class="wsm-ml-2 wsm-rounded wsm-bg-slate-950 wsm-border-slate-800 focus:wsm-ring-indigo-500">
+									دانلودی (Downloadable)
+								</label>
+							</div>
 						</div>
 						<div>
 							<label for="p-desc" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">توضیحات کامل</label>
@@ -386,6 +398,51 @@
 									<option value="instock" ${productData?.stock_status === 'instock' ? 'selected' : ''}>موجود در انبار</option>
 									<option value="outofstock" ${productData?.stock_status === 'outofstock' ? 'selected' : ''}>ناموجود</option>
 								</select>
+							</div>
+						</div>
+					</div>
+
+					<!-- Grouped Products Card -->
+					<div id="grouped-products-card" class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-space-y-4 wsm-hidden">
+						<h3 class="wsm-font-semibold wsm-text-slate-200">محصولات گروهی (Grouped Products)</h3>
+						<div>
+							<label for="p-grouped-children" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">محصولات عضو گروه (با کاما یا فاصله جدا کنید - IDهای محصولات)</label>
+							<input type="text" id="p-grouped-children" value="${isNew ? '' : (productData.children || []).join(', ')}" placeholder="مثال: 123, 124, 125" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
+						</div>
+					</div>
+
+					<!-- External/Affiliate Product Card -->
+					<div id="external-product-card" class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-space-y-4 wsm-hidden">
+						<h3 class="wsm-font-semibold wsm-text-slate-200">تنظیمات محصول وابسته / خارجی</h3>
+						<div class="wsm-grid wsm-grid-cols-1 md:wsm-grid-cols-2 wsm-gap-4">
+							<div>
+								<label for="p-product-url" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">نشانی اینترنتی محصول (URL)</label>
+								<input type="url" id="p-product-url" value="${isNew ? '' : WSM.escHtml(productData.product_url || '')}" placeholder="https://example.com/item" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
+							</div>
+							<div>
+								<label for="p-button-text" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">متن دکمه خرید</label>
+								<input type="text" id="p-button-text" value="${isNew ? '' : WSM.escHtml(productData.button_text || '')}" placeholder="خرید محصول" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
+							</div>
+						</div>
+					</div>
+
+					<!-- Downloadable Files Card -->
+					<div id="downloadable-files-card" class="wsm-bg-slate-900/60 wsm-backdrop-blur-md wsm-border wsm-border-slate-800 wsm-rounded-3xl wsm-p-6 wsm-shadow-lg wsm-space-y-4 wsm-hidden">
+						<h3 class="wsm-font-semibold wsm-text-slate-200">فایل‌های دانلودی</h3>
+						<div id="downloads-container" class="wsm-space-y-3">
+							<!-- Will be filled by JS -->
+						</div>
+						<div class="wsm-pt-2">
+							<button type="button" id="add-download-file-btn" class="wsm-px-3 wsm-py-1.5 wsm-text-xs wsm-bg-indigo-600 hover:wsm-bg-indigo-500 wsm-text-white wsm-rounded-xl wsm-transition-colors">افزودن فایل دانلودی</button>
+						</div>
+						<div class="wsm-grid wsm-grid-cols-1 md:wsm-grid-cols-2 wsm-gap-4 wsm-pt-2">
+							<div>
+								<label for="p-download-limit" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">محدودیت دانلود (تعداد دفعات مجاز)</label>
+								<input type="number" id="p-download-limit" value="${isNew ? '-1' : (productData.download_limit ?? -1)}" placeholder="-1 برای نامحدود" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
+							</div>
+							<div>
+								<label for="p-download-expiry" class="wsm-block wsm-text-xs wsm-font-semibold wsm-text-slate-400 wsm-mb-2">انقضای دانلود (تعداد روز)</label>
+								<input type="number" id="p-download-expiry" value="${isNew ? '-1' : (productData.download_expiry ?? -1)}" placeholder="-1 برای نامحدود" class="wsm-w-full wsm-bg-slate-950/80 wsm-border wsm-border-slate-800 wsm-rounded-2xl wsm-px-4 wsm-py-3 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500">
 							</div>
 						</div>
 					</div>
@@ -573,17 +630,103 @@
 			}
 		});
 
-		// VARIABLE PRODUCT ACTIONS
+		// PRODUCT TYPE AND DOWNLOADABLE ACTIONS
 		function toggleProductType() {
-			if (pType && pType.value === 'variable') {
-				simpleCard?.classList.add('wsm-hidden');
+			const type = pType ? pType.value : 'simple';
+
+			// Hide all type-specific sections first
+			simpleCard?.classList.add('wsm-hidden');
+			variableCard?.classList.add('wsm-hidden');
+			document.getElementById('grouped-products-card')?.classList.add('wsm-hidden');
+			document.getElementById('external-product-card')?.classList.add('wsm-hidden');
+
+			// Show matching section
+			if (type === 'variable') {
 				variableCard?.classList.remove('wsm-hidden');
 				renderAttributes();
 				renderVariations();
+			} else if (type === 'grouped') {
+				document.getElementById('grouped-products-card')?.classList.remove('wsm-hidden');
+			} else if (type === 'external') {
+				document.getElementById('external-product-card')?.classList.remove('wsm-hidden');
 			} else {
 				simpleCard?.classList.remove('wsm-hidden');
-				variableCard?.classList.add('wsm-hidden');
 			}
+
+			// Manage download section based on downloadable checkbox
+			toggleDownloadableSection();
+		}
+
+		function toggleDownloadableSection() {
+			const downloadableCheckbox = document.getElementById('p-downloadable');
+			const downloadableCard = document.getElementById('downloadable-files-card');
+			if (downloadableCheckbox && downloadableCheckbox.checked) {
+				downloadableCard?.classList.remove('wsm-hidden');
+			} else {
+				downloadableCard?.classList.add('wsm-hidden');
+			}
+		}
+
+		document.getElementById('p-downloadable')?.addEventListener('change', toggleDownloadableSection);
+
+		// DOWNLOADABLE FILES DYNAMIC LIST
+		function renderDownloads() {
+			const container = document.getElementById('downloads-container');
+			if (!container) return;
+			container.innerHTML = '';
+			const downloads = productData?.downloads || [];
+			downloads.forEach(d => {
+				addDownloadRow(d.name, d.file, d.id);
+			});
+			if (downloads.length === 0) {
+				addDownloadRow();
+			}
+		}
+
+		function addDownloadRow(name = '', file = '', id = '') {
+			const container = document.getElementById('downloads-container');
+			if (!container) return;
+			const row = document.createElement('div');
+			row.className = 'download-row wsm-flex wsm-gap-3 wsm-items-center wsm-bg-slate-950/40 wsm-p-3 wsm-rounded-xl wsm-border wsm-border-slate-800/60 wsm-mt-2';
+			row.innerHTML = `
+				<input type="hidden" class="download-id" value="${id}">
+				<div class="wsm-flex-1">
+					<input type="text" placeholder="نام فایل" class="download-name wsm-w-full wsm-bg-slate-900 wsm-border wsm-border-slate-800 wsm-rounded-xl wsm-px-3 wsm-py-2 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500" value="${WSM.escHtml(name)}">
+				</div>
+				<div class="wsm-flex-[2]">
+					<input type="text" placeholder="آدرس فایل (URL یا مسیر محلی)" class="download-file wsm-w-full wsm-bg-slate-900 wsm-border wsm-border-slate-800 wsm-rounded-xl wsm-px-3 wsm-py-2 wsm-text-sm wsm-text-slate-200 focus:wsm-outline-none focus:wsm-border-indigo-500" value="${WSM.escHtml(file)}">
+				</div>
+				<button type="button" class="remove-download-row-btn wsm-text-rose-400 hover:wsm-text-rose-300 wsm-text-sm wsm-px-2">حذف</button>
+			`;
+			row.querySelector('.remove-download-row-btn').addEventListener('click', () => {
+				row.remove();
+			});
+			container.appendChild(row);
+		}
+
+		document.getElementById('add-download-file-btn')?.addEventListener('click', () => addDownloadRow());
+
+		function getDownloadsPayload() {
+			const downloads = [];
+			document.querySelectorAll('.download-row').forEach(row => {
+				const nameInput = row.querySelector('.download-name');
+				const fileInput = row.querySelector('.download-file');
+				const idInput = row.querySelector('.download-id');
+				if (fileInput && fileInput.value) {
+					downloads.push({
+						id: idInput ? idInput.value : '',
+						name: nameInput ? nameInput.value : '',
+						file: fileInput.value
+					});
+				}
+			});
+			return downloads;
+		}
+
+		function getGroupedChildrenPayload() {
+			const input = document.getElementById('p-grouped-children');
+			if (!input || !input.value) return [];
+			return input.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
 		}
 
 		pType?.addEventListener('change', toggleProductType);
@@ -909,6 +1052,9 @@
 			});
 		}
 
+		// Initial render of downloads
+		renderDownloads();
+
 		// Initial toggle check
 		toggleProductType();
 
@@ -953,6 +1099,14 @@
 				height: document.getElementById('p-height').value,
 				attributes: attributes,
 				variations: variations,
+				virtual: document.getElementById('p-virtual')?.checked || false,
+				downloadable: document.getElementById('p-downloadable')?.checked || false,
+				downloads: getDownloadsPayload(),
+				download_limit: document.getElementById('p-download-limit')?.value || -1,
+				download_expiry: document.getElementById('p-download-expiry')?.value || -1,
+				children: getGroupedChildrenPayload(),
+				product_url: document.getElementById('p-product-url')?.value || '',
+				button_text: document.getElementById('p-button-text')?.value || '',
 			};
 
 			try {

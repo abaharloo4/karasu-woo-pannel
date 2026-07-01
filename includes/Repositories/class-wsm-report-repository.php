@@ -111,7 +111,7 @@ class WSM_Report_Repository {
 			$formatted[] = [
 				'id'          => $product->get_id(),
 				'name'        => $product->get_name(),
-				'total_sales' => (int) $product->get_meta( 'total_sales' ),
+				'total_sales' => (int) $product->get_total_sales(),
 				'price'       => (float) $product->get_price(),
 				'stock'       => $product->get_stock_quantity(),
 			];

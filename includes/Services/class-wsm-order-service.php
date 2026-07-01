@@ -30,6 +30,19 @@ class WSM_Order_Service {
 	private WSM_Order_Repository $repository;
 
 	/**
+	 * Order status state-machine allowed transitions.
+	 */
+	private const ALLOWED_TRANSITIONS = [
+		'pending'    => [ 'processing', 'on-hold', 'cancelled', 'failed' ],
+		'processing' => [ 'on-hold', 'completed', 'cancelled', 'refunded' ],
+		'on-hold'    => [ 'processing', 'cancelled', 'failed' ],
+		'completed'  => [ 'refunded' ],
+		'cancelled'  => [],
+		'refunded'   => [],
+		'failed'     => [ 'pending', 'cancelled' ],
+	];
+
+	/**
 	 * WSM_Order_Service constructor.
 	 *
 	 * @param WSM_Order_Repository $repository Target repository.
@@ -95,9 +108,43 @@ class WSM_Order_Service {
 			return new WP_Error( 'wsm_invalid_status', __( 'وضعیت سفارش نامعتبر است.', 'karasu-woo-pannel' ) );
 		}
 
+		$order = $this->repository->find_by_id( $id );
+		if ( ! $order ) {
+			return new WP_Error( 'wsm_order_not_found', __( 'سفارش یافت نشد.', 'karasu-woo-pannel' ) );
+		}
+
+		$current_status = $order->get_status();
+		if ( $current_status === $status ) {
+			return true;
+		}
+
+		if ( isset( self::ALLOWED_TRANSITIONS[ $current_status ] ) ) {
+			if ( ! in_array( $status, self::ALLOWED_TRANSITIONS[ $current_status ], true ) ) {
+				return new WP_Error(
+					'wsm_invalid_transition',
+					sprintf(
+						__( 'امکان تغییر وضعیت از "%s" به "%s" وجود ندارد.', 'karasu-woo-pannel' ),
+						wc_get_order_status_name( $current_status ),
+						wc_get_order_status_name( $status )
+					)
+				);
+			}
+		}
+
 		$updated = $this->repository->update_status( $id, $status );
 		if ( ! $updated ) {
 			return new WP_Error( 'wsm_update_failed', __( 'بروزرسانی وضعیت سفارش ناموفق بود.', 'karasu-woo-pannel' ) );
+		}
+
+		if ( 'cancelled' === $status ) {
+			$current_user = wp_get_current_user();
+			$user_display_name = $current_user->exists() ? $current_user->display_name : __( 'سیستم', 'karasu-woo-pannel' );
+			$note_text = sprintf(
+				__( 'سفارش توسط [%s] در تاریخ [%s] لغو شد.', 'karasu-woo-pannel' ),
+				$user_display_name,
+				WSM_Date_Helper::to_jalali_string( current_time( 'mysql' ) )
+			);
+			$order->add_order_note( $note_text, 0 );
 		}
 
 		return true;

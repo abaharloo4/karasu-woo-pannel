@@ -144,6 +144,15 @@ class WSM_Admin_Settings {
 			]
 		);
 
+		register_setting(
+			'wsm_settings_group',
+			'wsm_disable_github_updater',
+			[
+				'type'    => 'boolean',
+				'default' => false,
+			]
+		);
+
 		// Page Customization Options (HTML, CSS, JS separate for each page)
 		$pages = [ 'dashboard', 'orders', 'products', 'categories', 'attributes', 'brands', 'coupons', 'reports', 'sms', 'login' ];
 		$types = [ 'html', 'css', 'js' ];
@@ -231,6 +240,14 @@ class WSM_Admin_Settings {
 			'wsm_low_stock_threshold',
 			__( 'آستانه هشدار موجودی کم', 'karasu-woo-pannel' ),
 			[ $this, 'render_low_stock_field' ],
+			'wsm_settings',
+			'wsm_general_section'
+		);
+
+		add_settings_field(
+			'wsm_disable_github_updater',
+			__( 'غیرفعال‌سازی به‌روزرسانی خودکار', 'karasu-woo-pannel' ),
+			[ $this, 'render_disable_updater_field' ],
 			'wsm_settings',
 			'wsm_general_section'
 		);
@@ -374,6 +391,15 @@ class WSM_Admin_Settings {
 	public function render_low_stock_field(): void {
 		$value = get_option( 'wsm_low_stock_threshold', 5 );
 		echo '<input type="number" name="wsm_low_stock_threshold" value="' . esc_attr( $value ) . '" min="0" class="small-text">';
+	}
+
+	/**
+	 * Render disable GitHub updater checkbox field.
+	 */
+	public function render_disable_updater_field(): void {
+		$checked = get_option( 'wsm_disable_github_updater' ) ? 'checked' : '';
+		echo '<input type="checkbox" name="wsm_disable_github_updater" value="1" ' . $checked . '>';
+		echo '<p class="description">' . esc_html__( 'بررسی خودکار نسخه‌های جدید از گیت‌هاب را متوقف کنید تا افزونه هیچ ارتباط خروجی نداشته باشد.', 'karasu-woo-pannel' ) . '</p>';
 	}
 
 	/**

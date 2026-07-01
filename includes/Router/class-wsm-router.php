@@ -176,7 +176,7 @@ class WSM_Router {
 
 		wp_register_style(
 			'wsm-font-vazirmatn',
-			'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap',
+			WSM_PLUGIN_URL . 'assets/css/wsm-font.css',
 			[],
 			WSM_VERSION
 		);

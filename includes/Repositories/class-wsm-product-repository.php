@@ -12,6 +12,8 @@ namespace WooStoreManager\Repositories;
 use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variable;
+use WC_Product_Grouped;
+use WC_Product_External;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -88,6 +90,10 @@ class WSM_Product_Repository {
 
 		if ( 'variable' === $type ) {
 			$product = new WC_Product_Variable();
+		} elseif ( 'grouped' === $type ) {
+			$product = new WC_Product_Grouped();
+		} elseif ( 'external' === $type ) {
+			$product = new WC_Product_External();
 		} else {
 			$product = new WC_Product_Simple();
 		}
@@ -208,6 +214,26 @@ class WSM_Product_Repository {
 			$product->set_height( sanitize_text_field( $data['height'] ) );
 		}
 
+		// Virtual & Downloadable Flags
+		if ( isset( $data['virtual'] ) ) {
+			$product->set_virtual( (bool) $data['virtual'] );
+		}
+		if ( isset( $data['downloadable'] ) ) {
+			$product->set_downloadable( (bool) $data['downloadable'] );
+		}
+
+		if ( $product->get_downloadable() ) {
+			$this->save_downloadable_data( $product, $data );
+		}
+
+		if ( $product->is_type( 'grouped' ) ) {
+			$this->save_grouped_data( $product, $data );
+		}
+
+		if ( $product->is_type( 'external' ) ) {
+			$this->save_external_data( $product, $data );
+		}
+
 		return $product;
 	}
 
@@ -290,6 +316,105 @@ class WSM_Product_Repository {
 
 				$variation->save();
 			}
+		}
+	}
+
+	/**
+	 * Save grouped product children.
+	 *
+	 * @param \WC_Product_Grouped $product Grouped product.
+	 * @param array               $data    Product data array.
+	 */
+	private function save_grouped_data( $product, array $data ): void {
+		if ( ! isset( $data['children'] ) ) {
+			return;
+		}
+
+		$children_ids = array_map( 'absint', (array) $data['children'] );
+		$valid_children = [];
+
+		foreach ( $children_ids as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( $child && ! $child->is_type( 'grouped' ) && $child_id !== $product->get_id() ) {
+				$valid_children[] = $child_id;
+			}
+		}
+
+		$product->set_children( $valid_children );
+	}
+
+	/**
+	 * Save external product URL and button text.
+	 *
+	 * @param \WC_Product_External $product External product.
+	 * @param array                $data    Product data array.
+	 */
+	private function save_external_data( $product, array $data ): void {
+		if ( isset( $data['product_url'] ) ) {
+			$product->set_product_url( esc_url_raw( $data['product_url'] ) );
+		}
+		if ( isset( $data['button_text'] ) ) {
+			$product->set_button_text( sanitize_text_field( $data['button_text'] ) );
+		}
+	}
+
+	/**
+	 * Save downloadable files and limit/expiry settings.
+	 *
+	 * @param \WC_Product $product WooCommerce product.
+	 * @param array       $data    Product data array.
+	 */
+	private function save_downloadable_data( $product, array $data ): void {
+		if ( isset( $data['download_limit'] ) ) {
+			$product->set_download_limit( '' !== $data['download_limit'] ? intval( $data['download_limit'] ) : -1 );
+		}
+		if ( isset( $data['download_expiry'] ) ) {
+			$product->set_download_expiry( '' !== $data['download_expiry'] ? intval( $data['download_expiry'] ) : -1 );
+		}
+
+		if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
+			$downloads = [];
+			$upload_dir = wp_upload_dir();
+			$uploads_url = $upload_dir['baseurl'];
+			$uploads_path = realpath( $upload_dir['basedir'] );
+
+			foreach ( $data['downloads'] as $download ) {
+				if ( empty( $download['file'] ) ) {
+					continue;
+				}
+
+				$file = trim( $download['file'] );
+				$is_valid = false;
+
+				if ( str_starts_with( $file, $uploads_url ) ) {
+					$is_valid = true;
+				} elseif ( filter_var( $file, FILTER_VALIDATE_URL ) ) {
+					$file_host = wp_parse_url( $file, PHP_URL_HOST );
+					$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+					if ( $file_host === $site_host ) {
+						$is_valid = true;
+					} else {
+						$allowed_domains = apply_filters( 'wsm_allowed_download_domains', [ $site_host ] );
+						if ( in_array( $file_host, $allowed_domains, true ) ) {
+							$is_valid = true;
+						}
+					}
+				} else {
+					$real_file = realpath( $file );
+					if ( $real_file && $uploads_path && str_starts_with( $real_file, $uploads_path ) ) {
+						$is_valid = true;
+					}
+				}
+
+				if ( $is_valid ) {
+					$download_obj = new \WC_Product_Download();
+					$download_obj->set_name( sanitize_text_field( $download['name'] ?? '' ) );
+					$download_obj->set_file( $file );
+					$download_obj->set_id( ! empty( $download['id'] ) ? sanitize_key( $download['id'] ) : wp_generate_uuid4() );
+					$downloads[] = $download_obj;
+				}
+			}
+			$product->set_downloads( $downloads );
 		}
 	}
 

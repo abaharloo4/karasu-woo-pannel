@@ -201,6 +201,30 @@ class WSM_Product_Service {
 			$brand_ids = [];
 		}
 
+		$downloads = [];
+		if ( $product->get_downloadable() ) {
+			$product_downloads = $product->get_downloads();
+			foreach ( $product_downloads as $download ) {
+				$downloads[] = [
+					'id'   => $download->get_id(),
+					'name' => $download->get_name(),
+					'file' => $download->get_file(),
+				];
+			}
+		}
+
+		$children = [];
+		if ( 'grouped' === $type ) {
+			$children = $product->get_children();
+		}
+
+		$product_url = '';
+		$button_text = '';
+		if ( 'external' === $type ) {
+			$product_url = $product->get_product_url();
+			$button_text = $product->get_button_text();
+		}
+
 		return [
 			'id'                => $product->get_id(),
 			'name'              => $product->get_name(),
@@ -228,6 +252,14 @@ class WSM_Product_Service {
 			'height'            => $product->get_height(),
 			'attributes'        => $attributes,
 			'variations'        => $variations,
+			'virtual'           => $product->get_virtual(),
+			'downloadable'      => $product->get_downloadable(),
+			'downloads'         => $downloads,
+			'download_limit'    => $product->get_download_limit(),
+			'download_expiry'   => $product->get_download_expiry(),
+			'children'          => $children,
+			'product_url'       => $product_url,
+			'button_text'       => $button_text,
 		];
 	}
 }

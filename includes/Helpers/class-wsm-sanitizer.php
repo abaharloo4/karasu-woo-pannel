@@ -49,6 +49,14 @@ class WSM_Sanitizer {
 				'attributes'        => isset( $data['attributes'] ) ? (array) $data['attributes'] : [],
 				'variations'        => isset( $data['variations'] ) ? (array) $data['variations'] : [],
 				'brand_ids'         => isset( $data['brand_ids'] ) ? array_map( 'absint', (array) $data['brand_ids'] ) : [],
+				'virtual'           => (bool) ( $data['virtual'] ?? false ),
+				'downloadable'      => (bool) ( $data['downloadable'] ?? false ),
+				'downloads'         => isset( $data['downloads'] ) ? (array) $data['downloads'] : [],
+				'download_limit'    => isset( $data['download_limit'] ) ? intval( $data['download_limit'] ) : -1,
+				'download_expiry'   => isset( $data['download_expiry'] ) ? intval( $data['download_expiry'] ) : -1,
+				'children'          => isset( $data['children'] ) ? array_map( 'absint', (array) $data['children'] ) : [],
+				'product_url'       => isset( $data['product_url'] ) ? esc_url_raw( $data['product_url'] ) : '',
+				'button_text'       => isset( $data['button_text'] ) ? sanitize_text_field( $data['button_text'] ) : '',
 			];
 		}
 
@@ -116,6 +124,30 @@ class WSM_Sanitizer {
 		}
 		if ( array_key_exists( 'brand_ids', $data ) ) {
 			$sanitized['brand_ids'] = array_map( 'absint', (array) $data['brand_ids'] );
+		}
+		if ( array_key_exists( 'virtual', $data ) ) {
+			$sanitized['virtual'] = (bool) $data['virtual'];
+		}
+		if ( array_key_exists( 'downloadable', $data ) ) {
+			$sanitized['downloadable'] = (bool) $data['downloadable'];
+		}
+		if ( array_key_exists( 'downloads', $data ) ) {
+			$sanitized['downloads'] = (array) $data['downloads'];
+		}
+		if ( array_key_exists( 'download_limit', $data ) ) {
+			$sanitized['download_limit'] = intval( $data['download_limit'] );
+		}
+		if ( array_key_exists( 'download_expiry', $data ) ) {
+			$sanitized['download_expiry'] = intval( $data['download_expiry'] );
+		}
+		if ( array_key_exists( 'children', $data ) ) {
+			$sanitized['children'] = array_map( 'absint', (array) $data['children'] );
+		}
+		if ( array_key_exists( 'product_url', $data ) ) {
+			$sanitized['product_url'] = esc_url_raw( $data['product_url'] );
+		}
+		if ( array_key_exists( 'button_text', $data ) ) {
+			$sanitized['button_text'] = sanitize_text_field( $data['button_text'] );
 		}
 
 		return $sanitized;

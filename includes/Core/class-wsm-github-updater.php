@@ -70,6 +70,10 @@ class WSM_GitHub_Updater {
 	 * Register actions and filters.
 	 */
 	public function init(): void {
+		if ( get_option( 'wsm_disable_github_updater' ) ) {
+			return;
+		}
+
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
 		add_filter( 'site_transient_update_plugins', [ $this, 'check_update' ] );
 		add_filter( 'plugins_api', [ $this, 'plugin_popup' ], 20, 3 );
