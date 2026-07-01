@@ -1,58 +1,55 @@
-# KarasuWooPannel
+# پنل مدیریت فروشگاه KarasuWooPannel
 
-<p align="center">
-  <img src="assets/css/wsm-panel.css" alt="KarasuWooPannel Banner" style="display:none;" />
-</p>
+پنل مدیریت مستقل، راست‌چین (RTL)، واکنش‌گرا و مدرن مبتنی بر TailwindCSS برای فروشگاه‌ساز ووکامرس (WooCommerce).
 
-A completely independent, responsive, RTL, and TailwindCSS-based store administration panel for WooCommerce.
-
-**KarasuWooPannel** decouples the daily store management workflow from the traditional WordPress `/wp-admin` dashboard, providing shop managers with a secure, modern, and high-performance standalone environment.
+افزونه **KarasuWooPannel** با جداسازی (Decoupling) کامل فرآیند مدیریت روزانه فروشگاه از پیشخوان سنتی وردپرس (`/wp-admin`)، محیطی فوق‌العاده سریع، امن و بهینه را برای مدیران فروشگاه فراهم می‌سازد.
 
 ---
 
-## 🚀 Key Features
+## 🚀 ویژگی‌های کلیدی افزونه
 
-### 📦 Complete Product Type Support
-Full creation, editing, and listing capability for all standard WooCommerce product types and options:
-- **Simple & Variable Products**: Manage prices, SKU, attributes, and variation permutations.
-- **Grouped Products**: Link and manage group child products (with nested grouping prevention).
-- **External / Affiliate Products**: Add target purchase URLs and custom button labels.
-- **Virtual & Downloadable Products**: Upload download files securely, enforce download limit/expiry rules, and prevent Local File Inclusion (LFI) via secure path validations.
+### 📦 پشتیبانی همه‌جانبه از انواع محصولات ووکامرس
+ثبت، ویرایش و مدیریت تمامی انواع استاندارد محصولات در ووکامرس بدون نیاز به ورود به پیشخوان وردپرس:
+*   **محصولات ساده و متغیر (Simple & Variable):** مدیریت قیمت‌های اصلی و تخفیف، SKU، ویژگی‌ها و ترکیب‌های متغیر محصول.
+*   **محصولات گروهی (Grouped Products):** انتخاب و مدیریت محصولات عضو گروه با اعتبارسنجی هوشمند جهت جلوگیری از تعریف گروه تودرتو (Nested Grouping).
+*   **محصولات وابسته/خارجی (External/Affiliate):** درج آدرس اینترنتی خرید محصول و شخصی‌سازی متن دکمه خرید.
+*   **محصولات مجازی و دانلودی (Virtual & Downloadable):** بارگذاری امن فایل‌های دانلودی، مدیریت محدودیت تعداد دانلود و انقضای لینک دانلود.
+*   **امنیت مسیر فایل‌ها:** پیاده‌سازی مکانیزم بررسی دامنه و مسیر فایل‌ها جهت جلوگیری از حملات نفوذ به فایل‌های محلی سرور (Local File Inclusion - LFI).
 
-### 📋 Order Management & Cancellation
-- **Interactive Details**: View order totals, customer billing/shipping details, dynamic purchase lists, and inline card-to-card payment receipt previews.
-- **State-Machine Transition Rules**: Enforce safe status transitions (e.g. preventing direct transition of completed/refunded orders to cancelled).
-- **One-Click Cancellation**: Cancel orders with a single click (including a confirmation dialog) which automatically logs the panel operator's name and triggers WooCommerce stock restoration.
+### 📋 مدیریت و لغو هوشمند سفارش‌ها
+*   **نمایش جزئیات سفارش:** جزئیات کامل خریدار (آدرس، تلفن، ایمیل)، لیست اقلام سفارش، یادداشت‌ها و پیش‌نمایش تصویر فیش‌های واریزی کارت‌به‌کارت.
+*   **ماشین وضعیت تغییرات سفارش (State-Machine):** کنترل وضعیت‌های مجاز تغییر حالت سفارش به منظور رعایت قوانین کسب‌وکار (به عنوان مثال، سفارشی که قبلاً تکمیل یا مرجوع شده است، نمی‌تواند مستقیماً به وضعیت لغو شده تغییر یابد).
+*   **لغو سفارش با یک کلیک:** دکمه لغو سفارش به همراه مودال تایید که بلافاصله پس از لغو، موجودی انبار محصولات سفارش را بازگردانده و نام اپراتور لغوکننده و تاریخ دقیق شمسی را به عنوان یادداشت داخلی سفارش ثبت می‌کند.
 
-### 🛡️ Telemetry & Security Hardening
-- **Zero External Connections option**: Turn on the "Disable Automatic Updates" option in WP-Admin settings to completely halt outbound HTTP requests to `api.github.com`.
-- **Self-Hosted Assets**: Vazirmatn font is enqueued locally from plugin assets, eliminating third-party CDNs and Google Fonts requests.
-- **Role-based Access (UAC)**: Manage granular panel page accessibility for different user roles using the settings panel.
+### 🛡️ حفظ حریم خصوصی و امنیت کامل (Hardening)
+*   **گزینه عدم ارتباط خارجی (Zero Telemetry):** افزونه دارای گزینه‌ای در تنظیمات است که با فعال‌سازی آن، تمام اتصالات خروجی به سرویس گیت‌هاب جهت چک کردن نسخه جدید (`api.github.com`) متوقف می‌گردد تا هیچ درخواستی از سرور شما به خارج ارسال نشود.
+*   **فونت فارسی محلی (Self-Hosted Font):** فونت استاندارد و زیبای **وزیرمتن** به صورت فایل WOFF2 درون افزونه قرار گرفته و به صورت محلی بارگذاری می‌شود تا وابستگی به CDNهای خارجی و Google Fonts کاملاً قطع و سرعت پنل بیشینه شود.
+*   **کنترل سطح دسترسی کاربران (UAC):** قابلیت مدیریت دسترسی هر یک از نقش‌های کاربری به صفحات پنل مدیریت به صورت اختصاصی از پیشخوان وردپرس.
 
-### 💬 SMS Notification Gateway
-- Integrated **MeliPayamak** SMS API for transactional updates.
-- Supports both Pattern (Template) sending and standard line sending.
-- Send automated notifications to customers and shop administrators upon new orders, status modifications, or low stock warnings.
-
----
-
-## 🛠️ Installation
-
-1. Upload the `karasu-woo-pannel` folder to the `/wp-content/plugins/` directory.
-2. Activate the plugin through the **Plugins** menu in WordPress.
-3. Configure settings via **WooCommerce -> KarasuWooPannel** in your WP Admin dashboard.
-4. Access your decoupled store dashboard using the configured custom URL slug (e.g., `https://yourdomain.com/store-admin`).
+### 💬 درگاه اطلاع‌رسانی پیامکی (MeliPayamak)
+*   اتصال به درگاه محبوب **ملی‌پیامک** با پشتیبانی از سیستم ارسال بر اساس پترن (ارسال سریع با الگو) و خطوط اختصاصی.
+*   ارسال خودکار پیامک به مشتری و مدیر پس از ثبت سفارش جدید، تغییر وضعیت سفارش یا اتمام موجودی انبار.
+*   تب اختصاصی نمایش و مدیریت لاگ‌های پیامک به همراه دکمه پاکسازی لاگ‌ها.
 
 ---
 
-## 🧪 Requirements
+## 🛠️ راهنمای نصب و راه‌اندازی
 
-- **WordPress**: 6.0+
-- **WooCommerce**: 7.0+ (Fully compatible with HPOS / High-Performance Order Storage)
-- **PHP**: 8.0+
+1.  پوشه `karasu-woo-pannel` را در مسیر پلاگین‌های سایت خود (`/wp-content/plugins/`) بارگذاری کنید.
+2.  افزونه را از بخش **افزونه‌ها** در مدیریت وردپرس فعال نمایید.
+3.  به مسیر **ووکامرس -> KarasuWooPannel** رفته و تنظیمات اولیه نظیر اطلاعات وب‌سرویس پیامکی و آدرس اسلاگ (Slug) اختصاصی پنل خود را وارد کنید (به عنوان مثال: `store-admin`).
+4.  هم‌اکنون می‌توانید از طریق آدرس تعریف شده (مانند `https://yourdomain.com/store-admin`) بدون نیاز به محیط پیشفرض وردپرس، فروشگاه خود را مدیریت کنید.
 
 ---
 
-## 📝 License
+## 🧪 نیازمندی‌های سیستم
 
-Distributed under the GPLv2 or later License. See `readme.txt` for more details.
+*   **نسخه وردپرس:** ۶.۰ به بالا
+*   **نسخه ووکامرس:** ۷.۰ به بالا (سازگاری کامل با سیستم جدول سفارشات با کارایی بالا - HPOS)
+*   **نسخه PHP مورد نیاز:** ۸.۰ به بالا
+
+---
+
+## 📄 لایسنس
+
+این افزونه تحت لایسنس GPLv2 یا نسخه‌های بالاتر منتشر شده است. اطلاعات بیشتر را در فایل `readme.txt` مطالعه فرمایید.
